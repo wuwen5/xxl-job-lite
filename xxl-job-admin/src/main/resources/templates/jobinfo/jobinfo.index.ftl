@@ -29,6 +29,9 @@
 	              	<div class="input-group">
 	                	<span class="input-group-addon">${I18n.jobinfo_field_jobgroup}</span>
                 		<select class="form-control" id="jobGroup" >
+                		    <#if Request["XXL_JOB_LOGIN_IDENTITY"].role == 1>
+                		        <option value="0" >${I18n.system_all}</option>
+                		    </#if>
                 			<#list JobGroupList as group>
                 				<option value="${group.id}" <#if jobGroup==group.id>selected</#if> >${group.title}</option>
                 			</#list>

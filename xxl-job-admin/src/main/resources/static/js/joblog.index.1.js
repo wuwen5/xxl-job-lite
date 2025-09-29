@@ -95,7 +95,7 @@ $(function() {
 					{
 						"data": 'jobId',
 						"visible" : true,
-                        "width":'10%',
+                        "width":'5%',
 						"render": function ( data, type, row ) {
 
 							var jobhandler = '';
@@ -111,17 +111,21 @@ $(function() {
 							return '<a class="logTips" href="javascript:;" >'+ row.jobId +'<span style="display:none;">'+ temp +'</span></a>';
 						}
 					},
-					{ "data": 'jobGroup', "visible" : false},
+					{
+                        "data": 'jobDesc',
+                        "visible" : true,
+                        "width":'25%'
+                    },
 					{
 						"data": 'triggerTime',
-                        "width":'20%',
+                        "width":'15%',
 						"render": function ( data, type, row ) {
 							return data?moment(data).format("YYYY-MM-DD HH:mm:ss"):"";
 						}
 					},
 					{
 						"data": 'triggerCode',
-                        "width":'10%',
+                        "width":'5%',
 						"render": function ( data, type, row ) {
 							var html = data;
 							if (data == 200) {
@@ -136,21 +140,21 @@ $(function() {
 					},
 					{
 						"data": 'triggerMsg',
-                        "width":'10%',
+                        "width":'5%',
 						"render": function ( data, type, row ) {
 							return data?'<a class="logTips" href="javascript:;" >'+ I18n.system_show +'<span style="display:none;">'+ data +'</span></a>':I18n.system_empty;
 						}
 					},
 	                { 
 	                	"data": 'handleTime',
-                        "width":'20%',
+                        "width":'15%',
 	                	"render": function ( data, type, row ) {
 	                		return data?moment(data).format("YYYY-MM-DD HH:mm:ss"):"";
 	                	}
 	                },
 	                {
 						"data": 'handleCode',
-                        "width":'10%',
+                        "width":'5%',
 						"render": function ( data, type, row ) {
                             var html = data;
                             if (data == 200) {
@@ -167,7 +171,7 @@ $(function() {
 	                },
 	                { 
 	                	"data": 'handleMsg',
-                        "width":'10%',
+                        "width":'5%',
 	                	"render": function ( data, type, row ) {
 	                		return data?'<a class="logTips" href="javascript:;" >'+ I18n.system_show +'<span style="display:none;">'+ data +'</span></a>':I18n.system_empty;
 	                	}
