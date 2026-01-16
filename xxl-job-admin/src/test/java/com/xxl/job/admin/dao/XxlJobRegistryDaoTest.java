@@ -1,16 +1,15 @@
 package com.xxl.job.admin.dao;
 
+import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.admin.core.model.XxlJobRegistry;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class XxlJobRegistryDaoTest {
+public class XxlJobRegistryDaoTest extends AbstractTest {
 
     @Resource
     private XxlJobRegistryDao xxlJobRegistryDao;

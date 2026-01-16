@@ -1,15 +1,14 @@
 package com.xxl.job.admin.dao;
 
+import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.admin.core.model.XxlJobLogGlue;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class XxlJobLogGlueDaoTest {
+public class XxlJobLogGlueDaoTest extends AbstractTest {
 
     @Resource
     private XxlJobLogGlueDao xxlJobLogGlueDao;

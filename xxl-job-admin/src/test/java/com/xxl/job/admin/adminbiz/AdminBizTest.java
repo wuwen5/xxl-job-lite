@@ -1,5 +1,6 @@
-package com.xxl.job.adminbiz;
+package com.xxl.job.admin.adminbiz;
 
+import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.biz.model.HandleCallbackParam;
@@ -8,6 +9,8 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.context.XxlJobContext;
 import com.xxl.job.core.enums.RegistryConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,17 +22,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author xuxueli 2017-07-28 22:14:52
  */
-public class AdminBizTest {
+public class AdminBizTest extends AbstractTest {
 
     // admin-client
-    private static String addressUrl = "http://127.0.0.1:8080/xxl-job-admin/";
+    private static String addressUrl = "http://127.0.0.1:%d/xxl-job-admin";
     private static String accessToken = null;
     private static int timeoutSecond = 3;
 
+    @Autowired
+    private Environment environment;
+
+    private int port() {
+        return this.environment.getProperty("local.server.port", Integer.class, -1);
+    }
 
     @Test
     public void callback() throws Exception {
-        AdminBiz adminBiz = new AdminBizClient(addressUrl, accessToken, timeoutSecond);
+        AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
 
         HandleCallbackParam param = new HandleCallbackParam();
         param.setLogId(1);
@@ -49,7 +58,7 @@ public class AdminBizTest {
      */
     @Test
     public void registry() throws Exception {
-        AdminBiz adminBiz = new AdminBizClient(addressUrl, accessToken, timeoutSecond);
+        AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
 
         RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
         ReturnT<String> returnT = adminBiz.registry(registryParam);
@@ -64,7 +73,7 @@ public class AdminBizTest {
      */
     @Test
     public void registryRemove() throws Exception {
-        AdminBiz adminBiz = new AdminBizClient(addressUrl, accessToken, timeoutSecond);
+        AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
 
         RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
         ReturnT<String> returnT = adminBiz.registryRemove(registryParam);
