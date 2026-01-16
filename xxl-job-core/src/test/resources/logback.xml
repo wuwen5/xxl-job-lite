@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="true" scanPeriod="10 seconds">
+
+    <contextName>logback</contextName>
+
+    <property scope="context" name="CONSOLE_LOG_PATTERN" value="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%20.20t]){faint} [%clr(%-40.40logger{39}:%4.4L){cyan}] [%clr(%20.20M){cyan}] %clr(:){faint} %m${LOG_EXCEPTION_CONVERSION_WORD:-%.-10240wEx}%n"/>
+    <property scope="context" name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%20.20t] [%-40.40logger{39}:%4.4L] [%20.20M] : %m${LOG_EXCEPTION_CONVERSION_WORD:-%.-10240wEx}%n"/>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <property name="LOG_HOME" value="${LOG_HOME:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}}"/>
+
+    <springProperty scope="context" name="applicationName" source="spring.application.name" defaultValue="myApplication"/>
+
+    <property name="ERR_LOG_HOME" value="${ERR_LOG_HOME:-${LOG_HOME}/err}"/>
+    <property name="APP_LOG_HOME" value="${APP_LOG_HOME:-${LOG_HOME}/app}"/>
+   
+
+
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+
+</configuration>
