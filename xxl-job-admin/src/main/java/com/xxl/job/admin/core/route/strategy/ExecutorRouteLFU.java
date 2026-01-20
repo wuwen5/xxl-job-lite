@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ExecutorRouteLFU extends ExecutorRouter {
 
-    private static ConcurrentMap<Integer, HashMap<String, Integer>> jobLfuMap = new ConcurrentHashMap<Integer, HashMap<String, Integer>>();
+    private static ConcurrentMap<Integer, HashMap<String, Integer>> jobLfuMap = new ConcurrentHashMap<>();
     private static long CACHE_VALID_TIME = 0;
 
     public String route(int jobId, List<String> addressList) {
@@ -29,16 +29,18 @@ public class ExecutorRouteLFU extends ExecutorRouter {
         }
 
         // lfu item init
-        HashMap<String, Integer> lfuItemMap = jobLfuMap.get(jobId);     // Key排序可以用TreeMap+构造入参Compare；Value排序暂时只能通过ArrayList；
+        // Key排序可以用TreeMap+构造入参Compare；Value排序暂时只能通过ArrayList；
+        HashMap<String, Integer> lfuItemMap = jobLfuMap.get(jobId);     
         if (lfuItemMap == null) {
-            lfuItemMap = new HashMap<String, Integer>();
-            jobLfuMap.putIfAbsent(jobId, lfuItemMap);   // 避免重复覆盖
+            // 避免重复覆盖
+            lfuItemMap = jobLfuMap.computeIfAbsent(jobId, HashMap::new);   
         }
 
         // put new
         for (String address: addressList) {
             if (!lfuItemMap.containsKey(address) || lfuItemMap.get(address) >1000000 ) {
-                lfuItemMap.put(address, new Random().nextInt(addressList.size()));  // 初始化时主动Random一次，缓解首次压力
+                // 初始化时主动Random一次，缓解首次压力
+                lfuItemMap.put(address, new Random().nextInt(addressList.size()));  
             }
         }
         // remove old
@@ -48,23 +50,17 @@ public class ExecutorRouteLFU extends ExecutorRouter {
                 delKeys.add(existKey);
             }
         }
-        if (delKeys.size() > 0) {
+        if (!delKeys.isEmpty()) {
             for (String delKey: delKeys) {
                 lfuItemMap.remove(delKey);
             }
         }
 
         // load least userd count address
-        List<Map.Entry<String, Integer>> lfuItemList = new ArrayList<Map.Entry<String, Integer>>(lfuItemMap.entrySet());
-        Collections.sort(lfuItemList, new Comparator<Map.Entry<String, Integer>>() {
-            @Override
-            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                return o1.getValue().compareTo(o2.getValue());
-            }
-        });
+        List<Map.Entry<String, Integer>> lfuItemList = new ArrayList<>(lfuItemMap.entrySet());
+        lfuItemList.sort(Map.Entry.comparingByValue());
 
         Map.Entry<String, Integer> addressItem = lfuItemList.get(0);
-        String minAddress = addressItem.getKey();
         addressItem.setValue(addressItem.getValue() + 1);
 
         return addressItem.getKey();
@@ -73,7 +69,7 @@ public class ExecutorRouteLFU extends ExecutorRouter {
     @Override
     public ReturnT<String> route(TriggerParam triggerParam, List<String> addressList) {
         String address = route(triggerParam.getJobId(), addressList);
-        return new ReturnT<String>(address);
+        return new ReturnT<>(address);
     }
 
 }

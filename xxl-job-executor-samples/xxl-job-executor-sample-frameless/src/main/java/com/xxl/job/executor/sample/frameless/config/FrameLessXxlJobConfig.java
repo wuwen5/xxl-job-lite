@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -37,13 +38,13 @@ public class FrameLessXxlJobConfig {
         xxlJobExecutor = new XxlJobSimpleExecutor();
         xxlJobExecutor.setAdminAddresses(xxlJobProp.getProperty("xxl.job.admin.addresses"));
         xxlJobExecutor.setAccessToken(xxlJobProp.getProperty("xxl.job.admin.accessToken"));
-        xxlJobExecutor.setTimeout(Integer.valueOf(xxlJobProp.getProperty("xxl.job.admin.timeout")));
+        xxlJobExecutor.setTimeout(Integer.parseInt(xxlJobProp.getProperty("xxl.job.admin.timeout")));
         xxlJobExecutor.setAppname(xxlJobProp.getProperty("xxl.job.executor.appname"));
         xxlJobExecutor.setAddress(xxlJobProp.getProperty("xxl.job.executor.address"));
         xxlJobExecutor.setIp(xxlJobProp.getProperty("xxl.job.executor.ip"));
-        xxlJobExecutor.setPort(Integer.valueOf(xxlJobProp.getProperty("xxl.job.executor.port")));
+        xxlJobExecutor.setPort(Integer.parseInt(xxlJobProp.getProperty("xxl.job.executor.port")));
         xxlJobExecutor.setLogPath(xxlJobProp.getProperty("xxl.job.executor.logpath"));
-        xxlJobExecutor.setLogRetentionDays(Integer.valueOf(xxlJobProp.getProperty("xxl.job.executor.logretentiondays")));
+        xxlJobExecutor.setLogRetentionDays(Integer.parseInt(xxlJobProp.getProperty("xxl.job.executor.logretentiondays")));
 
         // registry job bean
         xxlJobExecutor.setXxlJobBeanList(Arrays.asList(new SampleXxlJob()));
@@ -67,26 +68,13 @@ public class FrameLessXxlJobConfig {
 
 
     public static Properties loadProperties(String propertyFileName) {
-        InputStreamReader in = null;
-        try {
-            ClassLoader loder = Thread.currentThread().getContextClassLoader();
-
-            in = new InputStreamReader(loder.getResourceAsStream(propertyFileName), "UTF-8");;
-            if (in != null) {
-                Properties prop = new Properties();
-                prop.load(in);
-                return prop;
-            }
+        ClassLoader loder = Thread.currentThread().getContextClassLoader();
+        try (InputStreamReader in = new InputStreamReader(loder.getResourceAsStream(propertyFileName), StandardCharsets.UTF_8)) {
+            Properties prop = new Properties();
+            prop.load(in);
+            return prop;
         } catch (IOException e) {
             logger.error("load {} error!", propertyFileName);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    logger.error("close {} error!", propertyFileName);
-                }
-            }
         }
         return null;
     }

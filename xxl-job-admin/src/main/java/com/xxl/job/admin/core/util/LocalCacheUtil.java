@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class LocalCacheUtil {
 
-    private static ConcurrentMap<String, LocalCacheData> cacheRepository = new ConcurrentHashMap<String, LocalCacheData>();   // 类型建议用抽象父类，兼容性更好；
+    private static ConcurrentMap<String, LocalCacheData> cacheRepository = new ConcurrentHashMap<>();   
     private static class LocalCacheData{
         private String key;
         private Object val;
@@ -65,7 +65,7 @@ public class LocalCacheUtil {
         cleanTimeoutCache();
 
         // set new cache
-        if (key==null || key.trim().length()==0) {
+        if (key==null || key.trim().isEmpty()) {
             return false;
         }
         if (val == null) {
@@ -87,7 +87,7 @@ public class LocalCacheUtil {
      * @return
      */
     public static boolean remove(String key){
-        if (key==null || key.trim().length()==0) {
+        if (key==null || key.trim().isEmpty()) {
             return false;
         }
         cacheRepository.remove(key);
@@ -101,7 +101,7 @@ public class LocalCacheUtil {
      * @return
      */
     public static Object get(String key){
-        if (key==null || key.trim().length()==0) {
+        if (key==null || key.trim().isEmpty()) {
             return null;
         }
         LocalCacheData localCacheData = cacheRepository.get(key);
@@ -119,13 +119,12 @@ public class LocalCacheUtil {
      * @return
      */
     public static boolean cleanTimeoutCache(){
-        if (!cacheRepository.keySet().isEmpty()) {
-            for (String key: cacheRepository.keySet()) {
-                LocalCacheData localCacheData = cacheRepository.get(key);
-                if (localCacheData!=null && System.currentTimeMillis()>=localCacheData.getTimeoutTime()) {
-                    cacheRepository.remove(key);
-                }
-            }
+        if (!cacheRepository.isEmpty()) {
+            long now = System.currentTimeMillis();
+            cacheRepository.entrySet().removeIf(entry ->
+                    entry.getValue() != null &&
+                            now >= entry.getValue().getTimeoutTime()
+            );
         }
         return true;
     }
