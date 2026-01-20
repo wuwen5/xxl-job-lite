@@ -93,7 +93,7 @@ public class XxlJobExecutor  {
         stopEmbedServer();
 
         // destroy jobThreadRepository
-        if (jobThreadRepository.size() > 0) {
+        if (!jobThreadRepository.isEmpty()) {
             for (Map.Entry<Integer, JobThread> item: jobThreadRepository.entrySet()) {
                 JobThread oldJobThread = removeJobThread(item.getKey(), "web container destroy and kill the job.");
                 // wait for job thread push result to callback queue
@@ -121,15 +121,15 @@ public class XxlJobExecutor  {
 
     // ---------------------- admin-client (rpc invoker) ----------------------
     private static List<AdminBiz> adminBizList;
-    private void initAdminBizList(String adminAddresses, String accessToken, int timeout) throws Exception {
-        if (adminAddresses!=null && adminAddresses.trim().length()>0) {
+    private void initAdminBizList(String adminAddresses, String accessToken, int timeout) {
+        if (adminAddresses!=null && !adminAddresses.trim().isEmpty()) {
             for (String address: adminAddresses.trim().split(",")) {
-                if (address!=null && address.trim().length()>0) {
+                if (!address.trim().isEmpty()) {
 
                     AdminBiz adminBiz = new AdminBizClient(address.trim(), accessToken, timeout);
 
                     if (adminBizList == null) {
-                        adminBizList = new ArrayList<AdminBiz>();
+                        adminBizList = new ArrayList<>();
                     }
                     adminBizList.add(adminBiz);
                 }
@@ -147,17 +147,18 @@ public class XxlJobExecutor  {
     private void initEmbedServer(String address, String ip, int port, String appname, String accessToken) throws Exception {
 
         // fill ip port
-        port = port>0?port: NetUtil.findAvailablePort(9999);
-        ip = (ip!=null&&ip.trim().length()>0)?ip: IpUtil.getIp();
+        port = port > 0 ? port : NetUtil.findAvailablePort(9999);
+        ip = (ip != null && !ip.trim().isEmpty()) ? ip : IpUtil.getIp();
 
         // generate address
-        if (address==null || address.trim().length()==0) {
-            String ip_port_address = IpUtil.getIpPort(ip, port);   // registry-address：default use address to registry , otherwise use ip:port if address is null
-            address = "http://{ip_port}/".replace("{ip_port}", ip_port_address);
+        if (address==null || address.trim().isEmpty()) {
+            // registry-address：default use address to registry , otherwise use ip:port if address is null
+            String ipPortAddress = IpUtil.getIpPort(ip, port);   
+            address = "http://{ip_port}/".replace("{ip_port}", ipPortAddress);
         }
 
         // accessToken
-        if (accessToken==null || accessToken.trim().length()==0) {
+        if (accessToken==null || accessToken.trim().isEmpty()) {
             logger.warn(">>>>>>>>>>> xxl-job accessToken is empty. To ensure system security, please set the accessToken.");
         }
 
@@ -196,7 +197,7 @@ public class XxlJobExecutor  {
         //make and simplify the variables since they'll be called several times later
         Class<?> clazz = bean.getClass();
         String methodName = executeMethod.getName();
-        if (name.trim().length() == 0) {
+        if (name.trim().isEmpty()) {
             throw new RuntimeException("xxl-job method-jobhandler name invalid, for[" + clazz + "#" + methodName + "] .");
         }
         if (loadJobHandler(name) != null) {
@@ -219,7 +220,7 @@ public class XxlJobExecutor  {
         Method initMethod = null;
         Method destroyMethod = null;
 
-        if (xxlJob.init().trim().length() > 0) {
+        if (!xxlJob.init().trim().isEmpty()) {
             try {
                 initMethod = clazz.getDeclaredMethod(xxlJob.init());
                 initMethod.setAccessible(true);
@@ -227,7 +228,7 @@ public class XxlJobExecutor  {
                 throw new RuntimeException("xxl-job method-jobhandler initMethod invalid, for[" + clazz + "#" + methodName + "] .");
             }
         }
-        if (xxlJob.destroy().trim().length() > 0) {
+        if (!xxlJob.destroy().trim().isEmpty()) {
             try {
                 destroyMethod = clazz.getDeclaredMethod(xxlJob.destroy());
                 destroyMethod.setAccessible(true);
@@ -243,13 +244,14 @@ public class XxlJobExecutor  {
 
 
     // ---------------------- job thread repository ----------------------
-    private static ConcurrentMap<Integer, JobThread> jobThreadRepository = new ConcurrentHashMap<Integer, JobThread>();
+    private static ConcurrentMap<Integer, JobThread> jobThreadRepository = new ConcurrentHashMap<>();
     public static JobThread registJobThread(int jobId, IJobHandler handler, String removeOldReason){
         JobThread newJobThread = new JobThread(jobId, handler);
         newJobThread.start();
-        logger.info(">>>>>>>>>>> xxl-job regist JobThread success, jobId:{}, handler:{}", new Object[]{jobId, handler});
+        logger.info(">>>>>>>>>>> xxl-job regist JobThread success, jobId:{}, handler:{}", jobId, handler);
 
-        JobThread oldJobThread = jobThreadRepository.put(jobId, newJobThread);	// putIfAbsent | oh my god, map's put method return the old value!!!
+        // putIfAbsent | oh my god, map's put method return the old value!!!
+        JobThread oldJobThread = jobThreadRepository.put(jobId, newJobThread);	
         if (oldJobThread != null) {
             oldJobThread.toStop(removeOldReason);
             oldJobThread.interrupt();

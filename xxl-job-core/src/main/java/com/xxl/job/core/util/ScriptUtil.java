@@ -6,7 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,17 +30,10 @@ public class ScriptUtil {
      */
     public static void markScriptFile(String scriptFileName, String content) throws IOException {
         // make file,   filePath/gluesource/666-123456789.py
-        FileOutputStream fileOutputStream = null;
-        try {
-            fileOutputStream = new FileOutputStream(scriptFileName);
-            fileOutputStream.write(content.getBytes("UTF-8"));
-            fileOutputStream.close();
+        try (FileOutputStream fileOutputStream = new FileOutputStream(scriptFileName)) {
+            fileOutputStream.write(content.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw e;
-        }finally{
-            if(fileOutputStream != null){
-                fileOutputStream.close();
-            }
         }
     }
 
@@ -65,10 +60,8 @@ public class ScriptUtil {
             List<String> cmdarray = new ArrayList<>();
             cmdarray.add(command);
             cmdarray.add(scriptFile);
-            if (params!=null && params.length>0) {
-                for (String param:params) {
-                    cmdarray.add(param);
-                }
+            if (params != null) {
+                Collections.addAll(cmdarray, params);
             }
             String[] cmdarrayFinal = cmdarray.toArray(new String[cmdarray.size()]);
 
@@ -77,24 +70,18 @@ public class ScriptUtil {
 
             // log-thread
             final FileOutputStream finalFileOutputStream = fileOutputStream;
-            inputThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        copy(process.getInputStream(), finalFileOutputStream, new byte[1024]);
-                    } catch (IOException e) {
-                        XxlJobHelper.log(e);
-                    }
+            inputThread = new Thread(() -> {
+                try {
+                    copy(process.getInputStream(), finalFileOutputStream, new byte[1024]);
+                } catch (IOException e) {
+                    XxlJobHelper.log(e);
                 }
             });
-            errThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        copy(process.getErrorStream(), finalFileOutputStream, new byte[1024]);
-                    } catch (IOException e) {
-                        XxlJobHelper.log(e);
-                    }
+            errThread = new Thread(() -> {
+                try {
+                    copy(process.getErrorStream(), finalFileOutputStream, new byte[1024]);
+                } catch (IOException e) {
+                    XxlJobHelper.log(e);
                 }
             });
             inputThread.start();
@@ -153,7 +140,9 @@ public class ScriptUtil {
                     }
                 }
             }
-            outputStream.flush();
+            if (outputStream != null) {
+                outputStream.flush();
+            }
             //out = null;
             inputStream.close();
             inputStream = null;

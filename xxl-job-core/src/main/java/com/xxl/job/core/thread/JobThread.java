@@ -42,8 +42,8 @@ public class JobThread extends Thread{
 	public JobThread(int jobId, IJobHandler handler) {
 		this.jobId = jobId;
 		this.handler = handler;
-		this.triggerQueue = new LinkedBlockingQueue<TriggerParam>();
-		this.triggerLogIdSet = Collections.synchronizedSet(new HashSet<Long>());
+		this.triggerQueue = new LinkedBlockingQueue<>();
+		this.triggerLogIdSet = Collections.synchronizedSet(new HashSet<>());
 
 		// assign job thread name
 		this.setName("xxl-job, JobThread-"+jobId+"-"+System.currentTimeMillis());
@@ -90,7 +90,7 @@ public class JobThread extends Thread{
      * @return
      */
     public boolean isRunningOrHasQueue() {
-        return running || triggerQueue.size()>0;
+        return running || !triggerQueue.isEmpty();
     }
 
     @Override
@@ -136,17 +136,14 @@ public class JobThread extends Thread{
 						// limit timeout
 						Thread futureThread = null;
 						try {
-							FutureTask<Boolean> futureTask = new FutureTask<Boolean>(new Callable<Boolean>() {
-								@Override
-								public Boolean call() throws Exception {
+							FutureTask<Boolean> futureTask = new FutureTask<>(() -> {
 
-									// init job context
-									XxlJobContext.setXxlJobContext(xxlJobContext);
+                                // init job context
+                                XxlJobContext.setXxlJobContext(xxlJobContext);
 
-									handler.execute();
-									return true;
-								}
-							});
+                                handler.execute();
+                                return true;
+                            });
 							futureThread = new Thread(futureTask);
 							futureThread.start();
 
@@ -159,7 +156,9 @@ public class JobThread extends Thread{
 							// handle result
 							XxlJobHelper.handleTimeout("job execute timeout ");
 						} finally {
-							futureThread.interrupt();
+                            if (futureThread != null) {
+                                futureThread.interrupt();
+                            }
 						}
 					} else {
 						// just execute
@@ -184,7 +183,7 @@ public class JobThread extends Thread{
 
 				} else {
 					if (idleTimes > 30) {
-						if(triggerQueue.size() == 0) {	// avoid concurrent trigger causes jobId-lost
+						if(triggerQueue.isEmpty()) {	// avoid concurrent trigger causes jobId-lost
 							XxlJobExecutor.removeJobThread(jobId, "excutor idle times over limit.");
 						}
 					}
@@ -227,7 +226,7 @@ public class JobThread extends Thread{
         }
 
 		// callback trigger request in queue
-		while(triggerQueue !=null && triggerQueue.size()>0){
+		while(triggerQueue !=null && !triggerQueue.isEmpty()){
 			TriggerParam triggerParam = triggerQueue.poll();
 			if (triggerParam!=null) {
 				// is killed

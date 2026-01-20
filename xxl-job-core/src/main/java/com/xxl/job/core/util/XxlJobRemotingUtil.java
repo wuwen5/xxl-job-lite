@@ -1,158 +1,136 @@
 package com.xxl.job.core.util;
 
 import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.core.remote.ServiceAddressResolver;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.*;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.cert.CertificateException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.Map;
 
 /**
  * @author xuxueli 2018-11-25 00:55:31
  */
 public class XxlJobRemotingUtil {
-    private static Logger logger = LoggerFactory.getLogger(XxlJobRemotingUtil.class);
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(XxlJobRemotingUtil.class);
+    
     public static final String XXL_JOB_ACCESS_TOKEN = "XXL-JOB-ACCESS-TOKEN";
 
+    private static volatile ServiceAddressResolver addressResolver = rawUrl -> rawUrl;
 
-    // trust-https start
-    private static void trustAllHosts(HttpsURLConnection connection) {
-        try {
-            SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            SSLSocketFactory newFactory = sc.getSocketFactory();
+    private static final SSLContext SSL_CONTEXT = createSslContext();
 
-            connection.setSSLSocketFactory(newFactory);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+    private static final SSLConnectionSocketFactory SSL_SOCKET_FACTORY = new SSLConnectionSocketFactory(SSL_CONTEXT, NoopHostnameVerifier.INSTANCE);
+    
+    public static void setAddressResolver(ServiceAddressResolver resolver) {
+        if (resolver != null) {
+            addressResolver = resolver;
         }
-        connection.setHostnameVerifier(new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        });
     }
-    private static final TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-        @Override
-        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-            return new java.security.cert.X509Certificate[]{};
-        }
-        @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        }
-        @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        }
-    }};
-    // trust-https end
-
-
+    
+    
     /**
-     * post
+     * post 
      *
-     * @param url
-     * @param accessToken
+     * @param url 请求地址
+     * @param accessToken 访问令牌
      * @param timeout           by second
-     * @param requestObj
-     * @param returnTargClassOfT
-     * @return
+     * @param requestObj 请求对象
+     * @param returnTargClassOfT 返回对象类型
+     * @return ReturnT<T> 返回结果
      */
-    public static ReturnT postBody(String url, String accessToken, int timeout, Object requestObj, Class returnTargClassOfT) {
-        HttpURLConnection connection = null;
-        BufferedReader bufferedReader = null;
-        try {
-            // connection
-            URL realUrl = new URL(url);
-            connection = (HttpURLConnection) realUrl.openConnection();
+    public static <T> ReturnT<T> postBody(String url, String accessToken, int timeout, Object requestObj, Class<T> returnTargClassOfT) {
 
-            // trust-https
-            boolean useHttps = url.startsWith("https");
-            if (useHttps) {
-                HttpsURLConnection https = (HttpsURLConnection) connection;
-                trustAllHosts(https);
-            }
+        String resolvedUrl = addressResolver.resolve(url);
 
-            // connection setting
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.setUseCaches(false);
-            connection.setReadTimeout(timeout * 1000);
-            connection.setConnectTimeout(timeout * 1000);
-            connection.setRequestProperty("connection", "Keep-Alive");
-            connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-            connection.setRequestProperty("Accept-Charset", "application/json;charset=UTF-8");
+        HttpPost post = new HttpPost(resolvedUrl);
+        post.addHeader("Content-Type", "application/json;charset=UTF-8");
+        post.addHeader("Accept-Charset", "application/json;charset=UTF-8");
 
-            if(accessToken!=null && accessToken.trim().length()>0){
-                connection.setRequestProperty(XXL_JOB_ACCESS_TOKEN, accessToken);
-            }
+        if (accessToken != null && !accessToken.isEmpty()) {
+            post.setHeader(XxlJobRemotingUtil.XXL_JOB_ACCESS_TOKEN, accessToken);
+        }
 
-            // do connection
-            connection.connect();
+        try (CloseableHttpClient client = getHttpClient(timeout)) {
 
-            // write requestBody
             if (requestObj != null) {
-                String requestBody = GsonTool.toJson(requestObj);
-
-                DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream());
-                dataOutputStream.write(requestBody.getBytes("UTF-8"));
-                dataOutputStream.flush();
-                dataOutputStream.close();
+                String json = GsonTool.toJson(requestObj);
+                post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
             }
 
-            /*byte[] requestBodyBytes = requestBody.getBytes("UTF-8");
-            connection.setRequestProperty("Content-Length", String.valueOf(requestBodyBytes.length));
-            OutputStream outwritestream = connection.getOutputStream();
-            outwritestream.write(requestBodyBytes);
-            outwritestream.flush();
-            outwritestream.close();*/
+            try (CloseableHttpResponse response = client.execute(post)) {
 
-            // valid StatusCode
-            int statusCode = connection.getResponseCode();
-            if (statusCode != 200) {
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "xxl-job remoting fail, StatusCode("+ statusCode +") invalid. for url : " + url);
-            }
+                int status = response.getStatusLine().getStatusCode();
+                if (status != ReturnT.SUCCESS_CODE) {
+                    return ReturnT.ofFail(
+                            "xxl-job remoting fail, status=" + status +
+                                    ", url=" + resolvedUrl);
+                }
 
-            // result
-            bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-            StringBuilder result = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                result.append(line);
-            }
-            String resultJson = result.toString();
+                String resultJson = EntityUtils.toString(
+                        response.getEntity(), StandardCharsets.UTF_8);
 
-            // parse returnT
-            try {
-                ReturnT returnT = GsonTool.fromJson(resultJson, ReturnT.class, returnTargClassOfT);
-                return returnT;
-            } catch (Exception e) {
-                logger.error("xxl-job remoting (url="+url+") response content invalid("+ resultJson +").", e);
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "xxl-job remoting (url="+url+") response content invalid("+ resultJson +").");
+                try {
+                    return GsonTool.fromReturnJson(resultJson, returnTargClassOfT);
+                } catch (Exception e) {
+                    LOGGER.error("xxl-job remoting (url={}) response content invalid({}).", url, resultJson, e);
+                    return ReturnT.ofFail("xxl-job remoting (url="+url+") response content invalid("+ resultJson +").");
+                }
             }
 
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new ReturnT<String>(ReturnT.FAIL_CODE, "xxl-job remoting error("+ e.getMessage() +"), for url : " + url);
-        } finally {
-            try {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-                if (connection != null) {
-                    connection.disconnect();
-                }
-            } catch (Exception e2) {
-                logger.error(e2.getMessage(), e2);
-            }
+            return ReturnT.ofFail(
+                    "xxl-job remoting error(" + e.getMessage() + "), url=" + resolvedUrl);
+        }
+    }
+
+    private static CloseableHttpClient getHttpClient(int timeoutSeconds) {
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(timeoutSeconds * 1000)
+                .setSocketTimeout(timeoutSeconds * 1000)
+                .setConnectionRequestTimeout(timeoutSeconds * 1000)
+                .build();
+
+        return HttpClients.custom()
+                .setSSLSocketFactory(SSL_SOCKET_FACTORY)
+                .setDefaultRequestConfig(config)
+                .build();
+    }
+
+    private static SSLContext createSslContext() {
+        try {
+            SSLContext ctx = SSLContext.getInstance("TLS");
+            ctx.init(null, new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(
+                                X509Certificate[] chain, String authType) {}
+                        @Override
+                        public void checkServerTrusted(
+                                X509Certificate[] chain, String authType) {}
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                    }
+            }, new SecureRandom());
+            return ctx;
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
     }
 

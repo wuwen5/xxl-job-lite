@@ -15,7 +15,7 @@ import org.springframework.core.env.Environment;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * admin api test
@@ -37,9 +37,9 @@ public class AdminBizTest extends AbstractTest {
     }
 
     @Test
-    public void callback() throws Exception {
+    public void callback() {
         AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
-
+        
         HandleCallbackParam param = new HandleCallbackParam();
         param.setLogId(1);
         param.setHandleCode(XxlJobContext.HANDLE_CODE_SUCCESS);
@@ -48,37 +48,35 @@ public class AdminBizTest extends AbstractTest {
 
         ReturnT<String> returnT = adminBiz.callback(callbackParamList);
 
-        assertTrue(returnT.getCode() == ReturnT.SUCCESS_CODE);
+        assertEquals(ReturnT.SUCCESS_CODE, returnT.getCode());
     }
 
     /**
      * registry executor
      *
-     * @throws Exception
      */
     @Test
-    public void registry() throws Exception {
+    public void registry() {
         AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
 
         RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
         ReturnT<String> returnT = adminBiz.registry(registryParam);
 
-        assertTrue(returnT.getCode() == ReturnT.SUCCESS_CODE);
+        assertEquals(ReturnT.SUCCESS_CODE, returnT.getCode());
     }
 
     /**
      * registry executor remove
      *
-     * @throws Exception
      */
     @Test
-    public void registryRemove() throws Exception {
+    public void registryRemove() {
         AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
 
         RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
         ReturnT<String> returnT = adminBiz.registryRemove(registryParam);
 
-        assertTrue(returnT.getCode() == ReturnT.SUCCESS_CODE);
+        assertEquals(ReturnT.SUCCESS_CODE, returnT.getCode());
 
     }
 

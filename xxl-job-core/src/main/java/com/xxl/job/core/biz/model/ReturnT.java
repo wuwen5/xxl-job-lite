@@ -29,6 +29,16 @@ public class ReturnT<T> implements Serializable {
 		this.code = SUCCESS_CODE;
 		this.content = content;
 	}
+
+    public ReturnT(int code, String msg, T content) {
+        this.content = content;
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public static <T> ReturnT<T> ofFail(String msg) {
+		return new ReturnT<>(FAIL_CODE, msg, null);
+	}
 	
 	public int getCode() {
 		return code;
