@@ -5,18 +5,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.xxl.job.core.biz.model.ReturnT;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 /**
  * @author xuxueli 2020-04-11 20:56:31
  */
 public class GsonTool {
 
-    private static Gson gson;
-    static {
-        gson= new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").disableHtmlEscaping().create();
-    }
+    private static final Gson GSON =new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").disableHtmlEscaping().create();
 
     /**
      * Object 转成 json
@@ -29,7 +26,7 @@ public class GsonTool {
      * @return String
      */
     public static String toJson(Object src) {
-        return gson.toJson(src);
+        return GSON.toJson(src);
     }
 
     /**
@@ -44,47 +41,28 @@ public class GsonTool {
      * @return
      */
     public static <T> T fromJson(String json, Class<T> classOfT) {
-        return gson.fromJson(json, classOfT);
+        return GSON.fromJson(json, classOfT);
     }
 
     public static <T> ReturnT<T> fromReturnJson(String json, Class<T> dataType) {
         Type returnType = TypeToken.getParameterized(ReturnT.class, dataType).getType();
-        return gson.fromJson(json, returnType);
+        return GSON.fromJson(json, returnType);
     }
-    
+
     /**
-     * json 转成 特定的 rawClass<classOfT> 的Object
+     * json 转成 特定的cls的 ArrayList
      *
      * <pre>
-     *     Response<Demo> response = GsonTool.fromJson(json, Response.class, Demo.class);
+     *     List<Demo> demoList = GsonTool.fromJsonList(json, Demo.class);
      * </pre>
      *
      * @param json
      * @param classOfT
-     * @param argClassOfT
      * @return
      */
-    public static <T> T fromJson(String json, Class<T> classOfT, Class<?> argClassOfT) {
-        Type type = new ParameterizedType4ReturnT(classOfT, new Class[]{argClassOfT});
-        return gson.fromJson(json, type);
-    }
-    public static class ParameterizedType4ReturnT implements ParameterizedType {
-        private final Class<?> raw;
-        private final Type[] args;
-        public ParameterizedType4ReturnT(Class<?> raw, Type[] args) {
-            this.raw = raw;
-            this.args = args != null ? args : new Type[0];
-        }
-        @Override
-        public Type[] getActualTypeArguments() {
-            return args;
-        }
-        @Override
-        public Type getRawType() {
-            return raw;
-        }
-        @Override
-        public Type getOwnerType() {return null;}
+    public static <T> ArrayList<T> fromJsonList(String json, Class<T> classOfT) {
+        Type type = TypeToken.getParameterized(ArrayList.class, classOfT).getType();
+        return GSON.fromJson(json, type);
     }
 
 }

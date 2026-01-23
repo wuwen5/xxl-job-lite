@@ -1,8 +1,10 @@
 package com.xxl.job.core.executor.impl;
 
+import com.xxl.job.core.biz.model.JobInfoParam;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.glue.GlueFactory;
 import com.xxl.job.core.handler.annotation.XxlJob;
+import com.xxl.job.core.thread.ExecutorRegistryThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -15,6 +17,8 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -35,7 +39,8 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
         /*initJobHandlerRepository(applicationContext);*/
 
         // init JobHandler Repository (for method)
-        initJobHandlerMethodRepository(applicationContext);
+        List<JobInfoParam> jobInfoParams = initJobHandlerMethodRepository(applicationContext);
+        ExecutorRegistryThread.getInstance().initJobInfoInitParams(jobInfoParams);
 
         // refresh GlueFactory
         GlueFactory.refreshInstance(1);
@@ -54,39 +59,17 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
         super.destroy();
     }
 
-
-    /*private void initJobHandlerRepository(ApplicationContext applicationContext) {
+    private List<JobInfoParam> initJobHandlerMethodRepository(ApplicationContext applicationContext) {
+        List<JobInfoParam> list = new ArrayList<>();
         if (applicationContext == null) {
-            return;
-        }
-
-        // init job handler action
-        Map<String, Object> serviceBeanMap = applicationContext.getBeansWithAnnotation(JobHandler.class);
-
-        if (serviceBeanMap != null && serviceBeanMap.size() > 0) {
-            for (Object serviceBean : serviceBeanMap.values()) {
-                if (serviceBean instanceof IJobHandler) {
-                    String name = serviceBean.getClass().getAnnotation(JobHandler.class).value();
-                    IJobHandler handler = (IJobHandler) serviceBean;
-                    if (loadJobHandler(name) != null) {
-                        throw new RuntimeException("xxl-job jobhandler[" + name + "] naming conflicts.");
-                    }
-                    registJobHandler(name, handler);
-                }
-            }
-        }
-    }*/
-
-    private void initJobHandlerMethodRepository(ApplicationContext applicationContext) {
-        if (applicationContext == null) {
-            return;
+            return list;
         }
         // init job handler from method
         String[] beanDefinitionNames = applicationContext.getBeanNamesForType(Object.class, false, true);
         for (String beanDefinitionName : beanDefinitionNames) {
 
             // get bean
-            Object bean = null;
+            Object bean;
             Lazy onBean = applicationContext.findAnnotationOnBean(beanDefinitionName, Lazy.class);
             if (onBean!=null){
                 logger.debug("xxl-job annotation scan, skip @Lazy Bean:{}", beanDefinitionName);
@@ -96,31 +79,38 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
             }
 
             // filter method
-            Map<Method, XxlJob> annotatedMethods = null;   // referred to ：org.springframework.context.event.EventListenerMethodProcessor.processBean
+            // referred to ：org.springframework.context.event.EventListenerMethodProcessor.processBean
+            Map<Method, XxlJob> annotatedMethods = null;   
             try {
                 annotatedMethods = MethodIntrospector.selectMethods(bean.getClass(),
-                        new MethodIntrospector.MetadataLookup<XxlJob>() {
-                            @Override
-                            public XxlJob inspect(Method method) {
-                                return AnnotatedElementUtils.findMergedAnnotation(method, XxlJob.class);
-                            }
-                        });
+                        (MethodIntrospector.MetadataLookup<XxlJob>) method -> AnnotatedElementUtils.findMergedAnnotation(method, XxlJob.class));
             } catch (Throwable ex) {
-                logger.error("xxl-job method-jobhandler resolve error for bean[" + beanDefinitionName + "].", ex);
+                logger.error("xxl-job method-jobhandler resolve error for bean[{}].", beanDefinitionName, ex);
             }
             if (annotatedMethods==null || annotatedMethods.isEmpty()) {
                 continue;
             }
-
+            
             // generate and regist method job handler
             for (Map.Entry<Method, XxlJob> methodXxlJobEntry : annotatedMethods.entrySet()) {
                 Method executeMethod = methodXxlJobEntry.getKey();
                 XxlJob xxlJob = methodXxlJobEntry.getValue();
                 // regist
                 registJobHandler(xxlJob, bean, executeMethod);
-            }
 
+                if (xxlJob != null && (!xxlJob.cron().isEmpty() || xxlJob.fixedRate() > 0)) {
+                    JobInfoParam infoInitParam = new JobInfoParam();
+                    infoInitParam.setExecutorParam(xxlJob.param());
+                    infoInitParam.setJobDesc(xxlJob.desc());
+                    infoInitParam.setExecutorHandler(xxlJob.value());
+                    infoInitParam.setCron(xxlJob.cron());
+                    infoInitParam.setFixedRate(xxlJob.fixedRate());
+                    list.add(infoInitParam);
+                }
+            }
+            
         }
+        return list;
     }
 
     // ---------------------- applicationContext ----------------------
@@ -134,14 +124,6 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
     public static ApplicationContext getApplicationContext() {
         return applicationContext;
     }
-
-    /*
-    BeanDefinitionRegistryPostProcessor
-    registry.getBeanDefine()
-    @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        this.registry = registry;
-    }
-    * */
+    
 
 }

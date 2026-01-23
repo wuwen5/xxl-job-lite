@@ -1,10 +1,15 @@
 package com.xxl.job.core.biz.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 
 /**
  * Created by xuxueli on 17/3/23.
  */
+@Setter
+@Getter
 public class LogResult implements Serializable {
     private static final long serialVersionUID = 42L;
 
@@ -22,35 +27,4 @@ public class LogResult implements Serializable {
     private String logContent;
     private boolean isEnd;
 
-    public int getFromLineNum() {
-        return fromLineNum;
-    }
-
-    public void setFromLineNum(int fromLineNum) {
-        this.fromLineNum = fromLineNum;
-    }
-
-    public int getToLineNum() {
-        return toLineNum;
-    }
-
-    public void setToLineNum(int toLineNum) {
-        this.toLineNum = toLineNum;
-    }
-
-    public String getLogContent() {
-        return logContent;
-    }
-
-    public void setLogContent(String logContent) {
-        this.logContent = logContent;
-    }
-
-    public boolean isEnd() {
-        return isEnd;
-    }
-
-    public void setEnd(boolean end) {
-        isEnd = end;
-    }
 }

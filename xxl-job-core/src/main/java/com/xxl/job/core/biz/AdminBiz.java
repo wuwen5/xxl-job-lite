@@ -1,6 +1,7 @@
 package com.xxl.job.core.biz;
 
 import com.xxl.job.core.biz.model.HandleCallbackParam;
+import com.xxl.job.core.biz.model.JobExecutorInitParam;
 import com.xxl.job.core.biz.model.RegistryParam;
 import com.xxl.job.core.biz.model.ReturnT;
 
@@ -20,7 +21,7 @@ public interface AdminBiz {
      * @param callbackParamList
      * @return
      */
-    public ReturnT<String> callback(List<HandleCallbackParam> callbackParamList);
+    ReturnT<String> callback(List<HandleCallbackParam> callbackParamList);
 
 
     // ---------------------- registry ----------------------
@@ -31,7 +32,7 @@ public interface AdminBiz {
      * @param registryParam
      * @return
      */
-    public ReturnT<String> registry(RegistryParam registryParam);
+    ReturnT<String> registry(RegistryParam registryParam);
 
     /**
      * registry remove
@@ -39,9 +40,12 @@ public interface AdminBiz {
      * @param registryParam
      * @return
      */
-    public ReturnT<String> registryRemove(RegistryParam registryParam);
+    ReturnT<String> registryRemove(RegistryParam registryParam);
 
 
+    default ReturnT<String> initJobInfo(JobExecutorInitParam jobExecutorInitParam) {
+        return new ReturnT<>(ReturnT.FAIL_CODE, "not implement");
+    }
     // ---------------------- biz (custome) ----------------------
     // group、job ... manage
 

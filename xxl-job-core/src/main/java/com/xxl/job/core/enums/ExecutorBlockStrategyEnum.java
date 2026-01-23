@@ -5,13 +5,23 @@ package com.xxl.job.core.enums;
  */
 public enum ExecutorBlockStrategyEnum {
 
+    /**
+     * 阻塞处理策略枚举
+     */
     SERIAL_EXECUTION("Serial execution"),
+    
     /*CONCURRENT_EXECUTION("并行"),*/
+    /**
+     * 放弃后续调度
+     */
     DISCARD_LATER("Discard Later"),
+    /**
+     * 覆盖之前调度
+     */
     COVER_EARLY("Cover Early");
 
     private String title;
-    private ExecutorBlockStrategyEnum (String title) {
+    ExecutorBlockStrategyEnum(String title) {
         this.title = title;
     }
 

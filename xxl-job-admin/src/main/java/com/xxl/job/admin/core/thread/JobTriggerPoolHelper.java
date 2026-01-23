@@ -30,38 +30,18 @@ public class JobTriggerPoolHelper {
                 XxlJobAdminConfig.getAdminConfig().getTriggerPoolFastMax(),
                 60L,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(2000),
-                new ThreadFactory() {
-                    @Override
-                    public Thread newThread(Runnable r) {
-                        return new Thread(r, "xxl-job, admin JobTriggerPoolHelper-fastTriggerPool-" + r.hashCode());
-                    }
-                },
-                new RejectedExecutionHandler() {
-                    @Override
-                    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                        logger.error(">>>>>>>>>>> xxl-job, admin JobTriggerPoolHelper-fastTriggerPool execute too fast, Runnable="+r.toString() );
-                    }
-                });
+                new LinkedBlockingQueue<>(2000),
+                r -> new Thread(r, "xxl-job, admin JobTriggerPoolHelper-fastTriggerPool-" + r.hashCode()),
+                (r, executor) -> logger.error(">>>>>>>>>>> xxl-job, admin JobTriggerPoolHelper-fastTriggerPool execute too fast, Runnable={}", r.toString()));
 
         slowTriggerPool = new ThreadPoolExecutor(
                 10,
                 XxlJobAdminConfig.getAdminConfig().getTriggerPoolSlowMax(),
                 60L,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(5000),
-                new ThreadFactory() {
-                    @Override
-                    public Thread newThread(Runnable r) {
-                        return new Thread(r, "xxl-job, admin JobTriggerPoolHelper-slowTriggerPool-" + r.hashCode());
-                    }
-                },
-                new RejectedExecutionHandler() {
-                    @Override
-                    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                        logger.error(">>>>>>>>>>> xxl-job, admin JobTriggerPoolHelper-slowTriggerPool execute too fast, Runnable="+r.toString() );
-                    }
-                });
+                new LinkedBlockingQueue<>(5000),
+                r -> new Thread(r, "xxl-job, admin JobTriggerPoolHelper-slowTriggerPool-" + r.hashCode()),
+                (r, executor) -> logger.error(">>>>>>>>>>> xxl-job, admin JobTriggerPoolHelper-slowTriggerPool execute too fast, Runnable={}", r.toString() ));
     }
 
 
@@ -74,7 +54,7 @@ public class JobTriggerPoolHelper {
 
 
     // job timeout count
-    private volatile long minTim = System.currentTimeMillis()/60000;     // ms > min
+    private volatile long minTim = System.currentTimeMillis()/60000;     
     private volatile ConcurrentMap<Integer, AtomicInteger> jobTimeoutCountMap = new ConcurrentHashMap<>();
 
 
@@ -89,14 +69,15 @@ public class JobTriggerPoolHelper {
                            final String addressList) {
 
         // choose thread pool
-        ThreadPoolExecutor triggerPool_ = fastTriggerPool;
+        ThreadPoolExecutor triggerPool = fastTriggerPool;
         AtomicInteger jobTimeoutCount = jobTimeoutCountMap.get(jobId);
-        if (jobTimeoutCount!=null && jobTimeoutCount.get() > 10) {      // job-timeout 10 times in 1 min
-            triggerPool_ = slowTriggerPool;
+        // job-timeout 10 times in 1 min
+        if (jobTimeoutCount!=null && jobTimeoutCount.get() > 10) {
+            triggerPool = slowTriggerPool;
         }
 
         // trigger
-        triggerPool_.execute(new Runnable() {
+        triggerPool.execute(new Runnable() {
             @Override
             public void run() {
 
@@ -110,9 +91,9 @@ public class JobTriggerPoolHelper {
                 } finally {
 
                     // check timeout-count-map
-                    long minTim_now = System.currentTimeMillis()/60000;
-                    if (minTim != minTim_now) {
-                        minTim = minTim_now;
+                    long minTimNow = System.currentTimeMillis()/60000;
+                    if (minTim != minTimNow) {
+                        minTim = minTimNow;
                         jobTimeoutCountMap.clear();
                     }
 

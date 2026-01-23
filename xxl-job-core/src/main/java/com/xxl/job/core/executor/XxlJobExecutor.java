@@ -12,11 +12,13 @@ import com.xxl.job.core.thread.JobThread;
 import com.xxl.job.core.thread.TriggerCallbackThread;
 import com.xxl.job.core.util.IpUtil;
 import com.xxl.job.core.util.NetUtil;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,50 +27,24 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Created by xuxueli on 2016/3/2 21:14.
  */
+@Setter
 public class XxlJobExecutor  {
     private static final Logger logger = LoggerFactory.getLogger(XxlJobExecutor.class);
 
-    // ---------------------- param ----------------------
     private String adminAddresses;
     private String accessToken;
     private int timeout;
     private String appname;
+    /**
+     * 执行器显示名称
+     */
+    private String title;
     private String address;
     private String ip;
     private int port;
     private String logPath;
     private int logRetentionDays;
-
-    public void setAdminAddresses(String adminAddresses) {
-        this.adminAddresses = adminAddresses;
-    }
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
-    }
-    public void setAppname(String appname) {
-        this.appname = appname;
-    }
-    public void setAddress(String address) {
-        this.address = address;
-    }
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-    public void setPort(int port) {
-        this.port = port;
-    }
-    public void setLogPath(String logPath) {
-        this.logPath = logPath;
-    }
-    public void setLogRetentionDays(int logRetentionDays) {
-        this.logRetentionDays = logRetentionDays;
-    }
-
-
-    // ---------------------- start + stop ----------------------
+    
     public void start() throws Exception {
 
         // init logpath
@@ -85,7 +61,7 @@ public class XxlJobExecutor  {
         TriggerCallbackThread.getInstance().start();
 
         // init executor-server
-        initEmbedServer(address, ip, port, appname, accessToken);
+        initEmbedServer();
     }
 
     public void destroy(){
@@ -120,17 +96,13 @@ public class XxlJobExecutor  {
 
 
     // ---------------------- admin-client (rpc invoker) ----------------------
-    private static List<AdminBiz> adminBizList;
+    private static List<AdminBiz> adminBizList = new ArrayList<>();
     private void initAdminBizList(String adminAddresses, String accessToken, int timeout) {
         if (adminAddresses!=null && !adminAddresses.trim().isEmpty()) {
             for (String address: adminAddresses.trim().split(",")) {
                 if (!address.trim().isEmpty()) {
 
                     AdminBiz adminBiz = new AdminBizClient(address.trim(), accessToken, timeout);
-
-                    if (adminBizList == null) {
-                        adminBizList = new ArrayList<>();
-                    }
                     adminBizList.add(adminBiz);
                 }
             }
@@ -138,13 +110,13 @@ public class XxlJobExecutor  {
     }
 
     public static List<AdminBiz> getAdminBizList(){
-        return adminBizList;
+        return Collections.unmodifiableList(adminBizList);
     }
 
     // ---------------------- executor-server (rpc provider) ----------------------
     private EmbedServer embedServer = null;
 
-    private void initEmbedServer(String address, String ip, int port, String appname, String accessToken) throws Exception {
+    private void initEmbedServer() {
 
         // fill ip port
         port = port > 0 ? port : NetUtil.findAvailablePort(9999);
@@ -164,7 +136,7 @@ public class XxlJobExecutor  {
 
         // start
         embedServer = new EmbedServer();
-        embedServer.start(address, port, appname, accessToken);
+        embedServer.start(address, port, appname, accessToken, title);
     }
 
     private void stopEmbedServer() {
@@ -180,7 +152,7 @@ public class XxlJobExecutor  {
 
 
     // ---------------------- job handler repository ----------------------
-    private static ConcurrentMap<String, IJobHandler> jobHandlerRepository = new ConcurrentHashMap<String, IJobHandler>();
+    private static final ConcurrentMap<String, IJobHandler> jobHandlerRepository = new ConcurrentHashMap<>();
     public static IJobHandler loadJobHandler(String name){
         return jobHandlerRepository.get(name);
     }
@@ -203,16 +175,6 @@ public class XxlJobExecutor  {
         if (loadJobHandler(name) != null) {
             throw new RuntimeException("xxl-job jobhandler[" + name + "] naming conflicts.");
         }
-
-        // execute method
-        /*if (!(method.getParameterTypes().length == 1 && method.getParameterTypes()[0].isAssignableFrom(String.class))) {
-            throw new RuntimeException("xxl-job method-jobhandler param-classtype invalid, for[" + bean.getClass() + "#" + method.getName() + "] , " +
-                    "The correct method format like \" public ReturnT<String> execute(String param) \" .");
-        }
-        if (!method.getReturnType().isAssignableFrom(ReturnT.class)) {
-            throw new RuntimeException("xxl-job method-jobhandler return-classtype invalid, for[" + bean.getClass() + "#" + method.getName() + "] , " +
-                    "The correct method format like \" public ReturnT<String> execute(String param) \" .");
-        }*/
 
         executeMethod.setAccessible(true);
 

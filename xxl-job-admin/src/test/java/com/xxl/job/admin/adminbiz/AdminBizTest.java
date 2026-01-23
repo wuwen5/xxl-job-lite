@@ -4,6 +4,9 @@ import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.biz.model.HandleCallbackParam;
+import com.xxl.job.core.biz.model.JobExecutorInitParam;
+import com.xxl.job.core.biz.model.JobExecutorParam;
+import com.xxl.job.core.biz.model.JobInfoParam;
 import com.xxl.job.core.biz.model.RegistryParam;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.context.XxlJobContext;
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,6 +82,20 @@ public class AdminBizTest extends AbstractTest {
 
         assertEquals(ReturnT.SUCCESS_CODE, returnT.getCode());
 
+    }
+
+    @Test
+    public void initJobInfo() {
+        AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
+
+        List<JobInfoParam> jobInfoParamList = new ArrayList<>();
+        jobInfoParamList.add(new JobInfoParam("xxl-job-executor-example", "测试", "demoJobHandler", "", "0/5 * * * * ?", -1));
+        JobExecutorInitParam initParam = new JobExecutorInitParam();
+        initParam.setJobExecutorParam(new JobExecutorParam("xxl-job-executor-example", "测试执行器"));
+        initParam.setJobInfoParamList(jobInfoParamList);
+        ReturnT<String> returnT = adminBiz.initJobInfo(initParam);
+
+        assertEquals(ReturnT.SUCCESS_CODE, returnT.getCode());
     }
 
 }

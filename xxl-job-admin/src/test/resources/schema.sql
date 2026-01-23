@@ -38,7 +38,7 @@ create table if not exists xxl_job_group
 (
     id                        INT PRIMARY KEY AUTO_INCREMENT,
     app_name     varchar(64) NOT NULL ,
-    title        varchar(12) NOT NULL ,
+    title        varchar(50) NOT NULL ,
     address_type INT  NOT NULL DEFAULT '0' ,
     address_list CLOB ,
     update_time  TIMESTAMP             DEFAULT NULL
@@ -78,4 +78,8 @@ CREATE TABLE IF NOT EXISTS xxl_job_user (
   password varchar(50) NOT NULL,
   role int NOT NULL,
   permission varchar(255) DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS xxl_job_lock (
+  lock_name VARCHAR2(150) not null PRIMARY KEY
 );

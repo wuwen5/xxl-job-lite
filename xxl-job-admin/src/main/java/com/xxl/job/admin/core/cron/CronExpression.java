@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -210,13 +211,19 @@ public final class CronExpression implements Serializable, Cloneable {
     protected static final int MONTH = 4;
     protected static final int DAY_OF_WEEK = 5;
     protected static final int YEAR = 6;
-    protected static final int ALL_SPEC_INT = 99; // '*'
-    protected static final int NO_SPEC_INT = 98; // '?'
+    /**
+     * '*'
+     */
+    protected static final int ALL_SPEC_INT = 99;
+    /**
+     * '?'
+     */
+    protected static final int NO_SPEC_INT = 98; 
     protected static final Integer ALL_SPEC = ALL_SPEC_INT;
     protected static final Integer NO_SPEC = NO_SPEC_INT;
     
-    protected static final Map<String, Integer> monthMap = new HashMap<String, Integer>(20);
-    protected static final Map<String, Integer> dayMap = new HashMap<String, Integer>(60);
+    protected static final Map<String, Integer> monthMap = new HashMap<>(20);
+    protected static final Map<String, Integer> dayMap = new HashMap<>(60);
     static {
         monthMap.put("JAN", 0);
         monthMap.put("FEB", 1);
@@ -443,25 +450,25 @@ public final class CronExpression implements Serializable, Cloneable {
         try {
 
             if (seconds == null) {
-                seconds = new TreeSet<Integer>();
+                seconds = new TreeSet<>();
             }
             if (minutes == null) {
-                minutes = new TreeSet<Integer>();
+                minutes = new TreeSet<>();
             }
             if (hours == null) {
-                hours = new TreeSet<Integer>();
+                hours = new TreeSet<>();
             }
             if (daysOfMonth == null) {
-                daysOfMonth = new TreeSet<Integer>();
+                daysOfMonth = new TreeSet<>();
             }
             if (months == null) {
-                months = new TreeSet<Integer>();
+                months = new TreeSet<>();
             }
             if (daysOfWeek == null) {
-                daysOfWeek = new TreeSet<Integer>();
+                daysOfWeek = new TreeSet<>();
             }
             if (years == null) {
-                years = new TreeSet<Integer>();
+                years = new TreeSet<>();
             }
 
             int exprOn = SECOND;
@@ -519,7 +526,7 @@ public final class CronExpression implements Serializable, Cloneable {
             throw pe;
         } catch (Exception e) {
             throw new ParseException("Illegal cron expression format ("
-                    + e.toString() + ")", 0);
+                    + e + ")", 0);
         }
     }
 
@@ -532,7 +539,7 @@ public final class CronExpression implements Serializable, Cloneable {
             return i;
         }
         char c = s.charAt(i);
-        if ((c >= 'A') && (c <= 'Z') && (!s.equals("L")) && (!s.equals("LW")) && (!s.matches("^L-[0-9]*[W]?"))) {
+        if ((c >= 'A') && (c <= 'Z') && (!"L".equals(s)) && (!"LW".equals(s)) && (!s.matches("^L-[0-9]*[W]?"))) {
             String sub = s.substring(i, i + 3);
             int sval = -1;
             int eval = -1;
@@ -862,43 +869,40 @@ public final class CronExpression implements Serializable, Cloneable {
     }
     
     public String getExpressionSummary() {
-        StringBuilder buf = new StringBuilder();
 
-        buf.append("seconds: ");
-        buf.append(getExpressionSetSummary(seconds));
-        buf.append("\n");
-        buf.append("minutes: ");
-        buf.append(getExpressionSetSummary(minutes));
-        buf.append("\n");
-        buf.append("hours: ");
-        buf.append(getExpressionSetSummary(hours));
-        buf.append("\n");
-        buf.append("daysOfMonth: ");
-        buf.append(getExpressionSetSummary(daysOfMonth));
-        buf.append("\n");
-        buf.append("months: ");
-        buf.append(getExpressionSetSummary(months));
-        buf.append("\n");
-        buf.append("daysOfWeek: ");
-        buf.append(getExpressionSetSummary(daysOfWeek));
-        buf.append("\n");
-        buf.append("lastdayOfWeek: ");
-        buf.append(lastdayOfWeek);
-        buf.append("\n");
-        buf.append("nearestWeekday: ");
-        buf.append(nearestWeekday);
-        buf.append("\n");
-        buf.append("NthDayOfWeek: ");
-        buf.append(nthdayOfWeek);
-        buf.append("\n");
-        buf.append("lastdayOfMonth: ");
-        buf.append(lastdayOfMonth);
-        buf.append("\n");
-        buf.append("years: ");
-        buf.append(getExpressionSetSummary(years));
-        buf.append("\n");
-
-        return buf.toString();
+        return "seconds: " +
+                getExpressionSetSummary(seconds) +
+                "\n" +
+                "minutes: " +
+                getExpressionSetSummary(minutes) +
+                "\n" +
+                "hours: " +
+                getExpressionSetSummary(hours) +
+                "\n" +
+                "daysOfMonth: " +
+                getExpressionSetSummary(daysOfMonth) +
+                "\n" +
+                "months: " +
+                getExpressionSetSummary(months) +
+                "\n" +
+                "daysOfWeek: " +
+                getExpressionSetSummary(daysOfWeek) +
+                "\n" +
+                "lastdayOfWeek: " +
+                lastdayOfWeek +
+                "\n" +
+                "nearestWeekday: " +
+                nearestWeekday +
+                "\n" +
+                "NthDayOfWeek: " +
+                nthdayOfWeek +
+                "\n" +
+                "lastdayOfMonth: " +
+                lastdayOfMonth +
+                "\n" +
+                "years: " +
+                getExpressionSetSummary(years) +
+                "\n";
     }
 
     protected String getExpressionSetSummary(java.util.Set<Integer> set) {
@@ -1174,7 +1178,7 @@ public final class CronExpression implements Serializable, Cloneable {
     public Date getTimeAfter(Date afterTime) {
 
         // Computation is based on Gregorian year only.
-        Calendar cl = new java.util.GregorianCalendar(getTimeZone()); 
+        Calendar cl = new GregorianCalendar(getTimeZone()); 
 
         // move ahead one second, since we're computing the time *after* the
         // given time
@@ -1200,7 +1204,7 @@ public final class CronExpression implements Serializable, Cloneable {
 
             // get second.................................................
             st = seconds.tailSet(sec);
-            if (st != null && st.size() != 0) {
+            if (!st.isEmpty()) {
                 sec = st.first();
             } else {
                 sec = seconds.first();
@@ -1215,7 +1219,7 @@ public final class CronExpression implements Serializable, Cloneable {
 
             // get minute.................................................
             st = minutes.tailSet(min);
-            if (st != null && st.size() != 0) {
+            if (!st.isEmpty()) {
                 t = min;
                 min = st.first();
             } else {
@@ -1236,7 +1240,7 @@ public final class CronExpression implements Serializable, Cloneable {
 
             // get hour...................................................
             st = hours.tailSet(hr);
-            if (st != null && st.size() != 0) {
+            if (!st.isEmpty()) {
                 t = hr;
                 hr = st.first();
             } else {
@@ -1262,7 +1266,8 @@ public final class CronExpression implements Serializable, Cloneable {
             // get day...................................................
             boolean dayOfMSpec = !daysOfMonth.contains(NO_SPEC);
             boolean dayOfWSpec = !daysOfWeek.contains(NO_SPEC);
-            if (dayOfMSpec && !dayOfWSpec) { // get day by day of month rule
+            // get day by day of month rule
+            if (dayOfMSpec && !dayOfWSpec) { 
                 st = daysOfMonth.tailSet(day);
                 if (lastdayOfMonth) {
                     if(!nearestWeekday) {
@@ -1273,7 +1278,8 @@ public final class CronExpression implements Serializable, Cloneable {
                             mon++;
                             if(mon > 12) { 
                                 mon = 1;
-                                tmon = 3333; // ensure test of mon != tmon further below fails
+                                // ensure test of mon != tmon further below fails
+                                tmon = 3333; 
                                 cl.add(Calendar.YEAR, 1);
                             }
                             day = 1;
@@ -1283,7 +1289,7 @@ public final class CronExpression implements Serializable, Cloneable {
                         day = getLastDayOfMonth(mon, cl.get(Calendar.YEAR));
                         day -= lastdayOffset;
                         
-                        java.util.Calendar tcal = java.util.Calendar.getInstance(getTimeZone());
+                        Calendar tcal = Calendar.getInstance(getTimeZone());
                         tcal.set(Calendar.SECOND, 0);
                         tcal.set(Calendar.MINUTE, 0);
                         tcal.set(Calendar.HOUR_OF_DAY, 0);
@@ -1319,7 +1325,7 @@ public final class CronExpression implements Serializable, Cloneable {
                     t = day;
                     day = daysOfMonth.first();
 
-                    java.util.Calendar tcal = java.util.Calendar.getInstance(getTimeZone());
+                    Calendar tcal = Calendar.getInstance(getTimeZone());
                     tcal.set(Calendar.SECOND, 0);
                     tcal.set(Calendar.MINUTE, 0);
                     tcal.set(Calendar.HOUR_OF_DAY, 0);
@@ -1583,9 +1589,9 @@ public final class CronExpression implements Serializable, Cloneable {
      * @param hour the hour to set
      */
     protected void setCalendarHour(Calendar cal, int hour) {
-        cal.set(java.util.Calendar.HOUR_OF_DAY, hour);
-        if (cal.get(java.util.Calendar.HOUR_OF_DAY) != hour && hour != 24) {
-            cal.set(java.util.Calendar.HOUR_OF_DAY, hour + 1);
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        if (cal.get(Calendar.HOUR_OF_DAY) != hour && hour != 24) {
+            cal.set(Calendar.HOUR_OF_DAY, hour + 1);
         }
     }
 

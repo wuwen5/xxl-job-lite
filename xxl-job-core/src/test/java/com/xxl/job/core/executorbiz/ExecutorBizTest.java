@@ -1,14 +1,21 @@
-package com.xxl.job.executorbiz;
+package com.xxl.job.core.executorbiz;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import com.xxl.job.core.biz.ExecutorBiz;
 import com.xxl.job.core.biz.client.ExecutorBizClient;
-import com.xxl.job.core.biz.model.*;
+import com.xxl.job.core.biz.model.IdleBeatParam;
+import com.xxl.job.core.biz.model.KillParam;
+import com.xxl.job.core.biz.model.LogParam;
+import com.xxl.job.core.biz.model.LogResult;
+import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.core.biz.model.TriggerParam;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.executor.XxlJobExecutor;
-import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import com.xxl.job.core.glue.GlueTypeEnum;
 import com.xxl.job.core.handler.IJobHandler;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,6 +27,16 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.time.Duration;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+
 /**
  * executor api test
  * <p>
@@ -28,7 +45,7 @@ import java.time.Duration;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @SpringBootApplication
-@Import(XxlJobSpringExecutor.class)
+@Import(TestConfiguration.class)
 public class ExecutorBizTest {
 
     // admin-client
@@ -36,6 +53,24 @@ public class ExecutorBizTest {
     private static String accessToken = null;
     private static int timeout = 3;
 
+    private static WireMockServer wireMockServer;
+
+    @BeforeAll
+    public static void setup() {
+        wireMockServer = new WireMockServer(options().port(18760));
+        wireMockServer.start();
+        configureFor(wireMockServer.port());
+
+        stubFor(post(urlPathMatching("/api/initJobInfo"))
+                .willReturn(ok().withBody("{\"code\":200,\"msg\":\"success\",\"content\":\"result\"}")));
+    }
+
+
+    @AfterAll
+    public static void teardown() {
+        wireMockServer.stop();
+    }
+    
     @BeforeEach
     void checkPort() {
         waitForPort("127.0.0.1", 9999, Duration.ofSeconds(10), Duration.ofMillis(100));
@@ -119,7 +154,7 @@ public class ExecutorBizTest {
 
         // Assert result
         Assertions.assertNotNull(retval);
-        Assertions.assertNull(((ReturnT<String>) retval).getContent());
+        Assertions.assertNull(retval.getContent());
         Assertions.assertEquals(500, retval.getCode());
         Assertions.assertEquals("job thread is running or has trigger queue.", retval.getMsg());
     }
@@ -158,7 +193,7 @@ public class ExecutorBizTest {
 
         // Assert result
         Assertions.assertNotNull(retval);
-        Assertions.assertNull(((ReturnT<String>) retval).getContent());
+        Assertions.assertNull(retval.getContent());
         Assertions.assertEquals(200, retval.getCode());
 //        Assertions.assertNull(retval.getMsg());
     }
@@ -176,6 +211,11 @@ public class ExecutorBizTest {
 
         // Assert result
         Assertions.assertNotNull(retval);
+    }
+    
+    @Test
+    public void registry() {
+        verify(postRequestedFor(urlPathEqualTo("/api/initJobInfo")));
     }
 
 }

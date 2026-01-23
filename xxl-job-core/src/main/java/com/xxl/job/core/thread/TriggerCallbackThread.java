@@ -34,7 +34,7 @@ public class TriggerCallbackThread {
     /**
      * job results callback queue
      */
-    private LinkedBlockingQueue<HandleCallbackParam> callBackQueue = new LinkedBlockingQueue<HandleCallbackParam>();
+    private LinkedBlockingQueue<HandleCallbackParam> callBackQueue = new LinkedBlockingQueue<>();
     public static void pushCallBack(HandleCallbackParam callback){
         getInstance().callBackQueue.add(callback);
         logger.debug(">>>>>>>>>>> xxl-job, push callback request, logId:{}", callback.getLogId());
@@ -64,17 +64,14 @@ public class TriggerCallbackThread {
                 while(!toStop){
                     try {
                         HandleCallbackParam callback = getInstance().callBackQueue.take();
-                        if (callback != null) {
+                        // callback list param
+                        List<HandleCallbackParam> callbackParamList = new ArrayList<>();
+                        int drainToNum = getInstance().callBackQueue.drainTo(callbackParamList);
+                        callbackParamList.add(callback);
 
-                            // callback list param
-                            List<HandleCallbackParam> callbackParamList = new ArrayList<HandleCallbackParam>();
-                            int drainToNum = getInstance().callBackQueue.drainTo(callbackParamList);
-                            callbackParamList.add(callback);
-
-                            // callback, will retry if error
-                            if (callbackParamList!=null && callbackParamList.size()>0) {
-                                doCallback(callbackParamList);
-                            }
+                        // callback, will retry if error
+                        if (!callbackParamList.isEmpty()) {
+                            doCallback(callbackParamList);
                         }
                     } catch (Throwable e) {
                         if (!toStop) {
@@ -85,9 +82,9 @@ public class TriggerCallbackThread {
 
                 // last callback
                 try {
-                    List<HandleCallbackParam> callbackParamList = new ArrayList<HandleCallbackParam>();
+                    List<HandleCallbackParam> callbackParamList = new ArrayList<>();
                     int drainToNum = getInstance().callBackQueue.drainTo(callbackParamList);
-                    if (callbackParamList!=null && callbackParamList.size()>0) {
+                    if (!callbackParamList.isEmpty()) {
                         doCallback(callbackParamList);
                     }
                 } catch (Throwable e) {
@@ -105,28 +102,25 @@ public class TriggerCallbackThread {
 
 
         // retry
-        triggerRetryCallbackThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(!toStop){
-                    try {
-                        retryFailCallbackFile();
-                    } catch (Throwable e) {
-                        if (!toStop) {
-                            logger.error(e.getMessage(), e);
-                        }
-
+        triggerRetryCallbackThread = new Thread(() -> {
+            while(!toStop){
+                try {
+                    retryFailCallbackFile();
+                } catch (Throwable e) {
+                    if (!toStop) {
+                        logger.error(e.getMessage(), e);
                     }
-                    try {
-                        TimeUnit.SECONDS.sleep(RegistryConfig.BEAT_TIMEOUT);
-                    } catch (Throwable e) {
-                        if (!toStop) {
-                            logger.error(e.getMessage(), e);
-                        }
+
+                }
+                try {
+                    TimeUnit.SECONDS.sleep(RegistryConfig.BEAT_TIMEOUT);
+                } catch (Throwable e) {
+                    if (!toStop) {
+                        logger.error(e.getMessage(), e);
                     }
                 }
-                logger.info(">>>>>>>>>>> xxl-job, executor retry callback thread destroy.");
             }
+            logger.info(">>>>>>>>>>> xxl-job, executor retry callback thread destroy.");
         });
         triggerRetryCallbackThread.setDaemon(true);
         triggerRetryCallbackThread.start();
@@ -206,7 +200,7 @@ public class TriggerCallbackThread {
 
     private void appendFailCallbackFile(List<HandleCallbackParam> callbackParamList){
         // valid
-        if (callbackParamList==null || callbackParamList.size()==0) {
+        if (callbackParamList==null || callbackParamList.isEmpty()) {
             return;
         }
 

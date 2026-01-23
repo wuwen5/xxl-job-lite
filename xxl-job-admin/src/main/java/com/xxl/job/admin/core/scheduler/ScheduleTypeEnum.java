@@ -7,6 +7,9 @@ import com.xxl.job.admin.core.util.I18nUtil;
  */
 public enum ScheduleTypeEnum {
 
+    /**
+     * none
+     */
     NONE(I18nUtil.getString("schedule_type_none")),
 
     /**
@@ -24,7 +27,10 @@ public enum ScheduleTypeEnum {
      */
     /*FIX_DELAY(I18nUtil.getString("schedule_type_fix_delay"))*/;
 
-    private String title;
+    /**
+     * title
+     */
+    private final String title;
 
     ScheduleTypeEnum(String title) {
         this.title = title;
