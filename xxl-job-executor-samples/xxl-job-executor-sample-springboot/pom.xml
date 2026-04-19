@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.xuxueli</groupId>
+        <groupId>io.github.wuwen5.xxl-job</groupId>
         <artifactId>xxl-job-executor-samples</artifactId>
         <version>2.5.2-SNAPSHOT</version>
     </parent>
@@ -13,7 +13,6 @@
 
     <name>${project.artifactId}</name>
     <description>Example executor project for spring boot.</description>
-    <url>https://www.xuxueli.com/</url>
 
     <properties>
     </properties>

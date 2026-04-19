@@ -1,14 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.xuxueli</groupId>
-	<artifactId>xxl-job</artifactId>
+    <groupId>io.github.wuwen5.xxl-job</groupId>
+	<artifactId>xxl-job-lite</artifactId>
 	<version>2.5.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>${project.artifactId}</name>
 	<description>A distributed task scheduling framework.</description>
-	<url>https://www.xuxueli.com/</url>
+    <url>https://github.com/wuwen5/xxl-job-lite</url>
 
 	<modules>
 		<module>xxl-job-core</module>
@@ -137,6 +137,16 @@
 		<connection>scm:git:https://github.com/xuxueli/xxl-job.git</connection>
 		<developerConnection>scm:git:git@github.com:xuxueli/xxl-job.git</developerConnection>
 	</scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/wuwen5/xxl-job-lite/issues</url>
+    </issueManagement>
+    <ciManagement>
+        <system>GitHub Actions</system>
+        <url>https://github.com/wuwen5/xxl-job-lite/actions</url>
+    </ciManagement>
+    
 	<developers>
 		<developer>
 			<id>XXL</id>
@@ -144,6 +154,11 @@
 			<email>931591021@qq.com</email>
 			<url>https://github.com/xuxueli</url>
 		</developer>
+        <developer>
+            <name>Wen Wu</name>
+            <email>wuwen.55@aliyun.com</email>
+            <url>https://github.com/wuwen5</url>
+        </developer>
 	</developers>
 
 	<profiles>
@@ -208,16 +223,6 @@
                     </plugin>
 				</plugins>
 			</build>
-			<distributionManagement>
-				<snapshotRepository>
-					<id>oss</id>
-					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-				</snapshotRepository>
-				<repository>
-					<id>oss</id>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-				</repository>
-			</distributionManagement>
 		</profile>
 	</profiles>
 
