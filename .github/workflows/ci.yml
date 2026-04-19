@@ -1,0 +1,38 @@
+name: Java CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        java: [ 11, 17, 21 ]
+        distribution: [ 'temurin' ]
+      name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: ${{ matrix.distribution }}
+          cache: maven
+      - name: Build with Maven
+        env:
+          TZ: UTC
+          JAVA_TOOL_OPTIONS: "-Duser.timezone=UTC"
+        run: ./mvnw -B clean verify --file pom.xml
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.java == '11'
+        uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
