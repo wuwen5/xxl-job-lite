@@ -10,7 +10,7 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<maven.deploy.skip>true</maven.deploy.skip>
+        <skip_maven_deploy>true</skip_maven_deploy>
 	</properties>
 
 	<dependencyManagement>
