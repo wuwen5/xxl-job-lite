@@ -234,7 +234,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
-                            <skip>${skip_maven_deploy}</skip>
+                            <skipPublishing>${skip_maven_deploy}</skipPublishing>
                         </configuration>
                     </plugin>
                     <plugin>
