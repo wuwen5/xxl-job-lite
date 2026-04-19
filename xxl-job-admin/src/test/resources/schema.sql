@@ -83,3 +83,13 @@ CREATE TABLE IF NOT EXISTS xxl_job_user (
 CREATE TABLE IF NOT EXISTS xxl_job_lock (
   lock_name VARCHAR2(150) not null PRIMARY KEY
 );
+
+
+CREATE TABLE IF NOT EXISTS xxl_job_log_report (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  trigger_day TIMESTAMP DEFAULT NULL,
+  running_count INT NOT NULL DEFAULT 0,
+  suc_count INT NOT NULL DEFAULT 0,
+  fail_count INT NOT NULL DEFAULT 0,
+  update_time TIMESTAMP DEFAULT NULL
+);
