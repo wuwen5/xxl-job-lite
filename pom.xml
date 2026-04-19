@@ -17,6 +17,8 @@
     </modules>
 
 	<properties>
+        <git.url>https://github.com/wuwen5/xxl-job-lite.git</git.url>
+        
 		<!-- env -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -26,13 +28,15 @@
 		<!-- plugin -->
 		<maven-source-plugin.version>3.3.1</maven-source-plugin.version>
 		<maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
-		<maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
+		<maven-gpg-plugin.version>3.5.4</maven-gpg-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-release-plugin.version>3.0.0-M6</maven-release-plugin.version>
+        <sonar.plugin>5.3.0.6276</sonar.plugin>
+        <sonar.organization>wuwen5</sonar.organization>
+        <sonar.inclusions>xxl-job-core/src/main/java/**,xxl-job-admin/src/main/java/**</sonar.inclusions>
+        <skip_maven_deploy>false</skip_maven_deploy>
         
-        <!--sonar-maven-plugin最新4.0版本需JDK11-->
-        <sonar-maven-plugin.version>3.11.0.3922</sonar-maven-plugin.version>
         <argLine />
         
 		<!-- base -->
@@ -66,24 +70,12 @@
     
 
     <build>
-		<plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-            </plugin>
-		</plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>${maven-release-plugin.version}</version>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.sonarsource.scanner.maven</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                    <version>${sonar-maven-plugin.version}</version>
                 </plugin>
                 
                 <plugin>
@@ -92,10 +84,16 @@
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
+                        <enableOutErrElements>false</enableOutErrElements>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <systemPropertyVariables>
                             <allure.results.directory>../target/allure-results</allure.results.directory>
                         </systemPropertyVariables>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.1</version>
                 </plugin>
 
                 <plugin>
@@ -119,8 +117,41 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.12.0</version>
+                    <configuration>
+                        <source>8</source>
+                        <show>protected</show>
+                        <charset>UTF-8</charset>
+                        <encoding>UTF-8</encoding>
+                        <docencoding>UTF-8</docencoding>
+                        <doclint>none</doclint>
+                        <failOnError>true</failOnError>
+                        <includeDependencySources>false</includeDependencySources>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.1.4</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>3.2.8</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar.plugin}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
 	</build>
 
 
@@ -132,10 +163,10 @@
 	</licenses>
 
 	<scm>
-		<tag>master</tag>
-		<url>https://github.com/xuxueli/xxl-job.git</url>
-		<connection>scm:git:https://github.com/xuxueli/xxl-job.git</connection>
-		<developerConnection>scm:git:git@github.com:xuxueli/xxl-job.git</developerConnection>
+        <tag>HEAD</tag>
+		<url>https://github.com/wuwen5/xxl-job-lite</url>
+        <connection>scm:git:${git.url}</connection>
+        <developerConnection>scm:git:${git.url}</developerConnection>
 	</scm>
 
     <issueManagement>
@@ -166,49 +197,24 @@
 		<profile>
 			<id>release</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
 			</activation>
 			<modules>
 				<module>xxl-job-core</module>
 			</modules>
+            <properties>
+                <gpg.skip>false</gpg.skip>
+                <maven.javadoc.skip>false</maven.javadoc.skip>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
 			<build>
 				<plugins>
-					<!-- Source -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<version>${maven-source-plugin.version}</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>jar-no-fork</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<!-- Javadoc -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>${maven-javadoc-plugin.version}</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-								<configuration>
-									<doclint>none</doclint>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<!-- GPG -->
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>${maven-gpg-plugin.version}</version>
 						<configuration>
 							<useAgent>false</useAgent>
 						</configuration>
@@ -220,6 +226,25 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.9.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <skip>${skip_maven_deploy}</skip>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <configuration>
+                            <skip>${skip_maven_deploy}</skip>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-source-plugin</artifactId>
                     </plugin>
 				</plugins>
 			</build>
