@@ -14,7 +14,7 @@ jobs:
         os: [ ubuntu-latest ]
         java: [ 11, 17, 21 ]
         distribution: [ 'temurin' ]
-      name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
+    name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v6
