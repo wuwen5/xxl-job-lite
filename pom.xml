@@ -32,7 +32,7 @@
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-release-plugin.version>3.0.0-M6</maven-release-plugin.version>
-        <sonar.plugin>5.3.0.6276</sonar.plugin>
+        <sonar.plugin>5.5.0.6356</sonar.plugin>
         <sonar.organization>wuwen5</sonar.organization>
         <sonar.inclusions>xxl-job-core/src/main/java/**,xxl-job-admin/src/main/java/**</sonar.inclusions>
         <skip_maven_deploy>false</skip_maven_deploy>
