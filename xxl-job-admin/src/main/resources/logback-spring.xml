@@ -66,9 +66,7 @@
         <includeCallerData>true</includeCallerData>
         <appender-ref ref="APP_FILE"/>
     </appender>
-
-    <logger name = "com.cenboomh" level="INFO"/>
-
+    
     <root level="WARN">
         <appender-ref ref="ASYNC_APP_FILE"/>
         <appender-ref ref="ERR_FILE"/>
