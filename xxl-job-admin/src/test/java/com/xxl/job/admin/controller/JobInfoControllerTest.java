@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import java.util.List;
 
