@@ -24,16 +24,13 @@
         </filter>
 
         <file>${ERR_LOG_HOME}/err.ing</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--日志文件输出的文件名，按天生成文件名 -->
             <fileNamePattern>${ERR_LOG_HOME}/err.%d{yyyy-MM-dd}.log.%i.zip</fileNamePattern>
             <!--15个周期，这里最小单位到天，所以为15天-->
             <MaxHistory>15</MaxHistory>
-            <!--日志文件保留天数 -->
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <!-- 按时间回滚的同时，按文件大小来回滚 -->
-                <maxFileSize>30MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 按时间回滚的同时，按文件大小来回滚 -->
+            <maxFileSize>30MB</maxFileSize>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>${FILE_LOG_PATTERN}</pattern>
@@ -43,16 +40,12 @@
 
     <appender name="APP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${APP_LOG_HOME}/app.ing</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${APP_LOG_HOME}/app.%d{yyyy-MM-dd_HH}.log.%i
-            </fileNamePattern>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${APP_LOG_HOME}/app.%d{yyyy-MM-dd_HH}.log.%i</fileNamePattern>
             <!--96个周期，这里最小单位到小时，所以为96小时(4天)-->
             <MaxHistory>96</MaxHistory>
-            <!--日志文件保留个数 -->
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <!-- 按时间回滚的同时，按文件大小来回滚 -->
-                <maxFileSize>30MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 按时间回滚的同时，按文件大小来回滚 -->
+            <maxFileSize>30MB</maxFileSize>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>${FILE_LOG_PATTERN}</pattern>
@@ -63,10 +56,16 @@
     <appender name="ASYNC_APP_FILE" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>1024</queueSize>
         <discardingThreshold>512</discardingThreshold>
-        <includeCallerData>true</includeCallerData>
+        <includeCallerData>false</includeCallerData>
         <appender-ref ref="APP_FILE"/>
     </appender>
-    
+
+    <logger name="com.xxl.job" level="DEBUG"/>
+
+    <logger name="com.xxl.job.admin.XxlJobAdminApplication" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
     <root level="WARN">
         <appender-ref ref="ASYNC_APP_FILE"/>
         <appender-ref ref="ERR_FILE"/>

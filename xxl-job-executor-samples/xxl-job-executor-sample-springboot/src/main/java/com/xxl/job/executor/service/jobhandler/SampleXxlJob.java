@@ -242,6 +242,12 @@ public class SampleXxlJob {
     public void demoJobHandler2() throws Exception {
         XxlJobHelper.log("XXL-JOB, Hello World.");
     }
+
+    @XxlJob(value = "demoJobHandler3", cron = "0/10 * * * * ?", desc = "自动注册的示例")
+    public void demoJobHandler3() throws Exception {
+        XxlJobHelper.log("XXL-JOB, Hello World.");
+    }
+    
     public void init(){
         logger.info("init");
     }
