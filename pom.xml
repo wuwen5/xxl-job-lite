@@ -47,9 +47,6 @@
 		<gson.version>2.11.0</gson.version>
 		<!-- spring -->
 		<spring.version>5.3.39</spring.version>
-		<!-- db -->
-		<mybatis-spring-boot-starter.version>2.3.2</mybatis-spring-boot-starter.version>
-		<mysql-connector-j.version>9.6.0</mysql-connector-j.version>
 		<!-- dynamic language -->
 		<groovy.version>4.0.24</groovy.version>
 	</properties>
