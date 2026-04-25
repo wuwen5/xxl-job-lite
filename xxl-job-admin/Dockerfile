@@ -1,12 +1,12 @@
 # Perform the extraction in a separate builder container
-FROM bellsoft/liberica-openjre-debian:17-cds AS builder
+FROM eclipse-temurin:17-jre AS builder
 WORKDIR /builder
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=tools -jar application.jar extract --layers --destination extracted
 
 # This is the runtime container
-FROM bellsoft/liberica-openjre-debian:17-cds
+FROM eclipse-temurin:17-jre
 WORKDIR /application
 ENV PARAMS=""
 ENV TZ=PRC

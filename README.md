@@ -96,8 +96,8 @@ admin / 123456
 
 ```xml
 <dependency>
-  <groupId>io.github.wuwen5.xxl-job</groupId>
-  <artifactId>xxl-job-lite-core</artifactId>
+    <groupId>io.github.wuwen5.xxl-job</groupId>
+    <artifactId>xxl-job-core</artifactId>
 </dependency>
 ```
 
