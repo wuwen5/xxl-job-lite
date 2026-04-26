@@ -15,11 +15,13 @@ public class AbstractSpringMvcTest extends AbstractTest {
 
     @Autowired
     private WebApplicationContext applicationContext;
+
     protected MockMvc mockMvc;
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.applicationContext).build();
+        this.mockMvc =
+                MockMvcBuilders.webAppContextSetup(this.applicationContext).build();
     }
 
     @Autowired
@@ -27,8 +29,6 @@ public class AbstractSpringMvcTest extends AbstractTest {
 
     @PostConstruct
     public void init() throws TemplateModelException {
-        freeMarkerConfigurer.getConfiguration()
-                .setSharedVariable("I18nUtil", new I18nUtil());
+        freeMarkerConfigurer.getConfiguration().setSharedVariable("I18nUtil", new I18nUtil());
     }
-
 }

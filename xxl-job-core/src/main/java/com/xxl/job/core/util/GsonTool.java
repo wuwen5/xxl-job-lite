@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.xxl.job.core.biz.model.ReturnT;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
@@ -13,7 +12,10 @@ import java.util.ArrayList;
  */
 public class GsonTool {
 
-    private static final Gson GSON =new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").disableHtmlEscaping().create();
+    private static final Gson GSON = new GsonBuilder()
+            .setDateFormat("yyyy-MM-dd HH:mm:ss")
+            .disableHtmlEscaping()
+            .create();
 
     /**
      * Object 转成 json
@@ -64,5 +66,4 @@ public class GsonTool {
         Type type = TypeToken.getParameterized(ArrayList.class, classOfT).getType();
         return GSON.fromJson(json, type);
     }
-
 }

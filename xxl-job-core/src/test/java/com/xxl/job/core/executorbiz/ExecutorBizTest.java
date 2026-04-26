@@ -1,5 +1,15 @@
 package com.xxl.job.core.executorbiz;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.xxl.job.core.biz.ExecutorBiz;
 import com.xxl.job.core.biz.client.ExecutorBizClient;
@@ -13,6 +23,9 @@ import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.glue.GlueTypeEnum;
 import com.xxl.job.core.handler.IJobHandler;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.time.Duration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,20 +35,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.time.Duration;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.ok;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 /**
  * executor api test
@@ -65,12 +64,11 @@ public class ExecutorBizTest {
                 .willReturn(ok().withBody("{\"code\":200,\"msg\":\"success\",\"content\":\"result\"}")));
     }
 
-
     @AfterAll
     public static void teardown() {
         wireMockServer.stop();
     }
-    
+
     @BeforeEach
     void checkPort() {
         waitForPort("127.0.0.1", 9999, Duration.ofSeconds(10), Duration.ofMillis(100));
@@ -83,10 +81,7 @@ public class ExecutorBizTest {
 
         while (System.currentTimeMillis() < deadline) {
             try (Socket socket = new Socket()) {
-                socket.connect(
-                        new InetSocketAddress(host, port),
-                        (int) interval.toMillis()
-                );
+                socket.connect(new InetSocketAddress(host, port), (int) interval.toMillis());
                 // 连接成功，说明端口已就绪
                 return;
             } catch (Exception e) {
@@ -100,10 +95,7 @@ public class ExecutorBizTest {
             }
         }
 
-        Assertions.fail(
-                "等待端口 " + port + " 启动超时（" + timeout.getSeconds() + "s）",
-                lastException
-        );
+        Assertions.fail("等待端口 " + port + " 启动超时（" + timeout.getSeconds() + "s）", lastException);
     }
 
     @Test
@@ -147,7 +139,6 @@ public class ExecutorBizTest {
         triggerParam.setLogId(1);
         triggerParam.setLogDateTime(System.currentTimeMillis());
         executorBiz.run(triggerParam);
-
 
         // Act
         final ReturnT<String> retval = executorBiz.idleBeat(new IdleBeatParam(jobId));
@@ -195,7 +186,7 @@ public class ExecutorBizTest {
         Assertions.assertNotNull(retval);
         Assertions.assertNull(retval.getContent());
         Assertions.assertEquals(200, retval.getCode());
-//        Assertions.assertNull(retval.getMsg());
+        //        Assertions.assertNull(retval.getMsg());
     }
 
     @Test
@@ -212,10 +203,9 @@ public class ExecutorBizTest {
         // Assert result
         Assertions.assertNotNull(retval);
     }
-    
+
     @Test
     public void registry() {
         verify(postRequestedFor(urlPathEqualTo("/api/initJobInfo")));
     }
-
 }

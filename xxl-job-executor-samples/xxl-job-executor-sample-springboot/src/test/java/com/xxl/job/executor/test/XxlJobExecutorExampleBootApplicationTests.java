@@ -6,9 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class XxlJobExecutorExampleBootApplicationTests {
 
-	@Test
-	public void test() {
-		System.out.println(11);
-	}
-
+    @Test
+    public void test() {
+        System.out.println(11);
+    }
 }

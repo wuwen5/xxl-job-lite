@@ -34,12 +34,13 @@ public enum TriggerTypeEnum {
      */
     MISFIRE(I18nUtil.getString("jobconf_trigger_type_misfire"));
 
-    TriggerTypeEnum(String title){
+    TriggerTypeEnum(String title) {
         this.title = title;
     }
+
     private final String title;
+
     public String getTitle() {
         return title;
     }
-
 }

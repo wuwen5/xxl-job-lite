@@ -1,48 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>io.github.wuwen5.xxl-job</groupId>
-        <artifactId>xxl-job-executor-samples</artifactId>
-        <version>2.5.3-SNAPSHOT</version>
-    </parent>
-    <artifactId>xxl-job-executor-sample-frameless</artifactId>
-    <packaging>jar</packaging>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.github.wuwen5.xxl-job</groupId>
+    <artifactId>xxl-job-executor-samples</artifactId>
+    <version>2.5.3-SNAPSHOT</version>
+  </parent>
+  <artifactId>xxl-job-executor-sample-frameless</artifactId>
+  <packaging>jar</packaging>
 
-    <name>${project.artifactId}</name>
-    <description>Example executor project for spring boot.</description>
-    
-    <properties>
-        <slf4j-api.version>2.0.17</slf4j-api.version>
-        <junit-jupiter.version>5.11.4</junit-jupiter.version>
-    </properties>
+  <name>${project.artifactId}</name>
+  <description>Example executor project for spring boot.</description>
 
-    <dependencies>
+  <properties>
+    <slf4j-api.version>2.0.17</slf4j-api.version>
+    <junit-jupiter.version>5.11.4</junit-jupiter.version>
+  </properties>
 
-        <!-- slf4j -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-reload4j</artifactId>
-            <version>${slf4j-api.version}</version>
-        </dependency>
-        <!-- junit -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
+  <dependencies>
 
-        <!-- xxl-job-core -->
-        <dependency>
-            <groupId>io.github.wuwen5.xxl-job</groupId>
-            <artifactId>xxl-job-core</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
+    <!-- slf4j -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-reload4j</artifactId>
+      <version>${slf4j-api.version}</version>
+    </dependency>
+    <!-- junit -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-    </dependencies>
+    <!-- xxl-job-core -->
+    <dependency>
+      <groupId>io.github.wuwen5.xxl-job</groupId>
+      <artifactId>xxl-job-core</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
 
+  </dependencies>
 
 </project>

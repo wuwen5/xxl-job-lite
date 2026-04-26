@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class TestConfiguration {
-    
+
     @Bean
     public XxlJobSpringExecutor xxlJobSpringExecutor() {
 
@@ -18,7 +18,7 @@ public class TestConfiguration {
         executor.setAppname("xxljob-ut");
         return executor;
     }
-    
+
     @Bean
     public ExampleJob exampleJob() {
         return new ExampleJob();

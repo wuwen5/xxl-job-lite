@@ -30,8 +30,8 @@ public @interface XxlJob {
     String cron() default "";
 
     long fixedRate() default -1;
-    
+
     String desc() default "";
-    
+
     String param() default "";
 }

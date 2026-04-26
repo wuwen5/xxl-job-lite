@@ -1,22 +1,22 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>io.github.wuwen5.xxl-job</groupId>
-        <artifactId>xxl-job-lite</artifactId>
-        <version>2.5.3-SNAPSHOT</version>
-    </parent>
-    <artifactId>xxl-job-executor-samples</artifactId>
-    <packaging>pom</packaging>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.github.wuwen5.xxl-job</groupId>
+    <artifactId>xxl-job-lite</artifactId>
+    <version>2.5.3-SNAPSHOT</version>
+  </parent>
+  <artifactId>xxl-job-executor-samples</artifactId>
+  <packaging>pom</packaging>
 
-    <modules>
-        <module>xxl-job-executor-sample-frameless</module>
-        <module>xxl-job-executor-sample-springboot</module>
-    </modules>
+  <modules>
+    <module>xxl-job-executor-sample-frameless</module>
+    <module>xxl-job-executor-sample-springboot</module>
+  </modules>
 
-    <properties>
-        <sonar.skip>true</sonar.skip>
-        <skip_maven_deploy>true</skip_maven_deploy>
-    </properties>
+  <properties>
+    <sonar.skip>true</sonar.skip>
+    <skip_maven_deploy>true</skip_maven_deploy>
+  </properties>
 
 </project>

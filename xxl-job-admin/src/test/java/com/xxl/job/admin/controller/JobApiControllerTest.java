@@ -1,5 +1,10 @@
 package com.xxl.job.admin.controller;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.xxl.job.core.biz.model.HandleCallbackParam;
 import com.xxl.job.core.biz.model.JobExecutorInitParam;
 import com.xxl.job.core.biz.model.JobExecutorParam;
@@ -8,20 +13,14 @@ import com.xxl.job.core.biz.model.RegistryParam;
 import com.xxl.job.core.context.XxlJobContext;
 import com.xxl.job.core.enums.RegistryConfig;
 import com.xxl.job.core.util.GsonTool;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for {@link JobApiController}.
@@ -37,9 +36,7 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testGetMethodNotAllowed() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        get("/api/callback")
-                                .contentType(MediaType.APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get("/api/callback").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -52,10 +49,9 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testUnknownUri() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        post("/api/unknownUri")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{}"))
+        MvcResult result = mockMvc.perform(post("/api/unknownUri")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -77,10 +73,9 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
         List<HandleCallbackParam> paramList = Arrays.asList(param);
         String body = GsonTool.toJson(paramList);
 
-        MvcResult result = mockMvc.perform(
-                        post("/api/callback")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(body))
+        MvcResult result = mockMvc.perform(post("/api/callback")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value(200))
@@ -96,10 +91,9 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
     public void testCallbackEmpty() throws Exception {
         String body = GsonTool.toJson(new ArrayList<>());
 
-        MvcResult result = mockMvc.perform(
-                        post("/api/callback")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(body))
+        MvcResult result = mockMvc.perform(post("/api/callback")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -114,15 +108,12 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testRegistry() throws Exception {
         RegistryParam param = new RegistryParam(
-                RegistryConfig.RegistType.EXECUTOR.name(),
-                "xxl-job-executor-example",
-                "127.0.0.1:9999");
+                RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
         String body = GsonTool.toJson(param);
 
-        MvcResult result = mockMvc.perform(
-                        post("/api/registry")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(body))
+        MvcResult result = mockMvc.perform(post("/api/registry")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andReturn();
@@ -138,10 +129,9 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
         RegistryParam param = new RegistryParam("", "", "");
         String body = GsonTool.toJson(param);
 
-        MvcResult result = mockMvc.perform(
-                        post("/api/registry")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(body))
+        MvcResult result = mockMvc.perform(post("/api/registry")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -157,15 +147,12 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testRegistryRemove() throws Exception {
         RegistryParam param = new RegistryParam(
-                RegistryConfig.RegistType.EXECUTOR.name(),
-                "xxl-job-executor-example",
-                "127.0.0.1:9999");
+                RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
         String body = GsonTool.toJson(param);
 
-        MvcResult result = mockMvc.perform(
-                        post("/api/registryRemove")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(body))
+        MvcResult result = mockMvc.perform(post("/api/registryRemove")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andReturn();
@@ -181,10 +168,9 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
         RegistryParam param = new RegistryParam("", "", "");
         String body = GsonTool.toJson(param);
 
-        MvcResult result = mockMvc.perform(
-                        post("/api/registryRemove")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(body))
+        MvcResult result = mockMvc.perform(post("/api/registryRemove")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -200,9 +186,8 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testInitJobInfo() throws Exception {
         List<JobInfoParam> jobInfoParamList = new ArrayList<>();
-        jobInfoParamList.add(new JobInfoParam(
-                "xxl-job-executor-example", "测试任务", "demoJobHandler",
-                "", "0/5 * * * * ?", -1));
+        jobInfoParamList.add(
+                new JobInfoParam("xxl-job-executor-example", "测试任务", "demoJobHandler", "", "0/5 * * * * ?", -1));
 
         JobExecutorInitParam initParam = new JobExecutorInitParam();
         initParam.setJobExecutorParam(new JobExecutorParam("xxl-job-executor-example", "测试执行器"));
@@ -210,10 +195,9 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
 
         String body = GsonTool.toJson(initParam);
 
-        MvcResult result = mockMvc.perform(
-                        post("/api/initJobInfo")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(body))
+        MvcResult result = mockMvc.perform(post("/api/initJobInfo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andReturn();
@@ -226,13 +210,10 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testInitJobInfoNullBody() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        post("/api/initJobInfo")
-                                .contentType(MediaType.APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(post("/api/initJobInfo").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         logger.info("testInitJobInfoNullBody: {}", result.getResponse().getContentAsString());
     }
 }
-

@@ -8,14 +8,13 @@ import java.io.Serializable;
 public class IdleBeatParam implements Serializable {
     private static final long serialVersionUID = 42L;
 
-    public IdleBeatParam() {
-    }
+    public IdleBeatParam() {}
+
     public IdleBeatParam(int jobId) {
         this.jobId = jobId;
     }
 
     private int jobId;
-
 
     public int getJobId() {
         return jobId;
@@ -24,5 +23,4 @@ public class IdleBeatParam implements Serializable {
     public void setJobId(int jobId) {
         this.jobId = jobId;
     }
-
 }

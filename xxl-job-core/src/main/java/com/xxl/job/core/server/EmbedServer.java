@@ -17,10 +17,9 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
+import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.*;
 
 /**
  * Copy from : https://github.com/xuxueli/xxl-rpc
@@ -37,8 +36,9 @@ public class EmbedServer {
     public void start(final String address, final int port, final String appname, final String accessToken) {
         start(address, port, appname, accessToken, null);
     }
-    
-    public void start(final String address, final int port, final String appname, final String accessToken, final String title) {
+
+    public void start(
+            final String address, final int port, final String appname, final String accessToken, final String title) {
         executorBiz = new ExecutorBizImpl();
         thread = new Thread(() -> {
             // param
@@ -57,15 +57,18 @@ public class EmbedServer {
             try {
                 // start server
                 ServerBootstrap bootstrap = new ServerBootstrap();
-                bootstrap.group(bossGroup, workerGroup)
+                bootstrap
+                        .group(bossGroup, workerGroup)
                         .channel(NioServerSocketChannel.class)
                         .childHandler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             public void initChannel(SocketChannel channel) {
                                 channel.pipeline()
-                                        .addLast(new IdleStateHandler(0, 0, 30 * 3, TimeUnit.SECONDS))  // beat 3N, close if idle
+                                        .addLast(new IdleStateHandler(
+                                                0, 0, 30 * 3, TimeUnit.SECONDS)) // beat 3N, close if idle
                                         .addLast(new HttpServerCodec())
-                                        .addLast(new HttpObjectAggregator(5 * 1024 * 1024))  // merge request & reponse to FULL
+                                        .addLast(new HttpObjectAggregator(
+                                                5 * 1024 * 1024)) // merge request & reponse to FULL
                                         .addLast(new EmbedHttpServerHandler(executorBiz, accessToken, bizThreadPool));
                             }
                         })
@@ -74,7 +77,10 @@ public class EmbedServer {
                 // bind
                 ChannelFuture future = bootstrap.bind(port).sync();
 
-                logger.info(">>>>>>>>>>> xxl-job remoting server start success, nettype = {}, port = {}", EmbedServer.class, port);
+                logger.info(
+                        ">>>>>>>>>>> xxl-job remoting server start success, nettype = {}, port = {}",
+                        EmbedServer.class,
+                        port);
 
                 // start registry
                 startRegistry(appname, address, title);
@@ -97,7 +103,7 @@ public class EmbedServer {
             }
         });
         // daemon, service jvm, user thread leave >>> daemon leave >>> jvm leave
-        thread.setDaemon(true);    
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -111,7 +117,6 @@ public class EmbedServer {
         stopRegistry();
         logger.info(">>>>>>>>>>> xxl-job remoting server destroy success.");
     }
-
 
     // ---------------------- registry ----------------------
 
@@ -138,7 +143,8 @@ public class EmbedServer {
         @Override
         protected void channelRead0(final ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
             // request parse
-            //final byte[] requestBytes = ByteBufUtil.getBytes(msg.content());    // byteBuf.toString(io.netty.util.CharsetUtil.UTF_8);
+            // final byte[] requestBytes = ByteBufUtil.getBytes(msg.content());    //
+            // byteBuf.toString(io.netty.util.CharsetUtil.UTF_8);
             String requestData = msg.content().toString(CharsetUtil.UTF_8);
             String uri = msg.uri();
             HttpMethod httpMethod = msg.method();
@@ -166,9 +172,7 @@ public class EmbedServer {
             if (uri == null || uri.trim().isEmpty()) {
                 return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, uri-mapping empty.");
             }
-            if (accessToken != null
-                    && !accessToken.trim().isEmpty()
-                    && !accessToken.equals(accessTokenReq)) {
+            if (accessToken != null && !accessToken.trim().isEmpty() && !accessToken.equals(accessTokenReq)) {
                 return new ReturnT<String>(ReturnT.FAIL_CODE, "The access token is wrong.");
             }
 
@@ -190,7 +194,8 @@ public class EmbedServer {
                         LogParam logParam = GsonTool.fromJson(requestData, LogParam.class);
                         return executorBiz.log(logParam);
                     default:
-                        return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, uri-mapping(" + uri + ") not found.");
+                        return new ReturnT<String>(
+                                ReturnT.FAIL_CODE, "invalid request, uri-mapping(" + uri + ") not found.");
                 }
             } catch (Throwable e) {
                 logger.error(e.getMessage(), e);
@@ -203,9 +208,16 @@ public class EmbedServer {
          */
         private void writeResponse(ChannelHandlerContext ctx, boolean keepAlive, String responseJson) {
             // write response
-            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(responseJson, CharsetUtil.UTF_8));   //  Unpooled.wrappedBuffer(responseJson)
-            response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html;charset=UTF-8");       // HttpHeaderValues.TEXT_PLAIN.toString()
-            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1,
+                    HttpResponseStatus.OK,
+                    Unpooled.copiedBuffer(responseJson, CharsetUtil.UTF_8)); //  Unpooled.wrappedBuffer(responseJson)
+            response.headers()
+                    .set(
+                            HttpHeaderNames.CONTENT_TYPE,
+                            "text/html;charset=UTF-8"); // HttpHeaderValues.TEXT_PLAIN.toString()
+            response.headers()
+                    .set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
             if (keepAlive) {
                 response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
             }
@@ -226,7 +238,8 @@ public class EmbedServer {
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
             if (evt instanceof IdleStateEvent) {
-                ctx.channel().close();      // beat 3N, close if idle
+                // beat 3N, close if idle
+                ctx.channel().close();
                 logger.debug(">>>>>>>>>>> xxl-job provider netty_http server close an idle channel.");
             } else {
                 super.userEventTriggered(ctx, evt);
@@ -238,7 +251,7 @@ public class EmbedServer {
     public void startRegistry(final String appname, final String address) {
         startRegistry(appname, address, null);
     }
-    
+
     public void startRegistry(final String appname, final String address, final String title) {
         // start registry
         ExecutorRegistryThread.getInstance().start(appname, address, title);

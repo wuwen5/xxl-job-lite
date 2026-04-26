@@ -1,14 +1,14 @@
 package com.xxl.job.core.util;
 
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import com.xxl.job.core.biz.model.ReturnT;
-import org.junit.jupiter.api.Test;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.xxl.job.core.biz.model.ReturnT;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author wuwen
@@ -21,7 +21,7 @@ class XxlJobRemotingUtilTest {
 
         stubFor(post(urlPathMatching("/api/registry"))
                 .willReturn(ok().withBody("{\"code\":200,\"msg\":\"success\",\"content\":\"result\"}")));
-        
+
         // given
         String url = "http://localhost:18760/api/registry";
         String accessToken = "test-token";

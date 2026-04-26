@@ -2,11 +2,9 @@ package com.xxl.job.core.executor.impl;
 
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.handler.annotation.XxlJob;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * xxl-job executor (for frameless)
@@ -16,13 +14,14 @@ import java.util.List;
 public class XxlJobSimpleExecutor extends XxlJobExecutor {
 
     private List<Object> xxlJobBeanList = new ArrayList<>();
+
     public List<Object> getXxlJobBeanList() {
         return xxlJobBeanList;
     }
+
     public void setXxlJobBeanList(List<Object> xxlJobBeanList) {
         this.xxlJobBeanList = xxlJobBeanList;
     }
-
 
     @Override
     public void start() {
@@ -43,14 +42,13 @@ public class XxlJobSimpleExecutor extends XxlJobExecutor {
         super.destroy();
     }
 
-
     private void initJobHandlerMethodRepository(List<Object> xxlJobBeanList) {
-        if (xxlJobBeanList==null || xxlJobBeanList.isEmpty()) {
+        if (xxlJobBeanList == null || xxlJobBeanList.isEmpty()) {
             return;
         }
 
         // init job handler from method
-        for (Object bean: xxlJobBeanList) {
+        for (Object bean : xxlJobBeanList) {
             // method
             Method[] methods = bean.getClass().getDeclaredMethods();
             if (methods.length == 0) {
@@ -61,9 +59,6 @@ public class XxlJobSimpleExecutor extends XxlJobExecutor {
                 // registry
                 registJobHandler(xxlJob, bean, executeMethod);
             }
-
         }
-
     }
-
 }

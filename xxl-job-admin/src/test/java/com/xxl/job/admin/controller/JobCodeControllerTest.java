@@ -1,7 +1,12 @@
 package com.xxl.job.admin.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.xxl.job.admin.service.impl.LoginService;
 import com.xxl.job.core.glue.GlueTypeEnum;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -11,12 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MvcResult;
-
-import jakarta.servlet.http.Cookie;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Unit tests for JobCodeController (/jobcode).
@@ -40,30 +39,28 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
         jdbcTemplate.execute("DELETE FROM xxl_job_logglue WHERE id > 0");
 
         // insert admin user (password = md5("123456"))
-        jdbcTemplate.execute(
-                "INSERT INTO xxl_job_user(id, username, password, role, permission) " +
-                "VALUES (1, 'admin', 'e10adc3949ba59abbe56e057f20f883e', 1, NULL)");
+        jdbcTemplate.execute("INSERT INTO xxl_job_user(id, username, password, role, permission) "
+                + "VALUES (1, 'admin', 'e10adc3949ba59abbe56e057f20f883e', 1, NULL)");
 
         // insert a job group (executor) that admin has permission to
-        jdbcTemplate.execute(
-                "INSERT INTO xxl_job_group(id, app_name, title, address_type, address_list, update_time) " +
-                "VALUES (1, 'test-executor', 'Test Executor', 0, NULL, NOW())");
+        jdbcTemplate.execute("INSERT INTO xxl_job_group(id, app_name, title, address_type, address_list, update_time) "
+                + "VALUES (1, 'test-executor', 'Test Executor', 0, NULL, NOW())");
 
         // insert a GLUE(Groovy) type job
         jdbcTemplate.execute(
-                "INSERT INTO xxl_job_info(id, job_group, job_desc, add_time, update_time, author, schedule_type, " +
-                "misfire_strategy, glue_type, trigger_status, trigger_last_time, trigger_next_time) " +
-                "VALUES (1, 1, 'GLUE Test Job', NOW(), NOW(), 'tester', 'NONE', 'DO_NOTHING', '" +
-                GlueTypeEnum.GLUE_GROOVY.name() + "', 0, 0, 0)");
+                "INSERT INTO xxl_job_info(id, job_group, job_desc, add_time, update_time, author, schedule_type, "
+                        + "misfire_strategy, glue_type, trigger_status, trigger_last_time, trigger_next_time) "
+                        + "VALUES (1, 1, 'GLUE Test Job', NOW(), NOW(), 'tester', 'NONE', 'DO_NOTHING', '"
+                        + GlueTypeEnum.GLUE_GROOVY.name()
+                        + "', 0, 0, 0)");
         glueJobId = 1;
 
         // login to get cookie
-        MvcResult ret = mockMvc.perform(
-                post("/login")
+        MvcResult ret = mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("userName", "admin")
-                        .param("password", "123456")
-        ).andReturn();
+                        .param("password", "123456"))
+                .andReturn();
         cookie = ret.getResponse().getCookie(LoginService.LOGIN_IDENTITY_KEY);
     }
 
@@ -75,16 +72,17 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
     @Test
     @Disabled
     public void testIndex() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        get("/jobcode")
-                                .param("jobId", String.valueOf(glueJobId))
-                                .cookie(cookie))
+        MvcResult result = mockMvc.perform(get("/jobcode")
+                        .param("jobId", String.valueOf(glueJobId))
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(view().name("biz/job.code"))
                 .andExpect(model().attributeExists("jobInfo", "jobLogGlues", "GlueTypeEnum"))
                 .andReturn();
 
-        logger.info("testIndex view: {}", result.getModelAndView() != null ? result.getModelAndView().getViewName() : null);
+        logger.info(
+                "testIndex view: {}",
+                result.getModelAndView() != null ? result.getModelAndView().getViewName() : null);
     }
 
     /**
@@ -93,10 +91,7 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testIndexJobNotFound() throws Exception {
-        mockMvc.perform(
-                        get("/jobcode")
-                                .param("jobId", "9999")
-                                .cookie(cookie))
+        mockMvc.perform(get("/jobcode").param("jobId", "9999").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(view().name("/common/common.exception"))
                 .andExpect(model().attributeExists("exceptionMsg"));
@@ -110,15 +105,13 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
     public void testIndexBeanTypeNotAllowed() throws Exception {
         // insert a BEAN type job
         jdbcTemplate.execute(
-                "INSERT INTO xxl_job_info(id, job_group, job_desc, add_time, update_time, author, schedule_type, " +
-                "misfire_strategy, executor_handler, glue_type, trigger_status, trigger_last_time, trigger_next_time) " +
-                "VALUES (2, 1, 'BEAN Test Job', NOW(), NOW(), 'tester', 'NONE', 'DO_NOTHING', 'demoHandler', '" +
-                GlueTypeEnum.BEAN.name() + "', 0, 0, 0)");
+                "INSERT INTO xxl_job_info(id, job_group, job_desc, add_time, update_time, author, schedule_type, "
+                        + "misfire_strategy, executor_handler, glue_type, trigger_status, trigger_last_time, trigger_next_time) "
+                        + "VALUES (2, 1, 'BEAN Test Job', NOW(), NOW(), 'tester', 'NONE', 'DO_NOTHING', 'demoHandler', '"
+                        + GlueTypeEnum.BEAN.name()
+                        + "', 0, 0, 0)");
 
-        mockMvc.perform(
-                        get("/jobcode")
-                                .param("jobId", "2")
-                                .cookie(cookie))
+        mockMvc.perform(get("/jobcode").param("jobId", "2").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(view().name("/common/common.exception"))
                 .andExpect(model().attributeExists("exceptionMsg"));
@@ -131,13 +124,12 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveSuccess() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        post("/jobcode/save")
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                                .param("id", String.valueOf(glueJobId))
-                                .param("glueSource", "// my groovy source code")
-                                .param("glueRemark", "initial version remark")
-                                .cookie(cookie))
+        MvcResult result = mockMvc.perform(post("/jobcode/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", String.valueOf(glueJobId))
+                        .param("glueSource", "// my groovy source code")
+                        .param("glueRemark", "initial version remark")
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value(200))
@@ -152,13 +144,12 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testSaveMultipleTimes() throws Exception {
         for (int i = 1; i <= 5; i++) {
-            mockMvc.perform(
-                            post("/jobcode/save")
-                                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                                    .param("id", String.valueOf(glueJobId))
-                                    .param("glueSource", "// version " + i)
-                                    .param("glueRemark", "remark version " + i)
-                                    .cookie(cookie))
+            mockMvc.perform(post("/jobcode/save")
+                            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                            .param("id", String.valueOf(glueJobId))
+                            .param("glueSource", "// version " + i)
+                            .param("glueRemark", "remark version " + i)
+                            .cookie(cookie))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.code").value(200));
         }
@@ -176,13 +167,12 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
     public void testSaveUpdatesGlueSourceInDb() throws Exception {
         String newSource = "// updated groovy source code";
 
-        mockMvc.perform(
-                        post("/jobcode/save")
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                                .param("id", String.valueOf(glueJobId))
-                                .param("glueSource", newSource)
-                                .param("glueRemark", "update remark v1")
-                                .cookie(cookie))
+        mockMvc.perform(post("/jobcode/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", String.valueOf(glueJobId))
+                        .param("glueSource", newSource)
+                        .param("glueRemark", "update remark v1")
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200));
 
@@ -197,13 +187,13 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveNullGlueRemark() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        post("/jobcode/save")
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                                .param("id", String.valueOf(glueJobId))
-                                .param("glueSource", "// source code")
-                                .cookie(cookie))
-                // no glueRemark param → MissingServletRequestParameterException handled by WebExceptionResolver as JSON 500
+        MvcResult result = mockMvc.perform(post("/jobcode/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", String.valueOf(glueJobId))
+                        .param("glueSource", "// source code")
+                        .cookie(cookie))
+                // no glueRemark param → MissingServletRequestParameterException handled by WebExceptionResolver as JSON
+                // 500
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -216,13 +206,12 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveRemarkTooShort() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        post("/jobcode/save")
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                                .param("id", String.valueOf(glueJobId))
-                                .param("glueSource", "// source code")
-                                .param("glueRemark", "abc")
-                                .cookie(cookie))
+        MvcResult result = mockMvc.perform(post("/jobcode/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", String.valueOf(glueJobId))
+                        .param("glueSource", "// source code")
+                        .param("glueRemark", "abc")
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -238,13 +227,12 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 101; i++) sb.append('a');
         String longRemark = sb.toString();
-        MvcResult result = mockMvc.perform(
-                        post("/jobcode/save")
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                                .param("id", String.valueOf(glueJobId))
-                                .param("glueSource", "// source code")
-                                .param("glueRemark", longRemark)
-                                .cookie(cookie))
+        MvcResult result = mockMvc.perform(post("/jobcode/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", String.valueOf(glueJobId))
+                        .param("glueSource", "// source code")
+                        .param("glueRemark", longRemark)
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -257,13 +245,12 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveJobNotFound() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        post("/jobcode/save")
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                                .param("id", "9999")
-                                .param("glueSource", "// source code")
-                                .param("glueRemark", "valid remark here")
-                                .cookie(cookie))
+        MvcResult result = mockMvc.perform(post("/jobcode/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", "9999")
+                        .param("glueSource", "// source code")
+                        .param("glueRemark", "valid remark here")
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -271,4 +258,3 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
         logger.info("testSaveJobNotFound: {}", result.getResponse().getContentAsString());
     }
 }
-

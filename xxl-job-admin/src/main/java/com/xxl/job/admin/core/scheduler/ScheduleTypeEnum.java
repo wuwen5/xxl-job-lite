@@ -22,10 +22,10 @@ public enum ScheduleTypeEnum {
      */
     FIX_RATE(I18nUtil.getString("schedule_type_fix_rate")),
 
-    /**
-     * schedule by fix delay (in seconds)， after the last time
-     */
-    /*FIX_DELAY(I18nUtil.getString("schedule_type_fix_delay"))*/;
+/**
+ * schedule by fix delay (in seconds)， after the last time
+ */
+/*FIX_DELAY(I18nUtil.getString("schedule_type_fix_delay"))*/ ;
 
     /**
      * title
@@ -40,13 +40,12 @@ public enum ScheduleTypeEnum {
         return title;
     }
 
-    public static ScheduleTypeEnum match(String name, ScheduleTypeEnum defaultItem){
-        for (ScheduleTypeEnum item: ScheduleTypeEnum.values()) {
+    public static ScheduleTypeEnum match(String name, ScheduleTypeEnum defaultItem) {
+        for (ScheduleTypeEnum item : ScheduleTypeEnum.values()) {
             if (item.name().equals(name)) {
                 return item;
             }
         }
         return defaultItem;
     }
-
 }

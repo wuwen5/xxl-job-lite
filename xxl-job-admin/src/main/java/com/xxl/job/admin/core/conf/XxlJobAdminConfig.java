@@ -3,30 +3,28 @@ package com.xxl.job.admin.core.conf;
 import com.xxl.job.admin.core.alarm.JobAlarmer;
 import com.xxl.job.admin.core.scheduler.XxlJobScheduler;
 import com.xxl.job.admin.dao.*;
+import jakarta.annotation.Resource;
+import java.util.Arrays;
+import javax.sql.DataSource;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
-import javax.sql.DataSource;
-import java.util.Arrays;
-
 /**
  * xxl-job config
  *
  * @author xuxueli 2017-04-28
  */
-
 @Component
 public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     private static XxlJobAdminConfig adminConfig = null;
+
     public static XxlJobAdminConfig getAdminConfig() {
         return adminConfig;
     }
-
 
     // ---------------------- XxlJobScheduler ----------------------
 
@@ -44,7 +42,6 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
     public void destroy() throws Exception {
         xxlJobScheduler.destroy();
     }
-
 
     // ---------------------- XxlJobScheduler ----------------------
 
@@ -74,21 +71,27 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     @Resource
     private XxlJobLogDao xxlJobLogDao;
+
     @Resource
     private XxlJobInfoDao xxlJobInfoDao;
+
     @Resource
     private XxlJobRegistryDao xxlJobRegistryDao;
+
     @Resource
     private XxlJobGroupDao xxlJobGroupDao;
+
     @Resource
     private XxlJobLogReportDao xxlJobLogReportDao;
+
     @Resource
     private JavaMailSender mailSender;
+
     @Resource
     private DataSource dataSource;
+
     @Resource
     private JobAlarmer jobAlarmer;
-
 
     public String getI18n() {
         if (!Arrays.asList("zh_CN", "zh_TC", "en").contains(i18n)) {
@@ -125,7 +128,7 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     public int getLogretentiondays() {
         if (logretentiondays < 7) {
-            return -1;  // Limit greater than or equal to 7, otherwise close
+            return -1; // Limit greater than or equal to 7, otherwise close
         }
         return logretentiondays;
     }
@@ -161,5 +164,4 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
     public JobAlarmer getJobAlarmer() {
         return jobAlarmer;
     }
-
 }

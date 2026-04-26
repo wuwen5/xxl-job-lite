@@ -2,10 +2,9 @@ package com.xxl.job.admin.core.route;
 
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.biz.model.TriggerParam;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * Created by xuxueli on 17/3/10.
@@ -20,5 +19,4 @@ public abstract class ExecutorRouter {
      * @return  ReturnT.content=address
      */
     public abstract ReturnT<String> route(TriggerParam triggerParam, List<String> addressList);
-
 }

@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ExampleJob {
-    
+
     @XxlJob(value = "testNoInitJobHandler")
     public void execute() {
         log.info("ExampleJob is executing...");

@@ -2,12 +2,11 @@ package com.xxl.job.admin.dao;
 
 import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.admin.core.model.XxlJobRegistry;
-import org.junit.jupiter.api.Test;
-
 import jakarta.annotation.Resource;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 public class XxlJobRegistryDaoTest extends AbstractTest {
 
@@ -15,7 +14,7 @@ public class XxlJobRegistryDaoTest extends AbstractTest {
     private XxlJobRegistryDao xxlJobRegistryDao;
 
     @Test
-    public void test(){
+    public void test() {
         int ret = xxlJobRegistryDao.registryUpdate("g1", "k1", "v1", new Date());
         if (ret < 1) {
             ret = xxlJobRegistryDao.registrySave("g1", "k1", "v1", new Date());
@@ -25,5 +24,4 @@ public class XxlJobRegistryDaoTest extends AbstractTest {
 
         int ret2 = xxlJobRegistryDao.removeDead(Arrays.asList(1));
     }
-
 }

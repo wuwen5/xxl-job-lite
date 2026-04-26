@@ -10,5 +10,4 @@ public class IndexController {
     String index() {
         return "xxl job executor running.";
     }
-
 }

@@ -71,7 +71,7 @@ public enum ExecutorRouteStrategyEnum {
         return title;
     }
 
-    /** 
+    /**
      * Get router
      * @return the router
      */
@@ -79,9 +79,9 @@ public enum ExecutorRouteStrategyEnum {
         return router;
     }
 
-    public static ExecutorRouteStrategyEnum match(String name, ExecutorRouteStrategyEnum defaultItem){
+    public static ExecutorRouteStrategyEnum match(String name, ExecutorRouteStrategyEnum defaultItem) {
         if (name != null) {
-            for (ExecutorRouteStrategyEnum item: ExecutorRouteStrategyEnum.values()) {
+            for (ExecutorRouteStrategyEnum item : ExecutorRouteStrategyEnum.values()) {
                 if (item.name().equals(name)) {
                     return item;
                 }
@@ -89,5 +89,4 @@ public enum ExecutorRouteStrategyEnum {
         }
         return defaultItem;
     }
-
 }

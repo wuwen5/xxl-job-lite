@@ -1,7 +1,6 @@
 package com.xxl.job.core.util;
 
 import com.xxl.job.core.context.XxlJobHelper;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +46,8 @@ public class ScriptUtil {
      * @return
      * @throws IOException
      */
-    public static int execToFile(String command, String scriptFile, String logFile, String... params) throws IOException {
+    public static int execToFile(String command, String scriptFile, String logFile, String... params)
+            throws IOException {
 
         FileOutputStream fileOutputStream = null;
         Thread inputThread = null;
@@ -88,7 +88,7 @@ public class ScriptUtil {
             errThread.start();
 
             // process-wait
-            int exitValue = process.waitFor();      // exit code: 0=success, 1=error
+            int exitValue = process.waitFor(); // exit code: 0=success, 1=error
 
             // log-thread join
             inputThread.join();
@@ -105,7 +105,6 @@ public class ScriptUtil {
                 } catch (IOException e) {
                     XxlJobHelper.log(e);
                 }
-
             }
             if (inputThread != null && inputThread.isAlive()) {
                 inputThread.interrupt();
@@ -128,7 +127,7 @@ public class ScriptUtil {
     private static long copy(InputStream inputStream, OutputStream outputStream, byte[] buffer) throws IOException {
         try {
             long total = 0;
-            for (;;) {
+            for (; ; ) {
                 int res = inputStream.read(buffer);
                 if (res == -1) {
                     break;
@@ -143,7 +142,7 @@ public class ScriptUtil {
             if (outputStream != null) {
                 outputStream.flush();
             }
-            //out = null;
+            // out = null;
             inputStream.close();
             inputStream = null;
             return total;

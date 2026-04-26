@@ -3,7 +3,6 @@ package com.xxl.job.admin.core.route.strategy;
 import com.xxl.job.admin.core.route.ExecutorRouter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.biz.model.TriggerParam;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,43 +18,43 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ExecutorRouteLRU extends ExecutorRouter {
 
-    private static ConcurrentMap<Integer, LinkedHashMap<String, String>> jobLRUMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Integer, LinkedHashMap<String, String>> JOB_LRU_MAP = new ConcurrentHashMap<>();
     private static long CACHE_VALID_TIME = 0;
 
     public String route(int jobId, List<String> addressList) {
 
         // cache clear
         if (System.currentTimeMillis() > CACHE_VALID_TIME) {
-            jobLRUMap.clear();
-            CACHE_VALID_TIME = System.currentTimeMillis() + 1000*60*60*24;
+            JOB_LRU_MAP.clear();
+            CACHE_VALID_TIME = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
         }
 
         // init lru
-        LinkedHashMap<String, String> lruItem = jobLRUMap.get(jobId);
+        LinkedHashMap<String, String> lruItem = JOB_LRU_MAP.get(jobId);
         if (lruItem == null) {
             /**
              * LinkedHashMap
              *      a、accessOrder：true=访问顺序排序（get/put时排序）；false=插入顺序排期；
              *      b、removeEldestEntry：新增元素时将会调用，返回true时会删除最老元素；可封装LinkedHashMap并重写该方法，比如定义最大容量，超出是返回true即可实现固定长度的LRU算法；
              */
-            lruItem = jobLRUMap.computeIfAbsent(jobId, k -> new LinkedHashMap<>(16, 0.75f, true));
+            lruItem = JOB_LRU_MAP.computeIfAbsent(jobId, k -> new LinkedHashMap<>(16, 0.75f, true));
         }
 
         // put new
-        for (String address: addressList) {
+        for (String address : addressList) {
             if (!lruItem.containsKey(address)) {
                 lruItem.put(address, address);
             }
         }
         // remove old
         List<String> delKeys = new ArrayList<>();
-        for (String existKey: lruItem.keySet()) {
+        for (String existKey : lruItem.keySet()) {
             if (!addressList.contains(existKey)) {
                 delKeys.add(existKey);
             }
         }
         if (!delKeys.isEmpty()) {
-            for (String delKey: delKeys) {
+            for (String delKey : delKeys) {
                 lruItem.remove(delKey);
             }
         }
@@ -70,5 +69,4 @@ public class ExecutorRouteLRU extends ExecutorRouter {
         String address = route(triggerParam.getJobId(), addressList);
         return new ReturnT<>(address);
     }
-
 }

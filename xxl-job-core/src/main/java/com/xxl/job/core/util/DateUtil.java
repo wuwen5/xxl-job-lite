@@ -1,14 +1,13 @@
 package com.xxl.job.core.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * date util
@@ -22,11 +21,9 @@ public class DateUtil {
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    private static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern(DATE_FORMAT);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
-    private static final DateTimeFormatter DATETIME_FORMATTER =
-            DateTimeFormatter.ofPattern(DATETIME_FORMAT);
+    private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_FORMAT);
 
     private static final ZoneId DEFAULT_ZONE = ZoneId.systemDefault();
 
@@ -53,11 +50,9 @@ public class DateUtil {
                 return DATETIME_FORMATTER.format(instant.atZone(DEFAULT_ZONE).toLocalDateTime());
             }
 
-            return DateTimeFormatter.ofPattern(pattern)
-                    .format(instant.atZone(DEFAULT_ZONE));
+            return DateTimeFormatter.ofPattern(pattern).format(instant.atZone(DEFAULT_ZONE));
         } catch (Exception e) {
-            logger.warn("format date error, date = {}, pattern = {}, errorMsg = {}",
-                    date, pattern, e.getMessage());
+            logger.warn("format date error, date = {}, pattern = {}, errorMsg = {}", date, pattern, e.getMessage());
             return null;
         }
     }
@@ -82,19 +77,18 @@ public class DateUtil {
                 return Date.from(localDate.atStartOfDay(DEFAULT_ZONE).toInstant());
             }
             if (DATETIME_FORMAT.equals(pattern)) {
-                LocalDateTime localDateTime =
-                        LocalDateTime.parse(dateString, DATETIME_FORMATTER);
+                LocalDateTime localDateTime = LocalDateTime.parse(dateString, DATETIME_FORMATTER);
                 return Date.from(localDateTime.atZone(DEFAULT_ZONE).toInstant());
             }
 
-            LocalDateTime localDateTime =
-                    LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern(pattern));
+            LocalDateTime localDateTime = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern(pattern));
             return Date.from(localDateTime.atZone(DEFAULT_ZONE).toInstant());
         } catch (Exception e) {
             logger.warn(
                     "parse date error, dateString = {}, pattern = {}, errorMsg = {}",
-                    dateString, pattern, e.getMessage()
-            );
+                    dateString,
+                    pattern,
+                    e.getMessage());
             return null;
         }
     }
@@ -147,8 +141,12 @@ public class DateUtil {
             }
             return Date.from(ldt.atZone(DEFAULT_ZONE).toInstant());
         } catch (Exception e) {
-            logger.warn("add date error, date = {}, amount = {}, unit = {}, errorMsg = {}",
-                    date, amount, unit, e.getMessage());
+            logger.warn(
+                    "add date error, date = {}, amount = {}, unit = {}, errorMsg = {}",
+                    date,
+                    amount,
+                    unit,
+                    e.getMessage());
             return null;
         }
     }

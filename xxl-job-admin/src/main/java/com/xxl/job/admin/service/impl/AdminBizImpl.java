@@ -20,15 +20,14 @@ import com.xxl.job.core.biz.model.RegistryParam;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.glue.GlueTypeEnum;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
  * @author xuxueli 2017-07-27 21:54:20
@@ -68,9 +67,12 @@ public class AdminBizImpl implements AdminBiz {
         int groupId = initJobGroups(jobExecutorParam.getJobExecutorParam());
         List<XxlJobInfo> jobsByGroup = xxlJobInfoDao.getJobsByGroup(groupId);
 
-        JdbcDbLockUtils.executeWithDbLock(XxlJobAdminConfig.getAdminConfig().getDataSource(), jobExecutorParam.getJobExecutorParam().getAppName(),
-                false, false, () -> jobExecutorParam.getJobInfoParamList()
-                        .stream()
+        JdbcDbLockUtils.executeWithDbLock(
+                XxlJobAdminConfig.getAdminConfig().getDataSource(),
+                jobExecutorParam.getJobExecutorParam().getAppName(),
+                false,
+                false,
+                () -> jobExecutorParam.getJobInfoParamList().stream()
                         .filter(job -> jobsByGroup.stream()
                                 .noneMatch(o -> job.getExecutorHandler().equals(o.getExecutorHandler())))
                         .map(o -> {
@@ -94,7 +96,8 @@ public class AdminBizImpl implements AdminBiz {
                             xxlJobInfo.setExecutorRouteStrategy(ExecutorRouteStrategyEnum.FIRST.name());
                             xxlJobInfo.setExecutorBlockStrategy(ExecutorBlockStrategyEnum.SERIAL_EXECUTION.name());
                             return xxlJobInfo;
-                        }).forEach(o -> xxlJobService.add(o, new XxlJobUser())));
+                        })
+                        .forEach(o -> xxlJobService.add(o, new XxlJobUser())));
 
         return ReturnT.SUCCESS;
     }
@@ -109,15 +112,23 @@ public class AdminBizImpl implements AdminBiz {
 
         XxlJobGroup newGroup = new XxlJobGroup();
         newGroup.setAppname(jobExecutorParam.getAppName());
-        newGroup.setTitle(jobExecutorParam.getTitle() == null || jobExecutorParam.getTitle().trim().isEmpty()
-                ? jobExecutorParam.getAppName() : jobExecutorParam.getTitle());
-        newGroup.setTitle(newGroup.getTitle().substring(0, Math.min(30, newGroup.getTitle().length())));
+        newGroup.setTitle(
+                jobExecutorParam.getTitle() == null
+                                || jobExecutorParam.getTitle().trim().isEmpty()
+                        ? jobExecutorParam.getAppName()
+                        : jobExecutorParam.getTitle());
+        newGroup.setTitle(newGroup.getTitle()
+                .substring(0, Math.min(30, newGroup.getTitle().length())));
         newGroup.setUpdateTime(new Date());
         newGroup.setAddressType(0);
 
         try {
-            JdbcDbLockUtils.executeWithDbLock(XxlJobAdminConfig.getAdminConfig().getDataSource(),
-                    jobExecutorParam.getAppName(), true, false, () -> xxlJobGroupDao.save(newGroup));
+            JdbcDbLockUtils.executeWithDbLock(
+                    XxlJobAdminConfig.getAdminConfig().getDataSource(),
+                    jobExecutorParam.getAppName(),
+                    true,
+                    false,
+                    () -> xxlJobGroupDao.save(newGroup));
         } catch (Exception e) {
             log.warn("初始化job_group失败, 可能已存在, appName={}", jobExecutorParam.getAppName(), e);
         }
@@ -125,7 +136,6 @@ public class AdminBizImpl implements AdminBiz {
         if (newGroup.getId() > 0) {
             return newGroup.getId();
         }
-
 
         // 重试3次查询已存在的分组
         for (int i = 0; i < 3; i++) {

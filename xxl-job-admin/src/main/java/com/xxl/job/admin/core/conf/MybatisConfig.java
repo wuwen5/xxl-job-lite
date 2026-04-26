@@ -17,5 +17,4 @@ public class MybatisConfig {
     public DatabaseIdProvider vendorDatabaseIdProvider() {
         return new VendorDatabaseIdProvider();
     }
-
 }

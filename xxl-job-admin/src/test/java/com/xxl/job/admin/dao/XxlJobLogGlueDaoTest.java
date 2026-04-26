@@ -2,11 +2,10 @@ package com.xxl.job.admin.dao;
 
 import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.admin.core.model.XxlJobLogGlue;
-import org.junit.jupiter.api.Test;
-
 import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 public class XxlJobLogGlueDaoTest extends AbstractTest {
 
@@ -14,7 +13,7 @@ public class XxlJobLogGlueDaoTest extends AbstractTest {
     private XxlJobLogGlueDao xxlJobLogGlueDao;
 
     @Test
-    public void test(){
+    public void test() {
         XxlJobLogGlue logGlue = new XxlJobLogGlue();
         logGlue.setJobId(1);
         logGlue.setGlueType("1");
@@ -29,7 +28,6 @@ public class XxlJobLogGlueDaoTest extends AbstractTest {
 
         int ret2 = xxlJobLogGlueDao.removeOld(1, 1);
 
-        int ret3 =xxlJobLogGlueDao.deleteByJobId(1);
+        int ret3 = xxlJobLogGlueDao.deleteByJobId(1);
     }
-
 }

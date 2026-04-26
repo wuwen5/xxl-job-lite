@@ -1,11 +1,10 @@
 package com.xxl.job.admin.core.util;
 
-import lombok.extern.slf4j.Slf4j;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import javax.sql.DataSource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author wuwen
@@ -13,30 +12,19 @@ import java.sql.SQLException;
 @Slf4j
 public final class JdbcDbLockUtils {
 
-    private JdbcDbLockUtils() {
-    }
+    private JdbcDbLockUtils() {}
 
-    private static final String INSERT_LOCK_SQL =
-            "insert into xxl_job_lock (lock_name) " +
-                    "select ? from dual where not exists " +
-                    "(select 1 from xxl_job_lock where lock_name = ?)";
+    private static final String INSERT_LOCK_SQL = "insert into xxl_job_lock (lock_name) "
+            + "select ? from dual where not exists " + "(select 1 from xxl_job_lock where lock_name = ?)";
 
-    private static final String LOCK_SQL =
-            "select lock_name from xxl_job_lock where lock_name = ? for update";
+    private static final String LOCK_SQL = "select lock_name from xxl_job_lock where lock_name = ? for update";
 
-    public static void executeWithDbLock(
-            DataSource dataSource,
-            String lockName,
-            Runnable run) {
+    public static void executeWithDbLock(DataSource dataSource, String lockName, Runnable run) {
         executeWithDbLock(dataSource, lockName, false, true, run);
     }
 
     public static void executeWithDbLock(
-            DataSource dataSource,
-            String lockName,
-            boolean insertLock,
-            boolean waitForLock,
-            Runnable run) {
+            DataSource dataSource, String lockName, boolean insertLock, boolean waitForLock, Runnable run) {
         Connection conn = null;
         PreparedStatement insertPs = null;
         PreparedStatement lockPs = null;
@@ -64,7 +52,7 @@ public final class JdbcDbLockUtils {
             try {
                 run.run();
             } finally {
-                conn.commit();    
+                conn.commit();
             }
             // ===== lock end =====
         } catch (SQLException e) {
@@ -96,9 +84,9 @@ public final class JdbcDbLockUtils {
                 // MySQL
                 || code == 1205
                 // PostgreSQL
-                || "55P03".equals(state);  
+                || "55P03".equals(state);
     }
-    
+
     // ===== helper methods =====
 
     private static void rollbackQuietly(Connection conn) {
@@ -111,8 +99,7 @@ public final class JdbcDbLockUtils {
         }
     }
 
-    private static void restoreAutoCommit(
-            Connection conn, Boolean originAutoCommit) {
+    private static void restoreAutoCommit(Connection conn, Boolean originAutoCommit) {
         if (conn != null && originAutoCommit != null) {
             try {
                 conn.setAutoCommit(originAutoCommit);

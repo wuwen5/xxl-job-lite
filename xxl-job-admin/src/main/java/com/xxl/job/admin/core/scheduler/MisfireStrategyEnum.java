@@ -27,13 +27,12 @@ public enum MisfireStrategyEnum {
         return title;
     }
 
-    public static MisfireStrategyEnum match(String name, MisfireStrategyEnum defaultItem){
-        for (MisfireStrategyEnum item: MisfireStrategyEnum.values()) {
+    public static MisfireStrategyEnum match(String name, MisfireStrategyEnum defaultItem) {
+        for (MisfireStrategyEnum item : MisfireStrategyEnum.values()) {
             if (item.name().equals(name)) {
                 return item;
             }
         }
         return defaultItem;
     }
-
 }

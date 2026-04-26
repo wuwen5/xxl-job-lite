@@ -2,9 +2,6 @@ package com.xxl.job.executor.sample.frameless.jobhandler;
 
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -13,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * XxlJob开发示例（Bean模式）
@@ -28,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 public class SampleXxlJob {
     private static Logger logger = LoggerFactory.getLogger(SampleXxlJob.class);
 
-
     /**
      * 1、简单任务示例（Bean模式）
      */
@@ -42,7 +40,6 @@ public class SampleXxlJob {
         }
         // default success
     }
-
 
     /**
      * 2、分片广播任务
@@ -64,9 +61,7 @@ public class SampleXxlJob {
                 XxlJobHelper.log("第 {} 片, 忽略", i);
             }
         }
-
     }
-
 
     /**
      * 3、命令行任务
@@ -84,7 +79,7 @@ public class SampleXxlJob {
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
-            //Process process = Runtime.getRuntime().exec(command);
+            // Process process = Runtime.getRuntime().exec(command);
 
             BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
             bufferedReader = new BufferedReader(new InputStreamReader(bufferedInputStream));
@@ -109,11 +104,9 @@ public class SampleXxlJob {
         if (exitValue == 0) {
             // default success
         } else {
-            XxlJobHelper.handleFail("command exit value("+exitValue+") is failed");
+            XxlJobHelper.handleFail("command exit value(" + exitValue + ") is failed");
         }
-
     }
-
 
     /**
      * 4、跨平台Http任务
@@ -127,8 +120,8 @@ public class SampleXxlJob {
 
         // param parse
         String param = XxlJobHelper.getJobParam();
-        if (param==null || param.trim().length()==0) {
-            XxlJobHelper.log("param["+ param +"] invalid.");
+        if (param == null || param.trim().length() == 0) {
+            XxlJobHelper.log("param[" + param + "] invalid.");
 
             XxlJobHelper.handleFail();
             return;
@@ -138,12 +131,15 @@ public class SampleXxlJob {
         String url = null;
         String method = null;
         String data = null;
-        for (String httpParam: httpParams) {
+        for (String httpParam : httpParams) {
             if (httpParam.startsWith("url:")) {
                 url = httpParam.substring(httpParam.indexOf("url:") + 4).trim();
             }
             if (httpParam.startsWith("method:")) {
-                method = httpParam.substring(httpParam.indexOf("method:") + 7).trim().toUpperCase();
+                method = httpParam
+                        .substring(httpParam.indexOf("method:") + 7)
+                        .trim()
+                        .toUpperCase();
             }
             if (httpParam.startsWith("data:")) {
                 data = httpParam.substring(httpParam.indexOf("data:") + 5).trim();
@@ -151,14 +147,14 @@ public class SampleXxlJob {
         }
 
         // param valid
-        if (url==null || url.trim().length()==0) {
-            XxlJobHelper.log("url["+ url +"] invalid.");
+        if (url == null || url.trim().length() == 0) {
+            XxlJobHelper.log("url[" + url + "] invalid.");
 
             XxlJobHelper.handleFail();
             return;
         }
-        if (method==null || !Arrays.asList("GET", "POST").contains(method)) {
-            XxlJobHelper.log("method["+ method +"] invalid.");
+        if (method == null || !Arrays.asList("GET", "POST").contains(method)) {
+            XxlJobHelper.log("method[" + method + "] invalid.");
 
             XxlJobHelper.handleFail();
             return;
@@ -188,7 +184,7 @@ public class SampleXxlJob {
             connection.connect();
 
             // data
-            if (isPostMethod && data!=null && data.trim().length()>0) {
+            if (isPostMethod && data != null && data.trim().length() > 0) {
                 DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream());
                 dataOutputStream.write(data.getBytes("UTF-8"));
                 dataOutputStream.flush();
@@ -230,7 +226,6 @@ public class SampleXxlJob {
                 XxlJobHelper.log(e2);
             }
         }
-
     }
 
     /**
@@ -240,12 +235,12 @@ public class SampleXxlJob {
     public void demoJobHandler2() throws Exception {
         XxlJobHelper.log("XXL-JOB, Hello World.");
     }
-    public void init(){
+
+    public void init() {
         logger.info("init");
     }
-    public void destroy(){
+
+    public void destroy() {
         logger.info("destroy");
     }
-
-
 }

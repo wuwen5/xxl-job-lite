@@ -3,7 +3,6 @@ package com.xxl.job.admin.core.route.strategy;
 import com.xxl.job.admin.core.route.ExecutorRouter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.biz.model.TriggerParam;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -17,41 +16,41 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ExecutorRouteLFU extends ExecutorRouter {
 
-    private static ConcurrentMap<Integer, HashMap<String, Integer>> jobLfuMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Integer, HashMap<String, Integer>> JOB_LFU_MAP = new ConcurrentHashMap<>();
     private static long CACHE_VALID_TIME = 0;
 
     public String route(int jobId, List<String> addressList) {
 
         // cache clear
         if (System.currentTimeMillis() > CACHE_VALID_TIME) {
-            jobLfuMap.clear();
-            CACHE_VALID_TIME = System.currentTimeMillis() + 1000*60*60*24;
+            JOB_LFU_MAP.clear();
+            CACHE_VALID_TIME = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
         }
 
         // lfu item init
         // Key排序可以用TreeMap+构造入参Compare；Value排序暂时只能通过ArrayList；
-        HashMap<String, Integer> lfuItemMap = jobLfuMap.get(jobId);     
+        HashMap<String, Integer> lfuItemMap = JOB_LFU_MAP.get(jobId);
         if (lfuItemMap == null) {
             // 避免重复覆盖
-            lfuItemMap = jobLfuMap.computeIfAbsent(jobId, HashMap::new);   
+            lfuItemMap = JOB_LFU_MAP.computeIfAbsent(jobId, HashMap::new);
         }
 
         // put new
-        for (String address: addressList) {
-            if (!lfuItemMap.containsKey(address) || lfuItemMap.get(address) >1000000 ) {
+        for (String address : addressList) {
+            if (!lfuItemMap.containsKey(address) || lfuItemMap.get(address) > 1000000) {
                 // 初始化时主动Random一次，缓解首次压力
-                lfuItemMap.put(address, new Random().nextInt(addressList.size()));  
+                lfuItemMap.put(address, new Random().nextInt(addressList.size()));
             }
         }
         // remove old
         List<String> delKeys = new ArrayList<>();
-        for (String existKey: lfuItemMap.keySet()) {
+        for (String existKey : lfuItemMap.keySet()) {
             if (!addressList.contains(existKey)) {
                 delKeys.add(existKey);
             }
         }
         if (!delKeys.isEmpty()) {
-            for (String delKey: delKeys) {
+            for (String delKey : delKeys) {
                 lfuItemMap.remove(delKey);
             }
         }
@@ -71,5 +70,4 @@ public class ExecutorRouteLFU extends ExecutorRouter {
         String address = route(triggerParam.getJobId(), addressList);
         return new ReturnT<>(address);
     }
-
 }

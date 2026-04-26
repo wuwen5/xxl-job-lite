@@ -20,5 +20,4 @@ public class ThrowableUtil {
         String errorMsg = stringWriter.toString();
         return errorMsg;
     }
-
 }

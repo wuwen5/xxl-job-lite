@@ -1,9 +1,8 @@
 package com.xxl.job.admin.core.model;
 
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Date;
 
 /**
  * xxl-job info
@@ -23,6 +22,7 @@ public class XxlJobInfo {
      * // 执行器主键ID
      */
     private int jobGroup;
+
     private String jobDesc;
 
     private Date addTime;
@@ -109,5 +109,4 @@ public class XxlJobInfo {
      * // 下次调度时间
      */
     private long triggerNextTime;
-
 }

@@ -1,5 +1,7 @@
 package com.xxl.job.admin.adminbiz;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
@@ -11,15 +13,12 @@ import com.xxl.job.core.biz.model.RegistryParam;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.context.XxlJobContext;
 import com.xxl.job.core.enums.RegistryConfig;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
 /**
  * admin api test
@@ -43,7 +42,7 @@ public class AdminBizTest extends AbstractTest {
     @Test
     public void callback() {
         AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
-        
+
         HandleCallbackParam param = new HandleCallbackParam();
         param.setLogId(1);
         param.setHandleCode(XxlJobContext.HANDLE_CODE_SUCCESS);
@@ -63,7 +62,8 @@ public class AdminBizTest extends AbstractTest {
     public void registry() {
         AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
 
-        RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
+        RegistryParam registryParam = new RegistryParam(
+                RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
         ReturnT<String> returnT = adminBiz.registry(registryParam);
 
         assertEquals(ReturnT.SUCCESS_CODE, returnT.getCode());
@@ -77,11 +77,11 @@ public class AdminBizTest extends AbstractTest {
     public void registryRemove() {
         AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
 
-        RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
+        RegistryParam registryParam = new RegistryParam(
+                RegistryConfig.RegistType.EXECUTOR.name(), "xxl-job-executor-example", "127.0.0.1:9999");
         ReturnT<String> returnT = adminBiz.registryRemove(registryParam);
 
         assertEquals(ReturnT.SUCCESS_CODE, returnT.getCode());
-
     }
 
     @Test
@@ -89,7 +89,8 @@ public class AdminBizTest extends AbstractTest {
         AdminBiz adminBiz = new AdminBizClient(String.format(addressUrl, port()), accessToken, timeoutSecond);
 
         List<JobInfoParam> jobInfoParamList = new ArrayList<>();
-        jobInfoParamList.add(new JobInfoParam("xxl-job-executor-example", "测试", "demoJobHandler", "", "0/5 * * * * ?", -1));
+        jobInfoParamList.add(
+                new JobInfoParam("xxl-job-executor-example", "测试", "demoJobHandler", "", "0/5 * * * * ?", -1));
         JobExecutorInitParam initParam = new JobExecutorInitParam();
         initParam.setJobExecutorParam(new JobExecutorParam("xxl-job-executor-example", "测试执行器"));
         initParam.setJobInfoParamList(jobInfoParamList);
@@ -97,5 +98,4 @@ public class AdminBizTest extends AbstractTest {
 
         assertEquals(ReturnT.SUCCESS_CODE, returnT.getCode());
     }
-
 }

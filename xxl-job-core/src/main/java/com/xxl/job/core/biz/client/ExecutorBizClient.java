@@ -11,8 +11,8 @@ import com.xxl.job.core.util.XxlJobRemotingUtil;
  */
 public class ExecutorBizClient implements ExecutorBiz {
 
-    public ExecutorBizClient() {
-    }
+    public ExecutorBizClient() {}
+
     public ExecutorBizClient(String addressUrl, String accessToken, int timeout) {
         this.addressUrl = addressUrl;
         this.accessToken = accessToken;
@@ -22,24 +22,23 @@ public class ExecutorBizClient implements ExecutorBiz {
         if (!this.addressUrl.endsWith("/")) {
             this.addressUrl = this.addressUrl + "/";
         }
-        if (!(this.timeout >=1 && this.timeout <= 10)) {
+        if (!(this.timeout >= 1 && this.timeout <= 10)) {
             this.timeout = 3;
         }
     }
 
-    private String addressUrl ;
+    private String addressUrl;
     private String accessToken;
     private int timeout;
 
-
     @Override
     public ReturnT<String> beat() {
-        return XxlJobRemotingUtil.postBody(addressUrl+"beat", accessToken, timeout, "", String.class);
+        return XxlJobRemotingUtil.postBody(addressUrl + "beat", accessToken, timeout, "", String.class);
     }
 
     @Override
-    public ReturnT<String> idleBeat(IdleBeatParam idleBeatParam){
-        return XxlJobRemotingUtil.postBody(addressUrl+"idleBeat", accessToken, timeout, idleBeatParam, String.class);
+    public ReturnT<String> idleBeat(IdleBeatParam idleBeatParam) {
+        return XxlJobRemotingUtil.postBody(addressUrl + "idleBeat", accessToken, timeout, idleBeatParam, String.class);
     }
 
     @Override
@@ -56,5 +55,4 @@ public class ExecutorBizClient implements ExecutorBiz {
     public ReturnT<LogResult> log(LogParam logParam) {
         return XxlJobRemotingUtil.postBody(addressUrl + "log", accessToken, timeout, logParam, LogResult.class);
     }
-
 }

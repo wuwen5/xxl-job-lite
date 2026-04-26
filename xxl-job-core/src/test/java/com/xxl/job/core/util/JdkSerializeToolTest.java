@@ -1,12 +1,11 @@
 package com.xxl.job.core.util;
 
-import com.xxl.job.core.biz.model.HandleCallbackParam;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
+import com.xxl.job.core.biz.model.HandleCallbackParam;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author wuwen
@@ -20,7 +19,7 @@ class JdkSerializeToolTest {
         byte[] serialize = JdkSerializeTool.serialize(list);
 
         Object deserialize = JdkSerializeTool.deserialize(serialize, List.class);
-        
+
         assertEquals(list.getClass(), deserialize.getClass());
     }
 }

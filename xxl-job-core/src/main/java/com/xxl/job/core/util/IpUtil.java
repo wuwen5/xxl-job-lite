@@ -1,8 +1,5 @@
 package com.xxl.job.core.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -10,6 +7,8 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ip tool
@@ -22,8 +21,6 @@ public class IpUtil {
     private static final String ANYHOST_VALUE = "0.0.0.0";
     private static final String LOCALHOST_VALUE = "127.0.0.1";
     private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
-
-
 
     private static volatile InetAddress LOCAL_ADDRESS = null;
 
@@ -64,7 +61,6 @@ public class IpUtil {
         return result;
     }
 
-
     /**
      * normalize the ipv6 Address, convert scope name to scope id.
      * e.g.
@@ -95,7 +91,6 @@ public class IpUtil {
 
     // ---------------------- find ip ----------------------
 
-
     private static InetAddress getLocalAddress0() {
         InetAddress localAddress = null;
         try {
@@ -125,7 +120,7 @@ public class IpUtil {
                             InetAddress addressItem = toValidAddress(addresses.nextElement());
                             if (addressItem != null) {
                                 try {
-                                    if(addressItem.isReachable(100)){
+                                    if (addressItem.isReachable(100)) {
                                         return addressItem;
                                     }
                                 } catch (IOException e) {
@@ -145,7 +140,6 @@ public class IpUtil {
         }
         return localAddress;
     }
-
 
     // ---------------------- tool ----------------------
 
@@ -168,7 +162,7 @@ public class IpUtil {
      *
      * @return String
      */
-    public static String getIp(){
+    public static String getIp() {
         return getLocalAddress().getHostAddress();
     }
 
@@ -178,26 +172,24 @@ public class IpUtil {
      * @param port
      * @return String
      */
-    public static String getIpPort(int port){
+    public static String getIpPort(int port) {
         String ip = getIp();
         return getIpPort(ip, port);
     }
 
-    public static String getIpPort(String ip, int port){
-        if (ip==null) {
+    public static String getIpPort(String ip, int port) {
+        if (ip == null) {
             return null;
         }
         return ip.concat(":").concat(String.valueOf(port));
     }
 
-    public static Object[] parseIpPort(String address){
+    public static Object[] parseIpPort(String address) {
         String[] array = address.split(":");
 
         String host = array[0];
         int port = Integer.parseInt(array[1]);
 
-        return new Object[]{host, port};
+        return new Object[] {host, port};
     }
-
-
 }

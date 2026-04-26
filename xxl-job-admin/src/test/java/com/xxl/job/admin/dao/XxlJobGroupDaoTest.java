@@ -2,11 +2,10 @@ package com.xxl.job.admin.dao;
 
 import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.admin.core.model.XxlJobGroup;
-import org.junit.jupiter.api.Test;
-
 import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 public class XxlJobGroupDaoTest extends AbstractTest {
 
@@ -14,7 +13,7 @@ public class XxlJobGroupDaoTest extends AbstractTest {
     private XxlJobGroupDao xxlJobGroupDao;
 
     @Test
-    public void test(){
+    public void test() {
         List<XxlJobGroup> list = xxlJobGroupDao.findAll();
 
         List<XxlJobGroup> list2 = xxlJobGroupDao.findByAddressType(0);
@@ -39,5 +38,4 @@ public class XxlJobGroupDaoTest extends AbstractTest {
 
         int ret3 = xxlJobGroupDao.remove(group.getId());
     }
-
 }

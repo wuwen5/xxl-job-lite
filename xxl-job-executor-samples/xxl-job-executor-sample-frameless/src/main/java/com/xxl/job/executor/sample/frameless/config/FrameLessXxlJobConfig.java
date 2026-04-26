@@ -1,15 +1,14 @@
 package com.xxl.job.executor.sample.frameless.config;
 
-import com.xxl.job.executor.sample.frameless.jobhandler.SampleXxlJob;
 import com.xxl.job.core.executor.impl.XxlJobSimpleExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.xxl.job.executor.sample.frameless.jobhandler.SampleXxlJob;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author xuxueli 2018-10-31 19:05:43
@@ -17,12 +16,11 @@ import java.util.Properties;
 public class FrameLessXxlJobConfig {
     private static Logger logger = LoggerFactory.getLogger(FrameLessXxlJobConfig.class);
 
-
     private static FrameLessXxlJobConfig instance = new FrameLessXxlJobConfig();
+
     public static FrameLessXxlJobConfig getInstance() {
         return instance;
     }
-
 
     private XxlJobSimpleExecutor xxlJobExecutor = null;
 
@@ -44,7 +42,8 @@ public class FrameLessXxlJobConfig {
         xxlJobExecutor.setIp(xxlJobProp.getProperty("xxl.job.executor.ip"));
         xxlJobExecutor.setPort(Integer.parseInt(xxlJobProp.getProperty("xxl.job.executor.port")));
         xxlJobExecutor.setLogPath(xxlJobProp.getProperty("xxl.job.executor.logpath"));
-        xxlJobExecutor.setLogRetentionDays(Integer.parseInt(xxlJobProp.getProperty("xxl.job.executor.logretentiondays")));
+        xxlJobExecutor.setLogRetentionDays(
+                Integer.parseInt(xxlJobProp.getProperty("xxl.job.executor.logretentiondays")));
 
         // registry job bean
         xxlJobExecutor.setXxlJobBeanList(Arrays.asList(new SampleXxlJob()));
@@ -66,10 +65,10 @@ public class FrameLessXxlJobConfig {
         }
     }
 
-
     public static Properties loadProperties(String propertyFileName) {
         ClassLoader loder = Thread.currentThread().getContextClassLoader();
-        try (InputStreamReader in = new InputStreamReader(loder.getResourceAsStream(propertyFileName), StandardCharsets.UTF_8)) {
+        try (InputStreamReader in =
+                new InputStreamReader(loder.getResourceAsStream(propertyFileName), StandardCharsets.UTF_8)) {
             Properties prop = new Properties();
             prop.load(in);
             return prop;
@@ -78,5 +77,4 @@ public class FrameLessXxlJobConfig {
         }
         return null;
     }
-
 }

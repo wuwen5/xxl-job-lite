@@ -1,235 +1,270 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.wuwen5.xxl-job</groupId>
-	<artifactId>xxl-job-lite</artifactId>
-	<version>2.5.3-SNAPSHOT</version>
-	<packaging>pom</packaging>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.github.wuwen5.xxl-job</groupId>
+  <artifactId>xxl-job-lite</artifactId>
+  <version>2.5.3-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-	<name>${project.artifactId}</name>
-	<description>A distributed task scheduling framework.</description>
+  <name>${project.artifactId}</name>
+  <description>A distributed task scheduling framework.</description>
+  <url>https://github.com/wuwen5/xxl-job-lite</url>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License version 3</name>
+      <url>https://opensource.org/licenses/GPL-3.0</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>XXL</id>
+      <name>xuxueli</name>
+      <email>931591021@qq.com</email>
+      <url>https://github.com/xuxueli</url>
+    </developer>
+    <developer>
+      <name>Wen Wu</name>
+      <email>wuwen.55@aliyun.com</email>
+      <url>https://github.com/wuwen5</url>
+    </developer>
+  </developers>
+
+  <modules>
+    <module>xxl-job-core</module>
+    <module>xxl-job-admin</module>
+    <module>xxl-job-executor-samples</module>
+  </modules>
+
+  <scm>
+    <connection>scm:git:${git.url}</connection>
+    <developerConnection>scm:git:${git.url}</developerConnection>
+    <tag>HEAD</tag>
     <url>https://github.com/wuwen5/xxl-job-lite</url>
+  </scm>
 
-	<modules>
-		<module>xxl-job-core</module>
-		<module>xxl-job-admin</module>
-		<module>xxl-job-executor-samples</module>
-    </modules>
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/wuwen5/xxl-job-lite/issues</url>
+  </issueManagement>
+  <ciManagement>
+    <system>GitHub Actions</system>
+    <url>https://github.com/wuwen5/xxl-job-lite/actions</url>
+  </ciManagement>
 
-	<properties>
-        <git.url>https://github.com/wuwen5/xxl-job-lite.git</git.url>
-        
-		<!-- env -->
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<!-- plugin -->
-		<maven-source-plugin.version>3.4.0</maven-source-plugin.version>
-		<maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
-		<maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
-        <sonar.plugin>5.5.0.6356</sonar.plugin>
-        <sonar.organization>wuwen5</sonar.organization>
-        <sonar.inclusions>xxl-job-core/src/main/java/**,xxl-job-admin/src/main/java/**</sonar.inclusions>
-        <skip_maven_deploy>false</skip_maven_deploy>
-        
-        <argLine />
-        
-		<!-- base -->
-		<javax.annotation-api.version>1.3.2</javax.annotation-api.version>
-		<!-- net -->
-		<netty.version>4.1.116.Final</netty.version>
-		<gson.version>2.11.0</gson.version>
-		<!-- spring -->
-		<spring.version>5.3.39</spring.version>
-		<!-- dynamic language -->
-		<groovy.version>4.0.24</groovy.version>
-	</properties>
-    
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>${maven-release-plugin.version}</version>
-                </plugin>
-                
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven-surefire-plugin.version}</version>
-                    <configuration>
-                        <argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
-                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                        <systemPropertyVariables>
-                            <allure.results.directory>../target/allure-results</allure.results.directory>
-                        </systemPropertyVariables>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven-source-plugin.version}</version>
-                </plugin>
+  <properties>
+    <git.url>https://github.com/wuwen5/xxl-job-lite.git</git.url>
 
-                <plugin>
-                    <!-- plugin docs: http://eclemma.org/jacoco/trunk/doc/ -->
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco-maven-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>default-prepare-agent</id>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>default-report</id>
-                            <phase>test</phase>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>${maven-javadoc-plugin.version}</version>
-                    <configuration>
-                        <source>8</source>
-                        <show>protected</show>
-                        <charset>UTF-8</charset>
-                        <encoding>UTF-8</encoding>
-                        <docencoding>UTF-8</docencoding>
-                        <doclint>none</doclint>
-                        <failOnError>true</failOnError>
-                        <includeDependencySources>false</includeDependencySources>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.4</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>${maven-gpg-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonarsource.scanner.maven</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                    <version>${sonar.plugin}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+    <!-- env -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+    <java.version>1.8</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <!-- plugin -->
+    <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+    <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+    <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
+    <sonar.plugin>5.5.0.6356</sonar.plugin>
+    <sonar.organization>wuwen5</sonar.organization>
+    <sonar.inclusions>xxl-job-core/src/main/java/**,xxl-job-admin/src/main/java/**</sonar.inclusions>
+    <skip_maven_deploy>false</skip_maven_deploy>
+    <spotless-maven-plugin.version>2.46.1</spotless-maven-plugin.version>
+    <spotless.action>check</spotless.action>
+    <palantirJavaFormat.version>2.38.0</palantirJavaFormat.version>
+
+    <argLine />
+
+    <!-- base -->
+    <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
+    <!-- net -->
+    <netty.version>4.1.116.Final</netty.version>
+    <gson.version>2.11.0</gson.version>
+    <!-- spring -->
+    <spring.version>5.3.39</spring.version>
+    <!-- dynamic language -->
+    <groovy.version>4.0.24</groovy.version>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${maven-release-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+          <configuration>
+            <argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <systemPropertyVariables>
+              <allure.results.directory>../target/allure-results</allure.results.directory>
+            </systemPropertyVariables>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${maven-source-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <!-- plugin docs: http://eclemma.org/jacoco/trunk/doc/ -->
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>default-prepare-agent</id>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>default-report</id>
+              <goals>
+                <goal>report</goal>
+              </goals>
+              <phase>test</phase>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+          <configuration>
+            <source>8</source>
+            <show>protected</show>
+            <charset>UTF-8</charset>
+            <encoding>UTF-8</encoding>
+            <docencoding>UTF-8</docencoding>
+            <doclint>none</doclint>
+            <failOnError>true</failOnError>
+            <includeDependencySources>false</includeDependencySources>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>3.1.4</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>${maven-gpg-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>${sonar.plugin}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless-maven-plugin.version}</version>
+        <configuration>
+          <java>
+            <excludes>
+              <exclude>**/generated-sources/**</exclude>
+            </excludes>
+            <palantirJavaFormat>
+              <version>${palantirJavaFormat.version}</version>
+            </palantirJavaFormat>
+            <removeUnusedImports />
+          </java>
+          <pom>
+            <sortPom>
+              <expandEmptyElements>false</expandEmptyElements>
+              <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
+            </sortPom>
+          </pom>
+          <upToDateChecking>
+            <enabled>true</enabled>
+          </upToDateChecking>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>${spotless.action}</goal>
+            </goals>
+            <phase>process-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+
+    <profile>
+      <id>release</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <modules>
+        <module>xxl-job-core</module>
+      </modules>
+      <properties>
+        <gpg.skip>false</gpg.skip>
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+        <maven.test.skip>true</maven.test.skip>
+      </properties>
+      <build>
         <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-            </plugin>
+          <!-- GPG -->
+          <plugin>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <configuration>
+              <useAgent>false</useAgent>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.10.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <skipPublishing>${skip_maven_deploy}</skipPublishing>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+              <skip>${skip_maven_deploy}</skip>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-source-plugin</artifactId>
+          </plugin>
         </plugins>
-	</build>
-
-
-	<licenses>
-		<license>
-			<name>GNU General Public License version 3</name>
-			<url>https://opensource.org/licenses/GPL-3.0</url>
-		</license>
-	</licenses>
-
-	<scm>
-        <tag>HEAD</tag>
-		<url>https://github.com/wuwen5/xxl-job-lite</url>
-        <connection>scm:git:${git.url}</connection>
-        <developerConnection>scm:git:${git.url}</developerConnection>
-	</scm>
-
-    <issueManagement>
-        <system>GitHub Issues</system>
-        <url>https://github.com/wuwen5/xxl-job-lite/issues</url>
-    </issueManagement>
-    <ciManagement>
-        <system>GitHub Actions</system>
-        <url>https://github.com/wuwen5/xxl-job-lite/actions</url>
-    </ciManagement>
-    
-	<developers>
-		<developer>
-			<id>XXL</id>
-			<name>xuxueli</name>
-			<email>931591021@qq.com</email>
-			<url>https://github.com/xuxueli</url>
-		</developer>
-        <developer>
-            <name>Wen Wu</name>
-            <email>wuwen.55@aliyun.com</email>
-            <url>https://github.com/wuwen5</url>
-        </developer>
-	</developers>
-
-	<profiles>
-
-		<profile>
-			<id>release</id>
-			<activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-			</activation>
-			<modules>
-				<module>xxl-job-core</module>
-			</modules>
-            <properties>
-                <gpg.skip>false</gpg.skip>
-                <maven.javadoc.skip>false</maven.javadoc.skip>
-                <maven.test.skip>true</maven.test.skip>
-            </properties>
-			<build>
-				<plugins>
-					<!-- GPG -->
-                    <plugin>
-                        <artifactId>maven-gpg-plugin</artifactId>
-						<configuration>
-							<useAgent>false</useAgent>
-						</configuration>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.central</groupId>
-                        <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.10.0</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <publishingServerId>central</publishingServerId>
-                            <skipPublishing>${skip_maven_deploy}</skipPublishing>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-deploy-plugin</artifactId>
-                        <configuration>
-                            <skip>${skip_maven_deploy}</skip>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-source-plugin</artifactId>
-                    </plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
