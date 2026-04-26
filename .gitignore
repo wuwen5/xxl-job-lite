@@ -7,3 +7,7 @@ target/
 .gitattributes
 *.log
 logs/
+
+e2e/node_modules
+e2e/playwright-report
+e2e/test-results

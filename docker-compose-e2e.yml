@@ -11,32 +11,17 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+    volumes:
+      - ./doc/db/tables_xxl_job.sql:/docker-entrypoint-initdb.d/tables_xxl_job.sql:ro
     ports:
       - "3306:3306"
       - "33060:33060"
     networks:
       - xxl-job-network
-  init-db:
-    image: gcr.io/ml-pipeline/mysql:8.0.26
+  xxl-job-admin:
     depends_on:
       mysql:
         condition: service_healthy
-    environment:
-      MYSQL_PWD: root_pwd
-    volumes:
-      - ./doc/db/tables_xxl_job.sql:/docker-entrypoint-initdb.d/tables_xxl_job.sql:ro
-    command:
-      - sh
-      - -c
-      - |
-        mysql -hmysql -uroot < /docker-entrypoint-initdb.d/tables_xxl_job.sql
-    restart: "no"
-    networks:
-      - xxl-job-network
-  xxl-job-admin:
-    depends_on:
-      init-db:
-        condition: service_completed_successfully
     build:
       context: xxl-job-admin/
       dockerfile: Dockerfile
@@ -66,7 +51,27 @@ services:
       dockerfile: Dockerfile
       no_cache: true
     environment:
+      SERVER_PORT: 8081
       XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://127.0.0.1:8081 | grep -q 'running'" ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - xxl-job-network
+
+  e2e-tests:
+    image: mcr.microsoft.com/playwright:v1.44.0-jammy
+    volumes:
+      - ./e2e:/e2e
+    working_dir: /e2e
+    command: bash -c "npm install && npx playwright test"
+    depends_on:
+      xxl-job-admin:
+        condition: service_healthy
+      executor-sample:
+        condition: service_healthy
     networks:
       - xxl-job-network
 
