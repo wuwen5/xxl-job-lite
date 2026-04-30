@@ -1,16 +1,15 @@
 package com.xxl.job.core.glue;
 
 import com.xxl.job.core.handler.IJobHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * glue factory, product class/object by name
  *
  * @author xuxueli 2016-1-2 20:02:27
  */
+@Slf4j
 public class GlueFactory {
-    private static final Logger logger = LoggerFactory.getLogger(GlueFactory.class);
 
     private static final String GROOVY_CLASS_LOADER_CLASS = "groovy.lang.GroovyClassLoader";
     private static final String GROOVY_GLUE_FACTORY_CLASS = "com.xxl.job.core.glue.impl.GroovyGlueFactory";
@@ -36,12 +35,13 @@ public class GlueFactory {
             try {
                 return (GlueFactory)
                         Class.forName(className).getDeclaredConstructor().newInstance();
-            } catch (Exception e) {
-                logger.warn(
+            } catch (Exception | LinkageError e) {
+                log.warn(
                         ">>>>>>>>>>> xxl-job, failed to create Groovy-capable GlueFactory [{}], "
                                 + "falling back to base factory. Cause: {}",
                         className,
-                        e.getMessage());
+                        e.getMessage(),
+                        e);
             }
         }
         return new GlueFactory();
@@ -57,7 +57,7 @@ public class GlueFactory {
         } catch (ClassNotFoundException e) {
             return false;
         } catch (LinkageError e) {
-            logger.warn(
+            log.warn(
                     ">>>>>>>>>>> xxl-job, Groovy detected but not usable; falling back to base factory. Cause: {}",
                     e.getMessage());
             return false;

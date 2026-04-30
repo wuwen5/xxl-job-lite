@@ -4,11 +4,11 @@ import com.xxl.job.core.glue.GlueFactory;
 import com.xxl.job.core.handler.IJobHandler;
 import groovy.lang.GroovyClassLoader;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Groovy-backed GlueFactory implementation.
@@ -16,22 +16,28 @@ import org.slf4j.LoggerFactory;
  *
  * @author xuxueli 2016-1-2 20:02:27
  */
+@Slf4j
 public class GroovyGlueFactory extends GlueFactory {
-    private static final Logger logger = LoggerFactory.getLogger(GroovyGlueFactory.class);
 
     /**
      * groovy class loader
      */
-    private GroovyClassLoader groovyClassLoader = new GroovyClassLoader();
+    private final GroovyClassLoader groovyClassLoader = new GroovyClassLoader();
 
-    private ConcurrentMap<String, Class<?>> CLASS_CACHE = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Class<?>> classCache = new ConcurrentHashMap<>();
 
     /**
-     * load new instance, prototype
+     * Load a new {@link IJobHandler} instance from the given Groovy source code.
      *
-     * @param codeSource
-     * @return
-     * @throws Exception
+     * <p>The source is compiled via {@link GroovyClassLoader}, with compiled classes cached by the
+     * MD5 hash of the source to avoid redundant recompilation. The resulting instance is injected
+     * with any required services before being returned.
+     *
+     * @param codeSource the Groovy source code of the job handler; must not be {@code null} or blank
+     * @return a freshly created {@link IJobHandler} instance
+     * @throws IllegalArgumentException if the source is blank, the compiled class cannot be
+     *     instantiated as an {@link IJobHandler}, or the compiled class is {@code null}
+     * @throws Exception if compilation or instantiation fails
      */
     @Override
     public IJobHandler loadNewInstance(String codeSource) throws Exception {
@@ -54,16 +60,12 @@ public class GroovyGlueFactory extends GlueFactory {
     private Class<?> getCodeSourceClass(String codeSource) {
         try {
             // md5
-            byte[] md5 = MessageDigest.getInstance("MD5").digest(codeSource.getBytes());
+            byte[] md5 = MessageDigest.getInstance("MD5").digest(codeSource.getBytes(StandardCharsets.UTF_8));
             String md5Str = new BigInteger(1, md5).toString(16);
 
-            Class<?> clazz = CLASS_CACHE.get(md5Str);
-            if (clazz == null) {
-                clazz = CLASS_CACHE.computeIfAbsent(md5Str, key -> groovyClassLoader.parseClass(codeSource));
-            }
-            return clazz;
+            return classCache.computeIfAbsent(md5Str, key -> groovyClassLoader.parseClass(codeSource));
         } catch (Exception e) {
-            logger.warn(
+            log.warn(
                     ">>>>>>>>>>> xxl-job, getCodeSourceClass md5 caching failed, parsing directly. Cause: {}",
                     e.getMessage());
             return groovyClassLoader.parseClass(codeSource);

@@ -4,21 +4,30 @@ import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import javax.annotation.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.AnnotationUtils;
 
 /**
+ * Spring-aware GlueFactory that extends {@link GroovyGlueFactory} to additionally inject Spring
+ * beans into Groovy job handler instances after compilation.
+ *
  * @author xuxueli 2018-11-01
  */
+@Slf4j
 public class SpringGlueFactory extends GroovyGlueFactory {
-    private static Logger logger = LoggerFactory.getLogger(SpringGlueFactory.class);
 
     /**
-     * inject action of spring
-     * @param instance
+     * Inject Spring-managed beans into the fields of the given Groovy job handler instance.
+     *
+     * <p>Fields annotated with {@link Resource} are resolved by bean name (using the field name as
+     * a fallback), then by type. Fields annotated with {@link Autowired} are resolved by type,
+     * optionally qualified via {@link Qualifier}. Fields that cannot be resolved are silently
+     * skipped.
+     *
+     * @param instance the job handler instance whose fields are to be injected; ignored if
+     *     {@code null} or if no Spring {@code ApplicationContext} is available
      */
     @Override
     public void injectService(Object instance) {
@@ -69,9 +78,9 @@ public class SpringGlueFactory extends GroovyGlueFactory {
                 try {
                     field.set(instance, fieldBean);
                 } catch (IllegalArgumentException e) {
-                    logger.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 } catch (IllegalAccessException e) {
-                    logger.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }
