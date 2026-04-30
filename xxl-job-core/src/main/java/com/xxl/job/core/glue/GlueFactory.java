@@ -56,6 +56,11 @@ public class GlueFactory {
             return true;
         } catch (ClassNotFoundException e) {
             return false;
+        } catch (LinkageError e) {
+            logger.warn(
+                    ">>>>>>>>>>> xxl-job, Groovy detected but not usable; falling back to base factory. Cause: {}",
+                    e.getMessage());
+            return false;
         }
     }
 
