@@ -1,7 +1,6 @@
 package com.xxl.job.core.glue.impl;
 
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
-import com.xxl.job.core.glue.GlueFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import javax.annotation.Resource;
@@ -14,7 +13,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 /**
  * @author xuxueli 2018-11-01
  */
-public class SpringGlueFactory extends GlueFactory {
+public class SpringGlueFactory extends GroovyGlueFactory {
     private static Logger logger = LoggerFactory.getLogger(SpringGlueFactory.class);
 
     /**
