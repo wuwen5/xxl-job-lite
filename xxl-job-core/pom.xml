@@ -50,11 +50,12 @@
     </dependency>
 
     <!-- ********************** plugin ********************** -->
-    <!-- groovy-all -->
+    <!-- groovy-all (optional: only needed for GLUE(Groovy) jobs) -->
     <dependency>
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy</artifactId>
       <version>${groovy.version}</version>
+      <optional>true</optional>
     </dependency>
 
     <!-- spring-context -->
