@@ -74,7 +74,7 @@
     <sonar.organization>wuwen5</sonar.organization>
     <sonar.inclusions>xxl-job-core/src/main/java/**,xxl-job-admin/src/main/java/**</sonar.inclusions>
     <skip_maven_deploy>false</skip_maven_deploy>
-    <spotless-maven-plugin.version>2.46.1</spotless-maven-plugin.version>
+    <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
     <spotless.action>check</spotless.action>
     <palantirJavaFormat.version>2.38.0</palantirJavaFormat.version>
 
