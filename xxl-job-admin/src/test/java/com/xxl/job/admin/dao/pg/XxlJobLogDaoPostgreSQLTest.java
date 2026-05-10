@@ -15,7 +15,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -37,8 +36,6 @@ public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
     }
 
     @Test
-    @Disabled(
-            "PostgreSQL mapper SQL issue: pageList uses MySQL-style LIMIT offset,pagesize, to be fixed in follow-up PR")
     void pageList_withFilters() {
         Instant now = Instant.now();
         long log1 = insertLog(1, 1, now.minus(40, ChronoUnit.MINUTES), 200, 200, 0, "addr-1");
@@ -57,8 +54,8 @@ public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
                 10,
                 0,
                 0,
-                Date.from(now.minus(35, ChronoUnit.MINUTES)),
-                Date.from(now.minus(15, ChronoUnit.MINUTES)),
+                Date.from(now.minus(45, ChronoUnit.MINUTES)),
+                Date.from(now.minus(25, ChronoUnit.MINUTES)),
                 0);
         assertEquals(2, byTime.size());
         assertTrue(byTime.stream().anyMatch(log -> log.getId() == log1));

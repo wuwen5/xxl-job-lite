@@ -21,7 +21,7 @@
         t.update_time <![CDATA[ < ]]> #{nowTime} + numtodsinterval(-#{timeout},'SECOND')
     </sql>
     <sql id="Timeout_Condition_Dead" databaseId="PostgreSQL">
-        t.update_time <![CDATA[ < ]]> #{nowTime} + numtodsinterval(-#{timeout},'SECOND')
+        t.update_time <![CDATA[ < ]]> #{nowTime}::timestamp - #{timeout} * interval '1 second'
     </sql>
     <sql id="Timeout_Condition_Dead" databaseId="H2">
         t.update_time <![CDATA[ < ]]> DATEADD('SECOND', -#{timeout}, #{nowTime})

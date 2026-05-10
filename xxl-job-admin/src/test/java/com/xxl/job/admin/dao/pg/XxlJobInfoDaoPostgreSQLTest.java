@@ -12,7 +12,6 @@ import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -30,8 +29,6 @@ public class XxlJobInfoDaoPostgreSQLTest extends AbstractPostgreSQLTest {
     }
 
     @Test
-    @Disabled(
-            "PostgreSQL mapper SQL issue: pageList uses MySQL-style LIMIT offset,pagesize, to be fixed in follow-up PR")
     void pageList_withDynamicFilters() {
         insertJobInfo(1, "alpha-desc", "handlerAlpha", "alice", 1, 1000L);
         insertJobInfo(1, "beta-desc", "handlerBeta", "bob", 0, 2000L);

@@ -12,25 +12,65 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface XxlJobRegistryDao {
 
-    public List<Integer> findDead(@Param("timeout") int timeout, @Param("nowTime") Date nowTime);
+    /**
+     * find dead registry id list
+     * @param timeout timeout seconds, registry update time before now minus timeout is dead
+     * @param nowTime current time
+     * @return dead registry id list
+     */
+    List<Integer> findDead(@Param("timeout") int timeout, @Param("nowTime") Date nowTime);
 
-    public int removeDead(@Param("ids") List<Integer> ids);
+    /**
+     * delete dead registry
+     * @param ids dead registry id list
+     * @return delete count
+     */
+    int removeDead(@Param("ids") List<Integer> ids);
 
-    public List<XxlJobRegistry> findAll(@Param("timeout") int timeout, @Param("nowTime") Date nowTime);
+    /**
+     * find alive registry list
+     * @param timeout timeout seconds, registry update time before now minus timeout is dead
+     * @param nowTime current time
+     * @return alive registry list
+     */
+    List<XxlJobRegistry> findAll(@Param("timeout") int timeout, @Param("nowTime") Date nowTime);
 
-    public int registryUpdate(
+    /**
+     * registry update
+     * @param registryGroup registry group
+     * @param registryKey registry key
+     * @param registryValue registry value
+     * @param updateTime update time
+     * @return update count
+     */
+    int registryUpdate(
             @Param("registryGroup") String registryGroup,
             @Param("registryKey") String registryKey,
             @Param("registryValue") String registryValue,
             @Param("updateTime") Date updateTime);
 
-    public int registrySave(
+    /**
+     * registry save
+     * @param registryGroup registry group
+     * @param registryKey registry key
+     * @param registryValue registry value
+     * @param updateTime update time
+     * @return insert count
+     */
+    int registrySave(
             @Param("registryGroup") String registryGroup,
             @Param("registryKey") String registryKey,
             @Param("registryValue") String registryValue,
             @Param("updateTime") Date updateTime);
 
-    public int registryDelete(
+    /**
+     * registry delete
+     * @param registryGroup registry group
+     * @param registryKey registry key
+     * @param registryValue registry value
+     * @return delete count
+     */
+    int registryDelete(
             @Param("registryGroup") String registryGroup,
             @Param("registryKey") String registryKey,
             @Param("registryValue") String registryValue);
