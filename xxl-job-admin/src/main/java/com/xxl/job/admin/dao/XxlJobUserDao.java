@@ -28,8 +28,12 @@ public interface XxlJobUserDao {
 
     /**
      * Counts the total number of job users matching criteria.
-     * @param offset starting offset
-     * @param pagesize page size
+     * <p>
+     * Note: {@code offset} and {@code pagesize} are not applied by the underlying SQL — they are
+     * accepted only to keep this method's signature consistent with {@link #pageList}.
+     * </p>
+     * @param offset ignored — kept for signature consistency with {@link #pageList}
+     * @param pagesize ignored — kept for signature consistency with {@link #pageList}
      * @param username username filter
      * @param role role filter
      * @return count of users

@@ -16,13 +16,18 @@ public interface XxlJobLogDao {
 
     /**
      * Retrieves a paginated list of job logs.
-     * @param offset starting offset
-     * @param pagesize page size
-     * @param jobGroup job group ID
-     * @param jobId job ID
-     * @param triggerTimeStart start trigger time
-     * @param triggerTimeEnd end trigger time
-     * @param logStatus log status
+     * <p>
+     * Filtering precedence: when {@code jobId > 0} the query filters by {@code jobId} alone and
+     * {@code jobGroup} is ignored; when {@code jobId == 0} and {@code jobGroup > 0} the query
+     * filters by {@code jobGroup} instead.
+     * </p>
+     * @param offset starting offset for pagination
+     * @param pagesize page size for pagination
+     * @param jobGroup job group ID (used only when {@code jobId == 0} and {@code jobGroup > 0})
+     * @param jobId job ID; use {@code 0} as a sentinel to fall back to {@code jobGroup} filtering
+     * @param triggerTimeStart start trigger time (inclusive), or {@code null} to skip
+     * @param triggerTimeEnd end trigger time (inclusive), or {@code null} to skip
+     * @param logStatus log status filter
      * @return list of XxlJobLog
      */
     List<XxlJobLog> pageList(
@@ -36,13 +41,18 @@ public interface XxlJobLogDao {
 
     /**
      * Counts the total number of job logs matching criteria.
-     * @param offset starting offset
-     * @param pagesize page size
-     * @param jobGroup job group ID
-     * @param jobId job ID
-     * @param triggerTimeStart start trigger time
-     * @param triggerTimeEnd end trigger time
-     * @param logStatus log status
+     * <p>
+     * Note: {@code offset} and {@code pagesize} are not applied by the underlying SQL — they are
+     * accepted only to keep this method's signature consistent with {@link #pageList}. The same
+     * {@code jobId}/{@code jobGroup} precedence rules as {@link #pageList} apply here.
+     * </p>
+     * @param offset ignored — kept for signature consistency with {@link #pageList}
+     * @param pagesize ignored — kept for signature consistency with {@link #pageList}
+     * @param jobGroup job group ID (used only when {@code jobId == 0} and {@code jobGroup > 0})
+     * @param jobId job ID; use {@code 0} as a sentinel to fall back to {@code jobGroup} filtering
+     * @param triggerTimeStart start trigger time (inclusive), or {@code null} to skip
+     * @param triggerTimeEnd end trigger time (inclusive), or {@code null} to skip
+     * @param logStatus log status filter
      * @return count of logs
      */
     int pageListCount(
