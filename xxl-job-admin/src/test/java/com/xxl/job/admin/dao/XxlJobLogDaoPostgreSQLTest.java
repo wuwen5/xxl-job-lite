@@ -1,6 +1,7 @@
 package com.xxl.job.admin.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -158,7 +159,7 @@ public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
         List<Long> lostJobIds = xxlJobLogDao.findLostJobIds(Date.from(now.minus(2, ChronoUnit.DAYS)));
         assertTrue(lostJobIds.contains(old2));
-        assertTrue(!lostJobIds.contains(recent));
+        assertFalse(lostJobIds.contains(recent));
     }
 
     private long insertLog(
