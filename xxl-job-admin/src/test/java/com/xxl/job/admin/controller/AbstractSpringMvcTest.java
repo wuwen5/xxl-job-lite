@@ -4,25 +4,20 @@ import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.admin.core.util.I18nUtil;
 import freemarker.template.TemplateModelException;
 import jakarta.annotation.PostConstruct;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
+@AutoConfigureMockMvc
 public class AbstractSpringMvcTest extends AbstractTest {
 
     @Autowired
     private WebApplicationContext applicationContext;
 
+    @Autowired
     protected MockMvc mockMvc;
-
-    @BeforeEach
-    public void setup() {
-        this.mockMvc =
-                MockMvcBuilders.webAppContextSetup(this.applicationContext).build();
-    }
 
     @Autowired
     private FreeMarkerConfigurer freeMarkerConfigurer;
