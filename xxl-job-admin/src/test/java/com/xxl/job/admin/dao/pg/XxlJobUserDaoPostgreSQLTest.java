@@ -82,8 +82,8 @@ public class XxlJobUserDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         saveUser("alpha", 0);
         saveUser("beta", 1);
 
-        List<XxlJobUser> users = xxlJobUserDao.pageList(0, 10, "a", -1);
-        assertEquals(2, users.size());
+        List<XxlJobUser> users = xxlJobUserDao.pageList(0, 10, "alpha", -1);
+        assertEquals(1, users.size());
     }
 
     private void saveUser(String username, int role) {

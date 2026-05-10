@@ -9,6 +9,7 @@ import com.xxl.job.admin.dao.XxlJobLogReportDao;
 import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,7 +29,7 @@ public class XxlJobLogReportDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
     @Test
     void saveUpdateQueryAndTotal() {
-        Date day1 = new Date(System.currentTimeMillis() - 86_400_000L);
+        Date day1 = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1));
         Date day2 = new Date();
 
         XxlJobLogReport report1 = new XxlJobLogReport();
