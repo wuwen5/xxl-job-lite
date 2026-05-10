@@ -6,7 +6,7 @@
     <sql id="symbol_page_begin">
     </sql>
     <sql id="symbol_page_end">
-        LIMIT #{offset}, #{pagesize}
+        LIMIT #{pagesize} OFFSET #{offset}
     </sql>
 
     <sql id="symbol_page_begin" databaseId="Oracle">

@@ -12,11 +12,32 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface XxlJobLogGlueDao {
 
-    public int save(XxlJobLogGlue xxlJobLogGlue);
+    /**
+     * Saves a job log glue.
+     * @param xxlJobLogGlue job log glue to save
+     * @return number of affected rows
+     */
+    int save(XxlJobLogGlue xxlJobLogGlue);
 
-    public List<XxlJobLogGlue> findByJobId(@Param("jobId") int jobId);
+    /**
+     * Finds job log glues by job ID.
+     * @param jobId job ID
+     * @return list of XxlJobLogGlue
+     */
+    List<XxlJobLogGlue> findByJobId(@Param("jobId") int jobId);
 
-    public int removeOld(@Param("jobId") int jobId, @Param("limit") int limit);
+    /**
+     * Removes old job log glues.
+     * @param jobId job ID
+     * @param limit limit number to keep
+     * @return number of removed rows
+     */
+    int removeOld(@Param("jobId") int jobId, @Param("limit") int limit);
 
-    public int deleteByJobId(@Param("jobId") int jobId);
+    /**
+     * Deletes job log glues by job ID.
+     * @param jobId job ID
+     * @return number of deleted rows
+     */
+    int deleteByJobId(@Param("jobId") int jobId);
 }

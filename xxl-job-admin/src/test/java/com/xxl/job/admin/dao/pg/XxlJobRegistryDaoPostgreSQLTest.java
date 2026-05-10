@@ -13,7 +13,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -31,8 +30,6 @@ public class XxlJobRegistryDaoPostgreSQLTest extends AbstractPostgreSQLTest {
     }
 
     @Test
-    @Disabled(
-            "PostgreSQL mapper SQL issue: findDead uses numtodsinterval in PostgreSQL branch, to be fixed in follow-up PR")
     void findDead() {
         Instant now = Instant.now();
         insertRegistry("EXECUTOR", "app", "dead-address", now.minus(2, ChronoUnit.MINUTES));
