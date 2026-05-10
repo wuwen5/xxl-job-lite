@@ -46,7 +46,7 @@ public class CronExpressionTest {
     @Test
     public void testConstructor_ValidRangeExpressions() throws ParseException {
         // 工作时间（9-18点）每小时执行
-        assertNotNull(new CronExpression("0 9-18 * * * ? *"));
+        assertNotNull(new CronExpression("0 0 9-18 * * ? *"));
 
         // 工作日执行（只指定星期）
         assertNotNull(new CronExpression("0 0 12 ? * MON-FRI *"));
