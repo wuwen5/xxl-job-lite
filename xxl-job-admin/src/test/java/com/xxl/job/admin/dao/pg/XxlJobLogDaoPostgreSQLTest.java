@@ -1,4 +1,4 @@
-package com.xxl.job.admin.dao;
+package com.xxl.job.admin.dao.pg;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.xxl.job.admin.AbstractPostgreSQLTest;
 import com.xxl.job.admin.core.model.XxlJobLog;
+import com.xxl.job.admin.dao.XxlJobLogDao;
 import jakarta.annotation.Resource;
 import java.sql.Timestamp;
 import java.time.Instant;

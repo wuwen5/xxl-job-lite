@@ -1,4 +1,4 @@
-package com.xxl.job.admin.dao;
+package com.xxl.job.admin.dao.pg;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.xxl.job.admin.AbstractPostgreSQLTest;
 import com.xxl.job.admin.core.model.XxlJobInfo;
+import com.xxl.job.admin.dao.XxlJobInfoDao;
 import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
