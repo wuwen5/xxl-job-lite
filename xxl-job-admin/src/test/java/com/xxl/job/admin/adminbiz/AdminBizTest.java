@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 
 /**
@@ -25,6 +26,7 @@ import org.springframework.core.env.Environment;
  *
  * @author xuxueli 2017-07-28 22:14:52
  */
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AdminBizTest extends AbstractTest {
 
     // admin-client
