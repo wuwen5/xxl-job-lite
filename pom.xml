@@ -72,7 +72,9 @@
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <sonar.plugin>5.5.0.6356</sonar.plugin>
     <sonar.organization>wuwen5</sonar.organization>
-    <sonar.inclusions>xxl-job-core/src/main/java/**,xxl-job-admin/src/main/java/**</sonar.inclusions>
+    <sonar.exclusions>**/src/test/**,
+          xxl-job-executor-samples/**</sonar.exclusions>
+
     <skip_maven_deploy>false</skip_maven_deploy>
     <spotless-maven-plugin.version>2.46.1</spotless-maven-plugin.version>
     <spotless.action>check</spotless.action>
