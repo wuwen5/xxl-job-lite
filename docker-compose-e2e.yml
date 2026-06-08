@@ -14,8 +14,8 @@ services:
     volumes:
       - ./doc/db/tables_xxl_job.sql:/docker-entrypoint-initdb.d/tables_xxl_job.sql:ro
     ports:
-      - "3306:3306"
-      - "33060:33060"
+      - "3306"
+      - "33060"
     networks:
       - xxl-job-network
   xxl-job-admin:
