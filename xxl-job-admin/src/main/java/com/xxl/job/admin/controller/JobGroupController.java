@@ -31,10 +31,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class JobGroupController {
 
     @Resource
-    public XxlJobInfoDao xxlJobInfoDao;
+    private XxlJobInfoDao xxlJobInfoDao;
 
     @Resource
-    public XxlJobGroupDao xxlJobGroupDao;
+    private XxlJobGroupDao xxlJobGroupDao;
 
     @Resource
     private XxlJobRegistryDao xxlJobRegistryDao;

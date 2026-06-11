@@ -46,10 +46,10 @@ public class JobLogController {
     private XxlJobGroupDao xxlJobGroupDao;
 
     @Resource
-    public XxlJobInfoDao xxlJobInfoDao;
+    private XxlJobInfoDao xxlJobInfoDao;
 
     @Resource
-    public XxlJobLogDao xxlJobLogDao;
+    private XxlJobLogDao xxlJobLogDao;
 
     @RequestMapping
     public String index(
