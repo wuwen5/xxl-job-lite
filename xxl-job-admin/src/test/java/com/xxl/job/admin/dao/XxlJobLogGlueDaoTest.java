@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class XxlJobLogGlueDaoTest extends AbstractTest {
+    private static final Date FIXED_TIME = new Date(1_700_000_000_000L);
 
     @Resource
     private XxlJobLogGlueDao xxlJobLogGlueDao;
@@ -20,8 +21,8 @@ public class XxlJobLogGlueDaoTest extends AbstractTest {
         logGlue.setGlueSource("1");
         logGlue.setGlueRemark("1");
 
-        logGlue.setAddTime(new Date());
-        logGlue.setUpdateTime(new Date());
+        logGlue.setAddTime(FIXED_TIME);
+        logGlue.setUpdateTime(FIXED_TIME);
         int ret = xxlJobLogGlueDao.save(logGlue);
 
         List<XxlJobLogGlue> list = xxlJobLogGlueDao.findByJobId(1);

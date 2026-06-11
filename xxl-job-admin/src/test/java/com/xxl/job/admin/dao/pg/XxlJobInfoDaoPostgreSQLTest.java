@@ -159,10 +159,10 @@ public class XxlJobInfoDaoPostgreSQLTest extends AbstractPostgreSQLTest {
             String author,
             int triggerStatus,
             long triggerNextTime) {
-        Date now = new Date();
         XxlJobInfo info = new XxlJobInfo();
         info.setJobGroup(jobGroup);
         info.setJobDesc(jobDesc);
+        Date now = new Date();
         info.setAddTime(now);
         info.setUpdateTime(now);
         info.setAuthor(author);

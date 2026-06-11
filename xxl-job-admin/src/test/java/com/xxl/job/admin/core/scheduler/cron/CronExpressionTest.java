@@ -3,7 +3,9 @@ package com.xxl.job.admin.core.scheduler.cron;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.text.ParseException;
-import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.jupiter.api.Test;
@@ -400,22 +402,20 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_EverySecond() throws ParseException {
         CronExpression cron = new CronExpression("* * * * * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 12, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 12, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(2026, nextCal.get(Calendar.YEAR));
-        assertEquals(Calendar.MAY, nextCal.get(Calendar.MONTH));
-        assertEquals(10, nextCal.get(Calendar.DAY_OF_MONTH));
-        assertEquals(12, nextCal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(0, nextCal.get(Calendar.MINUTE));
-        assertEquals(1, nextCal.get(Calendar.SECOND)); // 应该是下一秒
+        assertEquals(2026, nextLocalDateTime.getYear());
+        assertEquals(Month.MAY, nextLocalDateTime.getMonth());
+        assertEquals(10, nextLocalDateTime.getDayOfMonth());
+        assertEquals(12, nextLocalDateTime.getHour());
+        assertEquals(0, nextLocalDateTime.getMinute());
+        assertEquals(1, nextLocalDateTime.getSecond()); // 应该是下一秒
     }
 
     /**
@@ -424,19 +424,17 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_EveryMinute() throws ParseException {
         CronExpression cron = new CronExpression("0 * * * * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 12, 30, 45);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 12, 30, 45);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(0, nextCal.get(Calendar.SECOND));
-        assertEquals(31, nextCal.get(Calendar.MINUTE)); // 下一分钟
-        assertEquals(12, nextCal.get(Calendar.HOUR_OF_DAY));
+        assertEquals(0, nextLocalDateTime.getSecond());
+        assertEquals(31, nextLocalDateTime.getMinute()); // 下一分钟
+        assertEquals(12, nextLocalDateTime.getHour());
     }
 
     /**
@@ -445,19 +443,17 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_EveryHour() throws ParseException {
         CronExpression cron = new CronExpression("0 0 * * * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 12, 30, 45);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 12, 30, 45);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(0, nextCal.get(Calendar.SECOND));
-        assertEquals(0, nextCal.get(Calendar.MINUTE));
-        assertEquals(13, nextCal.get(Calendar.HOUR_OF_DAY)); // 下一小时
+        assertEquals(0, nextLocalDateTime.getSecond());
+        assertEquals(0, nextLocalDateTime.getMinute());
+        assertEquals(13, nextLocalDateTime.getHour()); // 下一小时
     }
 
     /**
@@ -466,20 +462,18 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_EveryDay() throws ParseException {
         CronExpression cron = new CronExpression("0 0 12 * * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 10, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 10, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(0, nextCal.get(Calendar.SECOND));
-        assertEquals(0, nextCal.get(Calendar.MINUTE));
-        assertEquals(12, nextCal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(10, nextCal.get(Calendar.DAY_OF_MONTH)); // 同一天
+        assertEquals(0, nextLocalDateTime.getSecond());
+        assertEquals(0, nextLocalDateTime.getMinute());
+        assertEquals(12, nextLocalDateTime.getHour());
+        assertEquals(10, nextLocalDateTime.getDayOfMonth()); // 同一天
     }
 
     /**
@@ -488,18 +482,16 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_PastToday_ReturnsTomorrow() throws ParseException {
         CronExpression cron = new CronExpression("0 0 12 * * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 14, 0, 0); // 下午2点，已过12点
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 14, 0, 0); // 下午2点，已过12点
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(12, nextCal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(11, nextCal.get(Calendar.DAY_OF_MONTH)); // 第二天
+        assertEquals(12, nextLocalDateTime.getHour());
+        assertEquals(11, nextLocalDateTime.getDayOfMonth()); // 第二天
     }
 
     /**
@@ -508,22 +500,16 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_Weekdays() throws ParseException {
         CronExpression cron = new CronExpression("0 0 12 ? * MON-FRI *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 9, 12, 0, 0); // 星期六
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 9, 12, 0, 0); // 星期六
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        int dayOfWeek = nextCal.get(Calendar.DAY_OF_WEEK);
-        assertTrue(dayOfWeek == Calendar.MONDAY
-                || dayOfWeek == Calendar.TUESDAY
-                || dayOfWeek == Calendar.WEDNESDAY
-                || dayOfWeek == Calendar.THURSDAY
-                || dayOfWeek == Calendar.FRIDAY);
+        int dayOfWeek = nextLocalDateTime.getDayOfWeek().getValue();
+        assertTrue(dayOfWeek >= 1 && dayOfWeek <= 5); // MONDAY=1, FRIDAY=5
     }
 
     /**
@@ -532,18 +518,16 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_FirstOfMonth() throws ParseException {
         CronExpression cron = new CronExpression("0 0 0 1 * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 15, 12, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 15, 12, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(1, nextCal.get(Calendar.DAY_OF_MONTH));
-        assertEquals(Calendar.JUNE, nextCal.get(Calendar.MONTH)); // 下个月1号
+        assertEquals(1, nextLocalDateTime.getDayOfMonth());
+        assertEquals(Month.JUNE, nextLocalDateTime.getMonth()); // 下个月1号
     }
 
     /**
@@ -552,19 +536,17 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_LastDayOfMonth() throws ParseException {
         CronExpression cron = new CronExpression("0 0 0 L * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 15, 12, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 15, 12, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
         // 5月有31天
-        assertEquals(31, nextCal.get(Calendar.DAY_OF_MONTH));
-        assertEquals(Calendar.MAY, nextCal.get(Calendar.MONTH));
+        assertEquals(31, nextLocalDateTime.getDayOfMonth());
+        assertEquals(Month.MAY, nextLocalDateTime.getMonth());
     }
 
     /**
@@ -573,18 +555,16 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_Every5Minutes() throws ParseException {
         CronExpression cron = new CronExpression("0 */5 * * * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 12, 13, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 12, 13, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(0, nextCal.get(Calendar.SECOND));
-        assertEquals(15, nextCal.get(Calendar.MINUTE)); // 下一个5分钟倍数
+        assertEquals(0, nextLocalDateTime.getSecond());
+        assertEquals(15, nextLocalDateTime.getMinute()); // 下一个5分钟倍数
     }
 
     /**
@@ -593,17 +573,15 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_MultipleTimes() throws ParseException {
         CronExpression cron = new CronExpression("0 0 9,12,15,18 * * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 10, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 10, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(12, nextCal.get(Calendar.HOUR_OF_DAY)); // 下一个指定时间是12点
+        assertEquals(12, nextLocalDateTime.getHour()); // 下一个指定时间是12点
     }
 
     /**
@@ -612,19 +590,17 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_CrossMonth() throws ParseException {
         CronExpression cron = new CronExpression("0 0 0 1 * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.DECEMBER, 15, 12, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.DECEMBER, 15, 12, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(1, nextCal.get(Calendar.DAY_OF_MONTH));
-        assertEquals(Calendar.JANUARY, nextCal.get(Calendar.MONTH));
-        assertEquals(2027, nextCal.get(Calendar.YEAR)); // 跨年
+        assertEquals(1, nextLocalDateTime.getDayOfMonth());
+        assertEquals(Month.JANUARY, nextLocalDateTime.getMonth());
+        assertEquals(2027, nextLocalDateTime.getYear()); // 跨年
     }
 
     /**
@@ -633,18 +609,16 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_LeapYearFebruary() throws ParseException {
         CronExpression cron = new CronExpression("0 0 0 L * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2024, Calendar.FEBRUARY, 15, 12, 0, 0); // 2024是闰年
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2024, Month.FEBRUARY, 15, 12, 0, 0); // 2024是闰年
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(29, nextCal.get(Calendar.DAY_OF_MONTH)); // 闰年2月有29天
-        assertEquals(Calendar.FEBRUARY, nextCal.get(Calendar.MONTH));
+        assertEquals(29, nextLocalDateTime.getDayOfMonth()); // 闰年2月有29天
+        assertEquals(Month.FEBRUARY, nextLocalDateTime.getMonth());
     }
 
     /**
@@ -653,18 +627,16 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_NonLeapYearFebruary() throws ParseException {
         CronExpression cron = new CronExpression("0 0 0 L * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2025, Calendar.FEBRUARY, 15, 12, 0, 0); // 2025不是闰年
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2025, Month.FEBRUARY, 15, 12, 0, 0); // 2025不是闰年
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(28, nextCal.get(Calendar.DAY_OF_MONTH)); // 非闰年2月有28天
-        assertEquals(Calendar.FEBRUARY, nextCal.get(Calendar.MONTH));
+        assertEquals(28, nextLocalDateTime.getDayOfMonth()); // 非闰年2月有28天
+        assertEquals(Month.FEBRUARY, nextLocalDateTime.getMonth());
     }
 
     /**
@@ -673,19 +645,17 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_NthFriday() throws ParseException {
         CronExpression cron = new CronExpression("0 0 0 ? * 6#3 *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 1, 12, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 1, 12, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(Calendar.FRIDAY, nextCal.get(Calendar.DAY_OF_WEEK));
+        assertEquals(5, nextLocalDateTime.getDayOfWeek().getValue()); // FRIDAY=5
         // 验证是第三个星期五（日期应该在15-21之间）
-        int day = nextCal.get(Calendar.DAY_OF_MONTH);
+        int day = nextLocalDateTime.getDayOfMonth();
         assertTrue(day >= 15 && day <= 21);
     }
 
@@ -695,19 +665,18 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_TimeZone() throws ParseException {
         CronExpression cron = new CronExpression("0 0 12 * * ? *");
-        cron.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
+        ZoneId shanghaiZone = ZoneId.of("Asia/Shanghai");
+        cron.setTimeZone(TimeZone.getTimeZone(shanghaiZone));
 
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
-        cal.set(2026, Calendar.MAY, 10, 10, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 10, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(shanghaiZone).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), shanghaiZone);
 
-        assertEquals(12, nextCal.get(Calendar.HOUR_OF_DAY));
+        assertEquals(12, nextLocalDateTime.getHour());
     }
 
     /**
@@ -717,11 +686,10 @@ public class CronExpressionTest {
     public void testGetNextValidTimeAfter_ConsecutiveCalls() throws ParseException {
         CronExpression cron = new CronExpression("0 0 * * * ? *"); // 每小时
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 10, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 10, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date first = cron.getNextValidTimeAfter(cal.getTime());
+        Date first = cron.getNextValidTimeAfter(dateTime);
         assertNotNull(first);
 
         Date second = cron.getNextValidTimeAfter(first);
@@ -738,19 +706,17 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_ExactMatch() throws ParseException {
         CronExpression cron = new CronExpression("0 0 12 * * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 12, 0, 0); // 正好是12:00:00
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 12, 0, 0); // 正好是12:00:00
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
         // 应该返回下一个匹配时间（明天12点）
-        assertEquals(12, nextCal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(11, nextCal.get(Calendar.DAY_OF_MONTH));
+        assertEquals(12, nextLocalDateTime.getHour());
+        assertEquals(11, nextLocalDateTime.getDayOfMonth());
     }
 
     /**
@@ -760,19 +726,17 @@ public class CronExpressionTest {
     public void testGetNextValidTimeAfter_ComplexExpression() throws ParseException {
         // 工作日上午9点到下午6点，每30分钟执行
         CronExpression cron = new CronExpression("0 */30 9-18 ? * MON-FRI *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 11, 8, 45, 0); // 周一上午8:45
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 11, 8, 45, 0); // 周一上午8:45
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(9, nextCal.get(Calendar.HOUR_OF_DAY)); // 9点开始
-        assertEquals(0, nextCal.get(Calendar.MINUTE));
-        assertEquals(Calendar.MONDAY, nextCal.get(Calendar.DAY_OF_WEEK));
+        assertEquals(9, nextLocalDateTime.getHour()); // 9点开始
+        assertEquals(0, nextLocalDateTime.getMinute());
+        assertEquals(1, nextLocalDateTime.getDayOfWeek().getValue()); // MONDAY=1
     }
 
     /**
@@ -781,20 +745,18 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_MidnightCrossing() throws ParseException {
         CronExpression cron = new CronExpression("0 0 0 * * ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MAY, 10, 23, 59, 59);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.MAY, 10, 23, 59, 59);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(0, nextCal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(0, nextCal.get(Calendar.MINUTE));
-        assertEquals(0, nextCal.get(Calendar.SECOND));
-        assertEquals(11, nextCal.get(Calendar.DAY_OF_MONTH)); // 第二天
+        assertEquals(0, nextLocalDateTime.getHour());
+        assertEquals(0, nextLocalDateTime.getMinute());
+        assertEquals(0, nextLocalDateTime.getSecond());
+        assertEquals(11, nextLocalDateTime.getDayOfMonth()); // 第二天
     }
 
     /**
@@ -803,18 +765,16 @@ public class CronExpressionTest {
     @Test
     public void testGetNextValidTimeAfter_YearEndCrossing() throws ParseException {
         CronExpression cron = new CronExpression("0 0 0 1 1 ? *");
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.DECEMBER, 31, 12, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2026, Month.DECEMBER, 31, 12, 0, 0);
+        Date dateTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        Date nextTime = cron.getNextValidTimeAfter(cal.getTime());
+        Date nextTime = cron.getNextValidTimeAfter(dateTime);
 
         assertNotNull(nextTime);
-        Calendar nextCal = Calendar.getInstance();
-        nextCal.setTime(nextTime);
+        LocalDateTime nextLocalDateTime = LocalDateTime.ofInstant(nextTime.toInstant(), ZoneId.systemDefault());
 
-        assertEquals(2027, nextCal.get(Calendar.YEAR));
-        assertEquals(Calendar.JANUARY, nextCal.get(Calendar.MONTH));
-        assertEquals(1, nextCal.get(Calendar.DAY_OF_MONTH));
+        assertEquals(2027, nextLocalDateTime.getYear());
+        assertEquals(Month.JANUARY, nextLocalDateTime.getMonth());
+        assertEquals(1, nextLocalDateTime.getDayOfMonth());
     }
 }

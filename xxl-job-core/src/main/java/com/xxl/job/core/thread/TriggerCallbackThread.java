@@ -70,13 +70,11 @@ public class TriggerCallbackThread {
                                 getInstance().callBackQueue.take();
                         // callback list param
                         List<HandleCallbackParam> callbackParamList = new ArrayList<>();
-                        int drainToNum = getInstance().callBackQueue.drainTo(callbackParamList);
+                        getInstance().callBackQueue.drainTo(callbackParamList);
                         callbackParamList.add(callback);
 
                         // callback, will retry if error
-                        if (!callbackParamList.isEmpty()) {
-                            doCallback(callbackParamList);
-                        }
+                        doCallback(callbackParamList);
                     } catch (Throwable e) {
                         if (!toStop) {
                             logger.error(e.getMessage(), e);
@@ -87,7 +85,7 @@ public class TriggerCallbackThread {
                 // last callback
                 try {
                     List<HandleCallbackParam> callbackParamList = new ArrayList<>();
-                    int drainToNum = getInstance().callBackQueue.drainTo(callbackParamList);
+                    getInstance().callBackQueue.drainTo(callbackParamList);
                     if (!callbackParamList.isEmpty()) {
                         doCallback(callbackParamList);
                     }

@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 
 public class XxlJobInfoDaoTest extends AbstractTest {
     private static Logger logger = LoggerFactory.getLogger(XxlJobInfoDaoTest.class);
+    private static final Date FIXED_ADD_TIME = new Date(1_700_000_000_000L);
+    private static final Date FIXED_UPDATE_TIME = new Date(1_700_000_100_000L);
+    private static final Date FIXED_GLUE_UPDATE_TIME = new Date(1_700_000_200_000L);
 
     @Resource
     private XxlJobInfoDao xxlJobInfoDao;
@@ -47,9 +50,9 @@ public class XxlJobInfoDaoTest extends AbstractTest {
         info.setGlueRemark("setGlueRemark");
         info.setChildJobId("1");
 
-        info.setAddTime(new Date());
-        info.setUpdateTime(new Date());
-        info.setGlueUpdatetime(new Date());
+        info.setAddTime(FIXED_ADD_TIME);
+        info.setUpdateTime(FIXED_UPDATE_TIME);
+        info.setGlueUpdatetime(FIXED_GLUE_UPDATE_TIME);
 
         int count = xxlJobInfoDao.save(info);
 
@@ -67,10 +70,10 @@ public class XxlJobInfoDaoTest extends AbstractTest {
         info2.setGlueType("setGlueType2");
         info2.setGlueSource("setGlueSource2");
         info2.setGlueRemark("setGlueRemark2");
-        info2.setGlueUpdatetime(new Date());
+        info2.setGlueUpdatetime(FIXED_GLUE_UPDATE_TIME);
         info2.setChildJobId("1");
 
-        info2.setUpdateTime(new Date());
+        info2.setUpdateTime(FIXED_UPDATE_TIME);
         int item2 = xxlJobInfoDao.update(info2);
 
         xxlJobInfoDao.delete(info2.getId());

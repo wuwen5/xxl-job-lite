@@ -46,10 +46,10 @@ public class JobLogController {
     private XxlJobGroupDao xxlJobGroupDao;
 
     @Resource
-    public XxlJobInfoDao xxlJobInfoDao;
+    private XxlJobInfoDao xxlJobInfoDao;
 
     @Resource
-    public XxlJobLogDao xxlJobLogDao;
+    private XxlJobLogDao xxlJobLogDao;
 
     @RequestMapping
     public String index(
@@ -139,7 +139,6 @@ public class JobLogController {
     public String logDetailPage(int id, Model model) {
 
         // base check
-        ReturnT<String> logStatue = ReturnT.SUCCESS;
         XxlJobLog jobLog = xxlJobLogDao.load(id);
         if (jobLog == null) {
             throw new RuntimeException(I18nUtil.getString("joblog_logid_unvalid"));

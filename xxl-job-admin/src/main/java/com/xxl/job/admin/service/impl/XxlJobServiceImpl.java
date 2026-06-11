@@ -40,7 +40,7 @@ public class XxlJobServiceImpl implements XxlJobService {
     private XxlJobInfoDao xxlJobInfoDao;
 
     @Resource
-    public XxlJobLogDao xxlJobLogDao;
+    private XxlJobLogDao xxlJobLogDao;
 
     @Resource
     private XxlJobLogGlueDao xxlJobLogGlueDao;
@@ -79,8 +79,7 @@ public class XxlJobServiceImpl implements XxlJobService {
     public ReturnT<String> add(XxlJobInfo jobInfo, XxlJobUser loginUser) {
 
         // valid base
-        XxlJobGroup group = xxlJobGroupDao.load(jobInfo.getJobGroup());
-        if (group == null) {
+        if (xxlJobGroupDao.load(jobInfo.getJobGroup()) == null) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
                     (I18nUtil.getString("system_please_choose") + I18nUtil.getString("jobinfo_field_jobgroup")));
@@ -208,7 +207,7 @@ public class XxlJobServiceImpl implements XxlJobService {
 
     private boolean isNumeric(String str) {
         try {
-            int result = Integer.parseInt(str);
+            Integer.parseInt(str);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -324,8 +323,7 @@ public class XxlJobServiceImpl implements XxlJobService {
         }
 
         // group valid
-        XxlJobGroup jobGroup = xxlJobGroupDao.load(jobInfo.getJobGroup());
-        if (jobGroup == null) {
+        if (xxlJobGroupDao.load(jobInfo.getJobGroup()) == null) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
                     (I18nUtil.getString("jobinfo_field_jobgroup") + I18nUtil.getString("system_unvalid")));

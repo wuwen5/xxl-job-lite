@@ -104,8 +104,11 @@ public class XxlJobCompleter {
     }
 
     private static boolean isNumeric(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
         try {
-            int ignore = Integer.parseInt(str);
+            Integer.parseInt(str);
             return true;
         } catch (NumberFormatException e) {
             return false;
