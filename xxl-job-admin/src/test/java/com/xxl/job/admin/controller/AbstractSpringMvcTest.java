@@ -11,7 +11,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 @AutoConfigureMockMvc
-public class AbstractSpringMvcTest extends AbstractTest {
+public abstract class AbstractSpringMvcTest extends AbstractTest {
 
     @Autowired
     private WebApplicationContext applicationContext;
