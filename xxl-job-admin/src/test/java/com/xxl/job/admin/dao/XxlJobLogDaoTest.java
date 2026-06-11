@@ -9,6 +9,7 @@ import com.xxl.job.admin.core.model.XxlJobLog;
 import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class XxlJobLogDaoTest extends AbstractTest {
@@ -18,6 +19,11 @@ public class XxlJobLogDaoTest extends AbstractTest {
 
     @Resource
     private XxlJobLogDao xxlJobLogDao;
+
+    @BeforeEach
+    void setUp() {
+        xxlJobLogDao.delete(1);
+    }
 
     @Test
     public void test() {
