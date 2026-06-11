@@ -167,13 +167,13 @@ public class EmbedServer {
         private Object process(HttpMethod httpMethod, String uri, String requestData, String accessTokenReq) {
             // valid
             if (HttpMethod.POST != httpMethod) {
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, HttpMethod not support.");
+                return new ReturnT<>(ReturnT.FAIL_CODE, "invalid request, HttpMethod not support.");
             }
             if (uri == null || uri.trim().isEmpty()) {
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, uri-mapping empty.");
+                return new ReturnT<>(ReturnT.FAIL_CODE, "invalid request, uri-mapping empty.");
             }
             if (accessToken != null && !accessToken.trim().isEmpty() && !accessToken.equals(accessTokenReq)) {
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "The access token is wrong.");
+                return new ReturnT<>(ReturnT.FAIL_CODE, "The access token is wrong.");
             }
 
             // services mapping
@@ -194,12 +194,11 @@ public class EmbedServer {
                         LogParam logParam = GsonTool.fromJson(requestData, LogParam.class);
                         return executorBiz.log(logParam);
                     default:
-                        return new ReturnT<String>(
-                                ReturnT.FAIL_CODE, "invalid request, uri-mapping(" + uri + ") not found.");
+                        return new ReturnT<>(ReturnT.FAIL_CODE, "invalid request, uri-mapping(" + uri + ") not found.");
                 }
             } catch (Throwable e) {
                 logger.error(e.getMessage(), e);
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "request error:" + ThrowableUtil.toString(e));
+                return new ReturnT<>(ReturnT.FAIL_CODE, "request error:" + ThrowableUtil.toString(e));
             }
         }
 

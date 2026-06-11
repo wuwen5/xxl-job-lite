@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class XxlJobLogGlueDaoPostgreSQLTest extends AbstractPostgreSQLTest {
+    private static final long BASE_TIME_MILLIS = 1_700_000_000_000L;
 
     @Resource
     private XxlJobLogGlueDao xxlJobLogGlueDao;
@@ -28,9 +29,9 @@ public class XxlJobLogGlueDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
     @Test
     void saveFindRemoveOldAndDeleteByJobId() {
-        saveLogGlue(1, "first", new Date(System.currentTimeMillis() - 10_000));
-        int secondId = saveLogGlue(1, "second", new Date(System.currentTimeMillis() - 5_000));
-        saveLogGlue(2, "other-job", new Date());
+        saveLogGlue(1, "first", new Date(BASE_TIME_MILLIS - 10_000));
+        int secondId = saveLogGlue(1, "second", new Date(BASE_TIME_MILLIS - 5_000));
+        saveLogGlue(2, "other-job", new Date(BASE_TIME_MILLIS));
 
         List<XxlJobLogGlue> byJobId = xxlJobLogGlueDao.findByJobId(1);
         assertEquals(2, byJobId.size());

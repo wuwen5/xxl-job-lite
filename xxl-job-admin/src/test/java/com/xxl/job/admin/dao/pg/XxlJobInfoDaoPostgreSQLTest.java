@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class XxlJobInfoDaoPostgreSQLTest extends AbstractPostgreSQLTest {
+    private static final Date FIXED_NOW = new Date(1_700_000_000_000L);
+    private static final Date FIXED_UPDATE_TIME = new Date(1_700_000_100_000L);
 
     @Resource
     private XxlJobInfoDao xxlJobInfoDao;
@@ -80,7 +82,7 @@ public class XxlJobInfoDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         loaded.setTriggerStatus(0);
         loaded.setTriggerLastTime(2000L);
         loaded.setTriggerNextTime(3000L);
-        loaded.setUpdateTime(new Date());
+        loaded.setUpdateTime(FIXED_UPDATE_TIME);
 
         assertEquals(1, xxlJobInfoDao.update(loaded));
         XxlJobInfo updated = xxlJobInfoDao.loadById(info.getId());
@@ -159,12 +161,11 @@ public class XxlJobInfoDaoPostgreSQLTest extends AbstractPostgreSQLTest {
             String author,
             int triggerStatus,
             long triggerNextTime) {
-        Date now = new Date();
         XxlJobInfo info = new XxlJobInfo();
         info.setJobGroup(jobGroup);
         info.setJobDesc(jobDesc);
-        info.setAddTime(now);
-        info.setUpdateTime(now);
+        info.setAddTime(FIXED_NOW);
+        info.setUpdateTime(FIXED_NOW);
         info.setAuthor(author);
         info.setAlarmEmail("test@example.com");
         info.setScheduleType("CRON");
@@ -179,7 +180,7 @@ public class XxlJobInfoDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         info.setGlueType("BEAN");
         info.setGlueSource("");
         info.setGlueRemark("remark");
-        info.setGlueUpdatetime(now);
+        info.setGlueUpdatetime(FIXED_NOW);
         info.setChildJobId("");
         info.setTriggerStatus(triggerStatus);
         info.setTriggerLastTime(0L);

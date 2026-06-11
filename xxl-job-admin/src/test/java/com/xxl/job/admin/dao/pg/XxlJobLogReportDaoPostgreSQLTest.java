@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class XxlJobLogReportDaoPostgreSQLTest extends AbstractPostgreSQLTest {
+    private static final long BASE_TIME_MILLIS = 1_700_000_000_000L;
 
     @Resource
     private XxlJobLogReportDao xxlJobLogReportDao;
@@ -29,8 +30,8 @@ public class XxlJobLogReportDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
     @Test
     void saveUpdateQueryAndTotal() {
-        Date day1 = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1));
-        Date day2 = new Date();
+        Date day1 = new Date(BASE_TIME_MILLIS - TimeUnit.DAYS.toMillis(1));
+        Date day2 = new Date(BASE_TIME_MILLIS);
 
         XxlJobLogReport report1 = new XxlJobLogReport();
         report1.setTriggerDay(day1);

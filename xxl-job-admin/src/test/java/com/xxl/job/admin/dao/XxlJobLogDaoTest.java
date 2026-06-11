@@ -8,6 +8,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class XxlJobLogDaoTest extends AbstractTest {
+    private static final Date FIXED_TRIGGER_TIME = new Date(1_700_000_000_000L);
+    private static final Date FIXED_HANDLE_TIME = new Date(1_700_000_100_000L);
+    private static final Date FIXED_CLEAR_BEFORE_TIME = new Date(1_700_000_200_000L);
 
     @Resource
     private XxlJobLogDao xxlJobLogDao;
@@ -24,7 +27,7 @@ public class XxlJobLogDaoTest extends AbstractTest {
         long ret1 = xxlJobLogDao.save(log);
         XxlJobLog dto = xxlJobLogDao.load(log.getId());
 
-        log.setTriggerTime(new Date());
+        log.setTriggerTime(FIXED_TRIGGER_TIME);
         log.setTriggerCode(1);
         log.setTriggerMsg("1");
         log.setExecutorAddress("1");
@@ -33,13 +36,13 @@ public class XxlJobLogDaoTest extends AbstractTest {
         ret1 = xxlJobLogDao.updateTriggerInfo(log);
         dto = xxlJobLogDao.load(log.getId());
 
-        log.setHandleTime(new Date());
+        log.setHandleTime(FIXED_HANDLE_TIME);
         log.setHandleCode(2);
         log.setHandleMsg("2");
         ret1 = xxlJobLogDao.updateHandleInfo(log);
         dto = xxlJobLogDao.load(log.getId());
 
-        List<Long> ret4 = xxlJobLogDao.findClearLogIds(1, 1, new Date(), 100, 100);
+        List<Long> ret4 = xxlJobLogDao.findClearLogIds(1, 1, FIXED_CLEAR_BEFORE_TIME, 100, 100);
 
         int ret2 = xxlJobLogDao.delete(log.getJobId());
     }

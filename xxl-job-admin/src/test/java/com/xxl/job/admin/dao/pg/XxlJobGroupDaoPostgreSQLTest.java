@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class XxlJobGroupDaoPostgreSQLTest extends AbstractPostgreSQLTest {
+    private static final Date FIXED_UPDATE_TIME = new Date(1_700_000_000_000L);
+    private static final Date FIXED_SECOND_UPDATE_TIME = new Date(1_700_000_100_000L);
 
     @Resource
     private XxlJobGroupDao xxlJobGroupDao;
@@ -35,7 +37,7 @@ public class XxlJobGroupDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         group.setTitle("group-a");
         group.setAddressType(0);
         group.setAddressList("127.0.0.1:9999");
-        group.setUpdateTime(new Date());
+        group.setUpdateTime(FIXED_UPDATE_TIME);
 
         assertEquals(1, xxlJobGroupDao.save(group));
         assertTrue(group.getId() > 0);
@@ -48,7 +50,7 @@ public class XxlJobGroupDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         loaded.setTitle("group-b");
         loaded.setAddressType(1);
         loaded.setAddressList("127.0.0.1:10000");
-        loaded.setUpdateTime(new Date());
+        loaded.setUpdateTime(FIXED_SECOND_UPDATE_TIME);
 
         assertEquals(1, xxlJobGroupDao.update(loaded));
         XxlJobGroup updated = xxlJobGroupDao.load(group.getId());
@@ -92,7 +94,7 @@ public class XxlJobGroupDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         group.setTitle(title);
         group.setAddressType(addressType);
         group.setAddressList("127.0.0.1:9999");
-        group.setUpdateTime(new Date());
+        group.setUpdateTime(FIXED_UPDATE_TIME);
         xxlJobGroupDao.save(group);
     }
 }

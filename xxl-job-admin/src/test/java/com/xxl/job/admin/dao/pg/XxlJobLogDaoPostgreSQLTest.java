@@ -19,6 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
+    private static final Instant BASE_INSTANT = Instant.parse("2024-01-01T00:00:00Z");
+    private static final Date FIXED_TRIGGER_TIME = Date.from(BASE_INSTANT);
+    private static final Date FIXED_TRIGGER_UPDATE_TIME = Date.from(BASE_INSTANT.plus(5, ChronoUnit.MINUTES));
+    private static final Date FIXED_HANDLE_TIME = Date.from(BASE_INSTANT.plus(10, ChronoUnit.MINUTES));
 
     @Resource
     private XxlJobLogDao xxlJobLogDao;
@@ -37,7 +41,7 @@ public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
     @Test
     void pageList_withFilters() {
-        Instant now = Instant.now();
+        Instant now = BASE_INSTANT.plus(1, ChronoUnit.HOURS);
         long log1 = insertLog(1, 1, now.minus(40, ChronoUnit.MINUTES), 200, 200, 0, "addr-1");
         insertLog(1, 1, now.minus(30, ChronoUnit.MINUTES), 500, 200, 0, "addr-2");
         insertLog(2, 2, now.minus(20, ChronoUnit.MINUTES), 200, 0, 0, "addr-3");
@@ -63,7 +67,7 @@ public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
     @Test
     void pageListCount_withFilters() {
-        Instant now = Instant.now();
+        Instant now = BASE_INSTANT.plus(2, ChronoUnit.HOURS);
         insertLog(1, 1, now.minus(40, ChronoUnit.MINUTES), 200, 200, 0, "addr-1");
         insertLog(1, 1, now.minus(30, ChronoUnit.MINUTES), 500, 200, 0, "addr-2");
         insertLog(2, 2, now.minus(20, ChronoUnit.MINUTES), 200, 0, 0, "addr-3");
@@ -91,7 +95,7 @@ public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         XxlJobLog log = new XxlJobLog();
         log.setJobGroup(1);
         log.setJobId(1);
-        log.setTriggerTime(new Date());
+        log.setTriggerTime(FIXED_TRIGGER_TIME);
         log.setTriggerCode(0);
         log.setHandleCode(0);
 
@@ -102,7 +106,7 @@ public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         assertNotNull(loaded);
         assertEquals(1, loaded.getJobGroup());
 
-        log.setTriggerTime(new Date());
+        log.setTriggerTime(FIXED_TRIGGER_UPDATE_TIME);
         log.setTriggerCode(200);
         log.setTriggerMsg("trigger-ok");
         log.setExecutorAddress("executor-a");
@@ -116,7 +120,7 @@ public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         assertEquals(200, afterTrigger.getTriggerCode());
         assertEquals("executor-a", afterTrigger.getExecutorAddress());
 
-        log.setHandleTime(new Date());
+        log.setHandleTime(FIXED_HANDLE_TIME);
         log.setHandleCode(500);
         log.setHandleMsg("handle-fail");
         assertEquals(1, xxlJobLogDao.updateHandleInfo(log));
@@ -136,7 +140,7 @@ public class XxlJobLogDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
     @Test
     void findClearLogIdsClearLogAndFindLostJobIds() {
-        Instant now = Instant.now();
+        Instant now = BASE_INSTANT.plus(3, ChronoUnit.HOURS);
         long old1 = insertLog(1, 1, now.minus(10, ChronoUnit.DAYS), 200, 200, 0, "addr-1");
         long old2 = insertLog(1, 1, now.minus(9, ChronoUnit.DAYS), 200, 0, 0, "addr-2");
         long recent = insertLog(1, 1, now.minus(1, ChronoUnit.DAYS), 200, 0, 0, "addr-3");

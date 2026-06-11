@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class XxlJobRegistryDaoPostgreSQLTest extends AbstractPostgreSQLTest {
+    private static final Instant BASE_INSTANT = Instant.parse("2024-01-01T00:00:00Z");
 
     @Resource
     private XxlJobRegistryDao xxlJobRegistryDao;
@@ -31,7 +32,7 @@ public class XxlJobRegistryDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
     @Test
     void findDead() {
-        Instant now = Instant.now();
+        Instant now = BASE_INSTANT;
         insertRegistry("EXECUTOR", "app", "dead-address", now.minus(2, ChronoUnit.MINUTES));
         List<Integer> deadIds = xxlJobRegistryDao.findDead(60, Date.from(now));
         assertEquals(1, deadIds.size());
@@ -39,7 +40,7 @@ public class XxlJobRegistryDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
     @Test
     void findAllRegistryUpdateSaveDeleteAndRemoveDead() {
-        Instant now = Instant.now();
+        Instant now = BASE_INSTANT.plus(1, ChronoUnit.HOURS);
 
         assertEquals(0, xxlJobRegistryDao.registryUpdate("EXECUTOR", "app", "address-1", Date.from(now)));
         assertEquals(

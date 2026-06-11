@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class XxlJobGroupDaoTest extends AbstractTest {
+    private static final Date FIXED_UPDATE_TIME = new Date(1_700_000_000_000L);
 
     @Resource
     private XxlJobGroupDao xxlJobGroupDao;
@@ -23,7 +24,7 @@ public class XxlJobGroupDaoTest extends AbstractTest {
         group.setTitle("setTitle");
         group.setAddressType(0);
         group.setAddressList("setAddressList");
-        group.setUpdateTime(new Date());
+        group.setUpdateTime(FIXED_UPDATE_TIME);
 
         int ret = xxlJobGroupDao.save(group);
 
@@ -32,7 +33,7 @@ public class XxlJobGroupDaoTest extends AbstractTest {
         group2.setTitle("setTitle2");
         group2.setAddressType(2);
         group2.setAddressList("setAddressList2");
-        group2.setUpdateTime(new Date());
+        group2.setUpdateTime(FIXED_UPDATE_TIME);
 
         int ret2 = xxlJobGroupDao.update(group2);
 

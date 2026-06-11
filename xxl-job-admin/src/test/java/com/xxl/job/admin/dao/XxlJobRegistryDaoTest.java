@@ -9,18 +9,19 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class XxlJobRegistryDaoTest extends AbstractTest {
+    private static final Date FIXED_NOW = new Date(1_700_000_000_000L);
 
     @Resource
     private XxlJobRegistryDao xxlJobRegistryDao;
 
     @Test
     public void test() {
-        int ret = xxlJobRegistryDao.registryUpdate("g1", "k1", "v1", new Date());
+        int ret = xxlJobRegistryDao.registryUpdate("g1", "k1", "v1", FIXED_NOW);
         if (ret < 1) {
-            ret = xxlJobRegistryDao.registrySave("g1", "k1", "v1", new Date());
+            ret = xxlJobRegistryDao.registrySave("g1", "k1", "v1", FIXED_NOW);
         }
 
-        List<XxlJobRegistry> list = xxlJobRegistryDao.findAll(1, new Date());
+        List<XxlJobRegistry> list = xxlJobRegistryDao.findAll(1, FIXED_NOW);
 
         int ret2 = xxlJobRegistryDao.removeDead(Arrays.asList(1));
     }

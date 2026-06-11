@@ -46,6 +46,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootApplication
 @Import(TestConfiguration.class)
 public class ExecutorBizTest {
+    private static final long FIXED_TIME_MILLIS = 1_700_000_000_000L;
 
     // admin-client
     private static String addressUrl = "http://127.0.0.1:9999/";
@@ -76,10 +77,10 @@ public class ExecutorBizTest {
 
     private void waitForPort(String host, int port, Duration timeout, Duration interval) {
 
-        long deadline = System.currentTimeMillis() + timeout.toMillis();
+        long deadline = System.nanoTime() + timeout.toNanos();
         Exception lastException = null;
 
-        while (System.currentTimeMillis() < deadline) {
+        while (System.nanoTime() < deadline) {
             try (Socket socket = new Socket()) {
                 socket.connect(new InetSocketAddress(host, port), (int) interval.toMillis());
                 // 连接成功，说明端口已就绪
@@ -135,9 +136,9 @@ public class ExecutorBizTest {
         triggerParam.setExecutorBlockStrategy(ExecutorBlockStrategyEnum.COVER_EARLY.name());
         triggerParam.setGlueType(GlueTypeEnum.BEAN.name());
         triggerParam.setGlueSource(null);
-        triggerParam.setGlueUpdatetime(System.currentTimeMillis());
+        triggerParam.setGlueUpdatetime(FIXED_TIME_MILLIS);
         triggerParam.setLogId(1);
-        triggerParam.setLogDateTime(System.currentTimeMillis());
+        triggerParam.setLogDateTime(FIXED_TIME_MILLIS);
         executorBiz.run(triggerParam);
 
         // Act
@@ -162,9 +163,9 @@ public class ExecutorBizTest {
         triggerParam.setExecutorBlockStrategy(ExecutorBlockStrategyEnum.COVER_EARLY.name());
         triggerParam.setGlueType(GlueTypeEnum.BEAN.name());
         triggerParam.setGlueSource(null);
-        triggerParam.setGlueUpdatetime(System.currentTimeMillis());
+        triggerParam.setGlueUpdatetime(FIXED_TIME_MILLIS);
         triggerParam.setLogId(1);
-        triggerParam.setLogDateTime(System.currentTimeMillis());
+        triggerParam.setLogDateTime(FIXED_TIME_MILLIS);
 
         // Act
         final ReturnT<String> retval = executorBiz.run(triggerParam);
