@@ -1,5 +1,8 @@
 package com.xxl.job.admin.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.admin.core.model.XxlJobRegistry;
 import jakarta.annotation.Resource;
@@ -18,11 +21,15 @@ public class XxlJobRegistryDaoTest extends AbstractTest {
     public void test() {
         int ret = xxlJobRegistryDao.registryUpdate("g1", "k1", "v1", FIXED_NOW);
         if (ret < 1) {
-            ret = xxlJobRegistryDao.registrySave("g1", "k1", "v1", FIXED_NOW);
+            assertEquals(1, xxlJobRegistryDao.registrySave("g1", "k1", "v1", FIXED_NOW));
+        } else {
+            assertEquals(1, ret);
         }
 
         List<XxlJobRegistry> list = xxlJobRegistryDao.findAll(1, FIXED_NOW);
+        assertTrue(list.stream().anyMatch(item -> "v1".equals(item.getRegistryValue())));
 
         int ret2 = xxlJobRegistryDao.removeDead(Arrays.asList(1));
+        assertEquals(1, ret2);
     }
 }
