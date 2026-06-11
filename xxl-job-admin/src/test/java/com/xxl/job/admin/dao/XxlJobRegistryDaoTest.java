@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.xxl.job.admin.AbstractTest;
 import com.xxl.job.admin.core.model.XxlJobRegistry;
 import jakarta.annotation.Resource;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,13 @@ public class XxlJobRegistryDaoTest extends AbstractTest {
         List<XxlJobRegistry> list = xxlJobRegistryDao.findAll(1, FIXED_NOW);
         assertTrue(list.stream().anyMatch(item -> "v1".equals(item.getRegistryValue())));
 
-        int ret2 = xxlJobRegistryDao.removeDead(Arrays.asList(1));
+        Integer registryId = list.stream()
+                .filter(item -> "v1".equals(item.getRegistryValue()))
+                .map(XxlJobRegistry::getId)
+                .findFirst()
+                .orElseThrow();
+
+        int ret2 = xxlJobRegistryDao.removeDead(List.of(registryId));
         assertEquals(1, ret2);
     }
 }
