@@ -167,7 +167,7 @@ public class TriggerCallbackThread {
                             callbackParamList,
                             "<br>----------- xxl-job job callback fail, callbackResult:" + callbackResult);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 callbackLog(
                         callbackParamList, "<br>----------- xxl-job job callback error, errorMsg:" + e.getMessage());
             }
