@@ -23,7 +23,7 @@ public class ExecutorRouteLFU extends ExecutorRouter {
     private static final ConcurrentMap<Integer, HashMap<String, Integer>> JOB_LFU_MAP = new ConcurrentHashMap<>();
     private static volatile long cacheValidTime = 0;
 
-    private String route(int jobId, List<String> addressList) {
+    private static String route(int jobId, List<String> addressList) {
 
         // cache clear
         if (System.currentTimeMillis() > cacheValidTime) {
