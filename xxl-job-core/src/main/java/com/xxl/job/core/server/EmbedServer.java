@@ -89,6 +89,7 @@ public class EmbedServer {
                 future.channel().closeFuture().sync();
 
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.info(">>>>>>>>>>> xxl-job remoting server stop.");
             } catch (Throwable e) {
                 logger.error(">>>>>>>>>>> xxl-job remoting server error.", e);

@@ -90,7 +90,8 @@ public class JobLogFileCleanThread {
 
                     try {
                         TimeUnit.DAYS.sleep(1);
-                    } catch (Throwable e) {
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         if (!toStop) {
                             logger.error(e.getMessage(), e);
                         }
@@ -116,6 +117,7 @@ public class JobLogFileCleanThread {
         try {
             localThread.join();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             logger.error(e.getMessage(), e);
         }
     }

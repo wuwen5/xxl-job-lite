@@ -3,9 +3,13 @@ package com.xxl.job.admin.core.route.strategy;
 import com.xxl.job.admin.core.route.ExecutorRouter;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.biz.model.TriggerParam;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 单个JOB对应的每个执行器，使用频率最低的优先被选举
@@ -17,14 +21,14 @@ import java.util.concurrent.ConcurrentMap;
 public class ExecutorRouteLFU extends ExecutorRouter {
 
     private static final ConcurrentMap<Integer, HashMap<String, Integer>> JOB_LFU_MAP = new ConcurrentHashMap<>();
-    private static long CACHE_VALID_TIME = 0;
+    private static volatile long cacheValidTime = 0;
 
-    public String route(int jobId, List<String> addressList) {
+    private static String route(int jobId, List<String> addressList) {
 
         // cache clear
-        if (System.currentTimeMillis() > CACHE_VALID_TIME) {
+        if (System.currentTimeMillis() > cacheValidTime) {
             JOB_LFU_MAP.clear();
-            CACHE_VALID_TIME = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
+            cacheValidTime = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
         }
 
         // lfu item init
@@ -39,7 +43,7 @@ public class ExecutorRouteLFU extends ExecutorRouter {
         for (String address : addressList) {
             if (!lfuItemMap.containsKey(address) || lfuItemMap.get(address) > 1000000) {
                 // 初始化时主动Random一次，缓解首次压力
-                lfuItemMap.put(address, new Random().nextInt(addressList.size()));
+                lfuItemMap.put(address, ThreadLocalRandom.current().nextInt(addressList.size()));
             }
         }
         // remove old

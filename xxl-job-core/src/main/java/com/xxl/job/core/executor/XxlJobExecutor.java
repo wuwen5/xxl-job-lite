@@ -76,6 +76,7 @@ public class XxlJobExecutor {
                     try {
                         oldJobThread.join();
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         logger.error(">>>>>>>>>>> xxl-job, JobThread destroy(join) error, jobId:{}", item.getKey(), e);
                     }
                 }
