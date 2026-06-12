@@ -32,7 +32,7 @@ public class JobScheduleHelper {
     private Thread ringThread;
     private volatile boolean scheduleThreadToStop = false;
     private volatile boolean ringThreadToStop = false;
-    private static volatile Map<Integer, List<Integer>> ringData = new ConcurrentHashMap<>();
+    private static final Map<Integer, List<Integer>> ringData = new ConcurrentHashMap<>();
 
     public void start() {
 

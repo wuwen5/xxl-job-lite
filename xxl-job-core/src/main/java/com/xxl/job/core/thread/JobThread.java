@@ -191,6 +191,11 @@ public class JobThread extends Thread {
                         }
                     }
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                if (toStop) {
+                    XxlJobHelper.log("<br>----------- JobThread toStop, stopReason:" + stopReason);
+                }
             } catch (Throwable e) {
                 if (toStop) {
                     XxlJobHelper.log("<br>----------- JobThread toStop, stopReason:" + stopReason);
