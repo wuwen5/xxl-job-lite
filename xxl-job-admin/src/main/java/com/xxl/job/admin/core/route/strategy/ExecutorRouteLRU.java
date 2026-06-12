@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ExecutorRouteLRU extends ExecutorRouter {
 
     private static final ConcurrentMap<Integer, LinkedHashMap<String, String>> JOB_LRU_MAP = new ConcurrentHashMap<>();
-    private static long CACHE_VALID_TIME = 0;
+    private static volatile long CACHE_VALID_TIME = 0;
 
     public String route(int jobId, List<String> addressList) {
 

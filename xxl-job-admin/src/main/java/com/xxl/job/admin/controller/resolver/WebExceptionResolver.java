@@ -21,7 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Component
 public class WebExceptionResolver implements HandlerExceptionResolver {
-    private static transient Logger logger = LoggerFactory.getLogger(WebExceptionResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebExceptionResolver.class);
 
     @Override
     public ModelAndView resolveException(

@@ -232,12 +232,16 @@ public class TriggerCallbackThread {
         if (callbackLogPath.isFile()) {
             callbackLogPath.delete();
         }
-        if (!(callbackLogPath.isDirectory() && callbackLogPath.list() != null && callbackLogPath.list().length > 0)) {
+        if (!(callbackLogPath.isDirectory())) {
+            return;
+        }
+        File[] callbackLogFiles = callbackLogPath.listFiles();
+        if (callbackLogFiles == null || callbackLogFiles.length == 0) {
             return;
         }
 
         // load and clear file, retry
-        for (File callbaclLogFile : callbackLogPath.listFiles()) {
+        for (File callbaclLogFile : callbackLogFiles) {
             byte[] callbackParamList_bytes = FileUtil.readFileContent(callbaclLogFile);
 
             // avoid empty file

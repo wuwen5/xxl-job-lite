@@ -6,6 +6,7 @@ import com.xxl.job.core.biz.model.TriggerParam;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 单个JOB对应的每个执行器，使用频率最低的优先被选举
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ExecutorRouteLFU extends ExecutorRouter {
 
     private static final ConcurrentMap<Integer, HashMap<String, Integer>> JOB_LFU_MAP = new ConcurrentHashMap<>();
-    private static long CACHE_VALID_TIME = 0;
+    private static volatile long CACHE_VALID_TIME = 0;
 
     public String route(int jobId, List<String> addressList) {
 
@@ -39,7 +40,7 @@ public class ExecutorRouteLFU extends ExecutorRouter {
         for (String address : addressList) {
             if (!lfuItemMap.containsKey(address) || lfuItemMap.get(address) > 1000000) {
                 // 初始化时主动Random一次，缓解首次压力
-                lfuItemMap.put(address, new Random().nextInt(addressList.size()));
+                lfuItemMap.put(address, ThreadLocalRandom.current().nextInt(addressList.size()));
             }
         }
         // remove old
