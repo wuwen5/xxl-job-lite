@@ -74,7 +74,8 @@ public class JobLogReportHelper {
 
                     try {
                         TimeUnit.MINUTES.sleep(1);
-                    } catch (Throwable e) {
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         if (!toStop) {
                             logger.error(e.getMessage(), e);
                         }
@@ -95,7 +96,8 @@ public class JobLogReportHelper {
         logrThread.interrupt();
         try {
             logrThread.join();
-        } catch (Throwable e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             logger.error(e.getMessage(), e);
         }
     }

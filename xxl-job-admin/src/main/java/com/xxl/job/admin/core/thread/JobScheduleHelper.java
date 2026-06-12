@@ -40,7 +40,8 @@ public class JobScheduleHelper {
         scheduleThread = new Thread(() -> {
             try {
                 TimeUnit.MILLISECONDS.sleep(5000 - System.currentTimeMillis() % 1000);
-            } catch (Throwable e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 if (!scheduleThreadToStop) {
                     logger.error(e.getMessage(), e);
                 }
@@ -157,7 +158,8 @@ public class JobScheduleHelper {
                         // pre-read period: success > scan each second; fail > skip this period;
                         TimeUnit.MILLISECONDS.sleep(
                                 (preReadSuc.get() ? 1000 : PRE_READ_MS) - System.currentTimeMillis() % 1000);
-                    } catch (Throwable e) {
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         if (!scheduleThreadToStop) {
                             logger.error(e.getMessage(), e);
                         }
@@ -178,7 +180,8 @@ public class JobScheduleHelper {
                 // align second
                 try {
                     TimeUnit.MILLISECONDS.sleep(1000 - System.currentTimeMillis() % 1000);
-                } catch (Throwable e) {
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     if (!ringThreadToStop) {
                         logger.error(e.getMessage(), e);
                     }
@@ -269,7 +272,8 @@ public class JobScheduleHelper {
         try {
             // wait
             TimeUnit.SECONDS.sleep(1);
-        } catch (Throwable e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             logger.error(e.getMessage(), e);
         }
         if (scheduleThread.getState() != Thread.State.TERMINATED) {
@@ -277,7 +281,8 @@ public class JobScheduleHelper {
             scheduleThread.interrupt();
             try {
                 scheduleThread.join();
-            } catch (Throwable e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.error(e.getMessage(), e);
             }
         }
@@ -290,7 +295,8 @@ public class JobScheduleHelper {
         if (hasRingData) {
             try {
                 TimeUnit.SECONDS.sleep(8);
-            } catch (Throwable e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.error(e.getMessage(), e);
             }
         }
@@ -299,7 +305,8 @@ public class JobScheduleHelper {
         ringThreadToStop = true;
         try {
             TimeUnit.SECONDS.sleep(1);
-        } catch (Throwable e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             logger.error(e.getMessage(), e);
         }
         if (ringThread.getState() != Thread.State.TERMINATED) {
@@ -307,7 +314,8 @@ public class JobScheduleHelper {
             ringThread.interrupt();
             try {
                 ringThread.join();
-            } catch (Throwable e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.error(e.getMessage(), e);
             }
         }
