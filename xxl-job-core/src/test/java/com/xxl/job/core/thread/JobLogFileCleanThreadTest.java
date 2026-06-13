@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.xxl.job.core.log.XxlJobFileAppender;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -62,12 +62,11 @@ class JobLogFileCleanThreadTest {
     }
 
     @Test
-    void testCleanExpiredLogFiles() throws IOException {
+    void testCleanExpiredLogFiles() throws IOException, InterruptedException {
         // Create expired log directories (older than retention period)
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, -10); // 10 days ago
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String expiredDateStr = sdf.format(cal.getTime());
+        LocalDate expiredDate = LocalDate.now().minusDays(10);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String expiredDateStr = expiredDate.format(formatter);
         File expiredDir = new File(tempLogDir, expiredDateStr);
         assertTrue(expiredDir.mkdirs());
 
@@ -79,10 +78,12 @@ class JobLogFileCleanThreadTest {
         JobLogFileCleanThread cleanThread = new JobLogFileCleanThread();
         cleanThread.start(7);
 
+        Thread.sleep(200);
+
         // Wait for cleanup to occur (thread sleeps 1 day, so we manually trigger by waiting)
         // Since the thread sleeps for 1 day, we need to wait or use reflection
         // For this test, we'll verify the directory exists before cleanup
-        assertTrue(expiredDir.exists());
+        assertFalse(expiredDir.exists());
 
         // Stop the thread
         cleanThread.toStop();
@@ -91,9 +92,9 @@ class JobLogFileCleanThreadTest {
     @Test
     void testKeepRecentLogFiles() throws IOException {
         // Create recent log directory (today)
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String todayDateStr = sdf.format(cal.getTime());
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String todayDateStr = today.format(formatter);
         File todayDir = new File(tempLogDir, todayDateStr);
         assertTrue(todayDir.mkdirs());
 
@@ -185,15 +186,9 @@ class JobLogFileCleanThreadTest {
     @Test
     void testBoundaryRetentionDays() throws IOException {
         // Test boundary: create directory exactly at retention limit
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        cal.add(Calendar.DAY_OF_MONTH, -7); // Exactly 7 days ago
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String boundaryDateStr = sdf.format(cal.getTime());
+        LocalDate boundaryDate = LocalDate.now().minusDays(7);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String boundaryDateStr = boundaryDate.format(formatter);
         File boundaryDir = new File(tempLogDir, boundaryDateStr);
         assertTrue(boundaryDir.mkdirs());
 
