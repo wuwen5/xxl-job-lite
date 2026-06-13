@@ -220,7 +220,7 @@ public class TriggerCallbackThread {
     private void retryFailCallbackFile() {
 
         // valid
-        File callbackLogPath = new File(FAIL_CALLBACK_FILE_NAME);
+        File callbackLogPath = new File(FAIL_CALLBACK_FILE_PATH);
         if (!callbackLogPath.exists()) {
             return;
         }
