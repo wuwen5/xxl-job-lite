@@ -1,18 +1,24 @@
 package com.xxl.job.core.log;
 
 import com.xxl.job.core.biz.model.LogResult;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * store trigger log in each log-file
  * @author xuxueli 2016-3-12 19:25:12
  */
+@Slf4j
 public class XxlJobFileAppender {
-    private static Logger logger = LoggerFactory.getLogger(XxlJobFileAppender.class);
 
     /**
      * log base path
@@ -33,20 +39,24 @@ public class XxlJobFileAppender {
 
     public static void initLogPath(String logPath) {
         // init
-        if (logPath != null && logPath.trim().length() > 0) {
+        if (logPath != null && !logPath.trim().isEmpty()) {
             logBasePath = logPath;
         }
         // mk base dir
         File logPathDir = new File(logBasePath);
         if (!logPathDir.exists()) {
-            logPathDir.mkdirs();
+            if (!logPathDir.mkdirs()) {
+                log.warn("Failed to create log base directory: {}", logBasePath);
+            }
         }
         logBasePath = logPathDir.getPath();
 
         // mk glue dir
         File glueBaseDir = new File(logPathDir, "gluesource");
         if (!glueBaseDir.exists()) {
-            glueBaseDir.mkdirs();
+            if (!glueBaseDir.mkdirs()) {
+                log.warn("Failed to create glue source directory: {}", glueBaseDir);
+            }
         }
         glueSrcPath = glueBaseDir.getPath();
     }
@@ -69,19 +79,21 @@ public class XxlJobFileAppender {
     public static String makeLogFileName(Date triggerDate, long logId) {
 
         // filePath/yyyy-MM-dd
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // avoid concurrent problem, can not be static
+        // avoid concurrent problem, can not be static
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         File logFilePath = new File(getLogPath(), sdf.format(triggerDate));
         if (!logFilePath.exists()) {
-            logFilePath.mkdir();
+            if (!logFilePath.mkdir()) {
+                log.warn("Failed to create log file directory: {}", logFilePath);
+            }
         }
 
         // filePath/yyyy-MM-dd/9999.log
-        String logFileName = logFilePath
+        return logFilePath
                 .getPath()
                 .concat(File.separator)
                 .concat(String.valueOf(logId))
                 .concat(".log");
-        return logFileName;
     }
 
     /**
@@ -93,16 +105,18 @@ public class XxlJobFileAppender {
     public static void appendLog(String logFileName, String appendLog) {
 
         // log file
-        if (logFileName == null || logFileName.trim().length() == 0) {
+        if (logFileName == null || logFileName.trim().isEmpty()) {
             return;
         }
         File logFile = new File(logFileName);
 
         if (!logFile.exists()) {
             try {
-                logFile.createNewFile();
+                if (!logFile.createNewFile()) {
+                    log.warn("Failed to create log file: {}", logFile);
+                }
             } catch (IOException e) {
-                logger.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 return;
             }
         }
@@ -114,21 +128,11 @@ public class XxlJobFileAppender {
         appendLog += "\r\n";
 
         // append file content
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(logFile, true);
-            fos.write(appendLog.getBytes("utf-8"));
+        try (FileOutputStream fos = new FileOutputStream(logFile, true)) {
+            fos.write(appendLog.getBytes(StandardCharsets.UTF_8));
             fos.flush();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -141,7 +145,7 @@ public class XxlJobFileAppender {
     public static LogResult readLog(String logFileName, int fromLineNum) {
 
         // valid log file
-        if (logFileName == null || logFileName.trim().length() == 0) {
+        if (logFileName == null || logFileName.trim().isEmpty()) {
             return new LogResult(fromLineNum, 0, "readLog fail, logFile not found", true);
         }
         File logFile = new File(logFileName);
@@ -151,42 +155,25 @@ public class XxlJobFileAppender {
         }
 
         // read file
-        StringBuffer logContentBuffer = new StringBuffer();
+        StringBuilder logContentBuffer = new StringBuilder();
         int toLineNum = 0;
-        LineNumberReader reader = null;
-        try {
-            // reader = new LineNumberReader(new FileReader(logFile));
-            reader = new LineNumberReader(new InputStreamReader(new FileInputStream(logFile), "utf-8"));
-            String line = null;
+        try (LineNumberReader reader = new LineNumberReader(
+                new InputStreamReader(Files.newInputStream(logFile.toPath()), StandardCharsets.UTF_8))) {
+            String line;
 
             while ((line = reader.readLine()) != null) {
-                toLineNum = reader.getLineNumber(); // [from, to], start as 1
+                // [from, to], start as 1
+                toLineNum = reader.getLineNumber();
                 if (toLineNum >= fromLineNum) {
                     logContentBuffer.append(line).append("\n");
                 }
             }
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
+            log.error(e.getMessage(), e);
         }
 
         // result
-        LogResult logResult = new LogResult(fromLineNum, toLineNum, logContentBuffer.toString(), false);
-        return logResult;
-
-        /*
-        // it will return the number of characters actually skipped
-        reader.skip(Long.MAX_VALUE);
-        int maxLineNum = reader.getLineNumber();
-        maxLineNum++;	// 最大行号
-        */
+        return new LogResult(fromLineNum, toLineNum, logContentBuffer.toString(), false);
     }
 
     /**
@@ -195,27 +182,16 @@ public class XxlJobFileAppender {
      * @return log line content
      */
     public static String readLines(File logFile) {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(logFile), "utf-8"));
-            if (reader != null) {
-                StringBuilder sb = new StringBuilder();
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line).append("\n");
-                }
-                return sb.toString();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(Files.newInputStream(logFile.toPath()), StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
             }
+            return sb.toString();
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
+            log.error(e.getMessage(), e);
         }
         return null;
     }

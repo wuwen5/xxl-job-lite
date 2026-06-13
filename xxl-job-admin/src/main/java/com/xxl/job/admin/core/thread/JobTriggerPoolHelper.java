@@ -3,23 +3,32 @@ package com.xxl.job.admin.core.thread;
 import com.xxl.job.admin.core.conf.XxlJobAdminConfig;
 import com.xxl.job.admin.core.trigger.TriggerTypeEnum;
 import com.xxl.job.admin.core.trigger.XxlJobTrigger;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * job trigger thread pool helper
  *
  * @author xuxueli 2018-07-03 21:08:07
  */
+@Slf4j
 public class JobTriggerPoolHelper {
-    private static Logger logger = LoggerFactory.getLogger(JobTriggerPoolHelper.class);
 
     // ---------------------- trigger pool ----------------------
 
-    // fast/slow thread pool
+    /**
+     * fast trigger thread pool
+     */
     private ThreadPoolExecutor fastTriggerPool = null;
+
+    /**
+     * slow trigger thread pool
+     */
     private ThreadPoolExecutor slowTriggerPool = null;
 
     public void start() {
@@ -30,7 +39,7 @@ public class JobTriggerPoolHelper {
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(2000),
                 r -> new Thread(r, "xxl-job, admin JobTriggerPoolHelper-fastTriggerPool-" + r.hashCode()),
-                (r, executor) -> logger.error(
+                (r, executor) -> log.error(
                         ">>>>>>>>>>> xxl-job, admin JobTriggerPoolHelper-fastTriggerPool execute too fast, Runnable={}",
                         r.toString()));
 
@@ -41,21 +50,19 @@ public class JobTriggerPoolHelper {
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(5000),
                 r -> new Thread(r, "xxl-job, admin JobTriggerPoolHelper-slowTriggerPool-" + r.hashCode()),
-                (r, executor) -> logger.error(
+                (r, executor) -> log.error(
                         ">>>>>>>>>>> xxl-job, admin JobTriggerPoolHelper-slowTriggerPool execute too fast, Runnable={}",
                         r.toString()));
     }
 
     public void stop() {
-        // triggerPool.shutdown();
         fastTriggerPool.shutdownNow();
         slowTriggerPool.shutdownNow();
-        logger.info(">>>>>>>>> xxl-job trigger thread pool shutdown success.");
+        log.info(">>>>>>>>> xxl-job trigger thread pool shutdown success.");
     }
 
-    // job timeout count
-    private volatile long minTim = System.currentTimeMillis() / 60000;
-    private volatile ConcurrentMap<Integer, AtomicInteger> jobTimeoutCountMap = new ConcurrentHashMap<>();
+    private long minTim = System.currentTimeMillis() / 60000;
+    private final ConcurrentMap<Integer, AtomicInteger> jobTimeoutCountMap = new ConcurrentHashMap<>();
 
     /**
      * add trigger
@@ -88,7 +95,7 @@ public class JobTriggerPoolHelper {
                     XxlJobTrigger.trigger(
                             jobId, triggerType, failRetryCount, executorShardingParam, executorParam, addressList);
                 } catch (Throwable e) {
-                    logger.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 } finally {
 
                     // check timeout-count-map

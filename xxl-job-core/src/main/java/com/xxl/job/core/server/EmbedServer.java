@@ -2,32 +2,52 @@ package com.xxl.job.core.server;
 
 import com.xxl.job.core.biz.ExecutorBiz;
 import com.xxl.job.core.biz.impl.ExecutorBizImpl;
-import com.xxl.job.core.biz.model.*;
+import com.xxl.job.core.biz.model.IdleBeatParam;
+import com.xxl.job.core.biz.model.KillParam;
+import com.xxl.job.core.biz.model.LogParam;
+import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.core.biz.model.TriggerParam;
 import com.xxl.job.core.thread.ExecutorRegistryThread;
 import com.xxl.job.core.util.GsonTool;
 import com.xxl.job.core.util.ThrowableUtil;
 import com.xxl.job.core.util.XxlJobRemotingUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpUtil;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
-import java.util.concurrent.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Copy from : https://github.com/xuxueli/xxl-rpc
+ * Copy from : <a href="https://github.com/xuxueli/xxl-rpc">...</a>
  *
  * @author xuxueli 2020-04-11 21:25
  */
+@Slf4j
 public class EmbedServer {
-    private static final Logger logger = LoggerFactory.getLogger(EmbedServer.class);
 
     private ExecutorBiz executorBiz;
     private Thread thread;
@@ -65,7 +85,7 @@ public class EmbedServer {
                             public void initChannel(SocketChannel channel) {
                                 channel.pipeline()
                                         .addLast(new IdleStateHandler(
-                                                0, 0, 30 * 3, TimeUnit.SECONDS)) // beat 3N, close if idle
+                                                0, 0, 30 * 3L, TimeUnit.SECONDS)) // beat 3N, close if idle
                                         .addLast(new HttpServerCodec())
                                         .addLast(new HttpObjectAggregator(
                                                 5 * 1024 * 1024)) // merge request & reponse to FULL
@@ -77,7 +97,7 @@ public class EmbedServer {
                 // bind
                 ChannelFuture future = bootstrap.bind(port).sync();
 
-                logger.info(
+                log.info(
                         ">>>>>>>>>>> xxl-job remoting server start success, nettype = {}, port = {}",
                         EmbedServer.class,
                         port);
@@ -90,16 +110,16 @@ public class EmbedServer {
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                logger.info(">>>>>>>>>>> xxl-job remoting server stop.");
+                log.info(">>>>>>>>>>> xxl-job remoting server stop.");
             } catch (Throwable e) {
-                logger.error(">>>>>>>>>>> xxl-job remoting server error.", e);
+                log.error(">>>>>>>>>>> xxl-job remoting server error.", e);
             } finally {
                 // stop
                 try {
                     workerGroup.shutdownGracefully();
                     bossGroup.shutdownGracefully();
                 } catch (Throwable e) {
-                    logger.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 }
             }
         });
@@ -116,7 +136,7 @@ public class EmbedServer {
 
         // stop registry
         stopRegistry();
-        logger.info(">>>>>>>>>>> xxl-job remoting server destroy success.");
+        log.info(">>>>>>>>>>> xxl-job remoting server destroy success.");
     }
 
     // ---------------------- registry ----------------------
@@ -124,16 +144,16 @@ public class EmbedServer {
     /**
      * netty_http
      * <p>
-     * Copy from : https://github.com/xuxueli/xxl-rpc
+     * Copy from : <a href="https://github.com/xuxueli/xxl-rpc">...</a>
      *
      * @author xuxueli 2015-11-24 22:25:15
      */
+    @Slf4j
     public static class EmbedHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-        private static final Logger logger = LoggerFactory.getLogger(EmbedHttpServerHandler.class);
 
-        private ExecutorBiz executorBiz;
-        private String accessToken;
-        private ThreadPoolExecutor bizThreadPool;
+        private final ExecutorBiz executorBiz;
+        private final String accessToken;
+        private final ThreadPoolExecutor bizThreadPool;
 
         public EmbedHttpServerHandler(ExecutorBiz executorBiz, String accessToken, ThreadPoolExecutor bizThreadPool) {
             this.executorBiz = executorBiz;
@@ -198,7 +218,7 @@ public class EmbedServer {
                         return new ReturnT<>(ReturnT.FAIL_CODE, "invalid request, uri-mapping(" + uri + ") not found.");
                 }
             } catch (Throwable e) {
-                logger.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 return new ReturnT<>(ReturnT.FAIL_CODE, "request error:" + ThrowableUtil.toString(e));
             }
         }
@@ -231,7 +251,7 @@ public class EmbedServer {
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            logger.error(">>>>>>>>>>> xxl-job provider netty_http server caught exception", cause);
+            log.error(">>>>>>>>>>> xxl-job provider netty_http server caught exception", cause);
             ctx.close();
         }
 
@@ -240,7 +260,7 @@ public class EmbedServer {
             if (evt instanceof IdleStateEvent) {
                 // beat 3N, close if idle
                 ctx.channel().close();
-                logger.debug(">>>>>>>>>>> xxl-job provider netty_http server close an idle channel.");
+                log.debug(">>>>>>>>>>> xxl-job provider netty_http server close an idle channel.");
             } else {
                 super.userEventTriggered(ctx, evt);
             }

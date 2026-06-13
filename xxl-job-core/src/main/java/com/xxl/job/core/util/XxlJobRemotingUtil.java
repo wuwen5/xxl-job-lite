@@ -8,6 +8,7 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -17,19 +18,16 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author xuxueli 2018-11-25 00:55:31
  */
+@Slf4j
 public class XxlJobRemotingUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(XxlJobRemotingUtil.class);
 
     public static final String XXL_JOB_ACCESS_TOKEN = "XXL-JOB-ACCESS-TOKEN";
 
-    private static volatile ServiceAddressResolver addressResolver = rawUrl -> rawUrl;
+    private static ServiceAddressResolver addressResolver = rawUrl -> rawUrl;
 
     private static final SSLContext SSL_CONTEXT = createSslContext();
 
@@ -84,7 +82,7 @@ public class XxlJobRemotingUtil {
                 try {
                     return GsonTool.fromReturnJson(resultJson, returnTargClassOfT);
                 } catch (Exception e) {
-                    LOGGER.error("xxl-job remoting (url={}) response content invalid({}).", url, resultJson, e);
+                    log.error("xxl-job remoting (url={}) response content invalid({}).", url, resultJson, e);
                     return ReturnT.ofFail(
                             "xxl-job remoting (url=" + url + ") response content invalid(" + resultJson + ").");
                 }

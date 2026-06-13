@@ -7,16 +7,22 @@ import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.log.XxlJobFileAppender;
 import com.xxl.job.core.util.ScriptUtil;
 import java.io.File;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Created by xuxueli on 17/4/27.
  */
+@Slf4j
 public class ScriptJobHandler extends IJobHandler {
 
-    private int jobId;
-    private long glueUpdatetime;
-    private String gluesource;
-    private GlueTypeEnum glueType;
+    private final int jobId;
+
+    @Getter
+    private final long glueUpdatetime;
+
+    private final String gluesource;
+    private final GlueTypeEnum glueType;
 
     public ScriptJobHandler(int jobId, long glueUpdatetime, String gluesource, GlueTypeEnum glueType) {
         this.jobId = jobId;
@@ -28,18 +34,17 @@ public class ScriptJobHandler extends IJobHandler {
         File glueSrcPath = new File(XxlJobFileAppender.getGlueSrcPath());
         if (glueSrcPath.exists()) {
             File[] glueSrcFileList = glueSrcPath.listFiles();
-            if (glueSrcFileList != null && glueSrcFileList.length > 0) {
+            if (glueSrcFileList != null) {
                 for (File glueSrcFileItem : glueSrcFileList) {
-                    if (glueSrcFileItem.getName().startsWith(String.valueOf(jobId) + "_")) {
-                        glueSrcFileItem.delete();
+                    if (glueSrcFileItem.getName().startsWith(jobId + "_")) {
+                        if (!glueSrcFileItem.delete()) {
+                            // delete failed, could log warning if needed
+                            log.warn("Failed to delete old script file: {}", glueSrcFileItem);
+                        }
                     }
                 }
             }
         }
-    }
-
-    public long getGlueUpdatetime() {
-        return glueUpdatetime;
     }
 
     @Override
@@ -80,10 +85,8 @@ public class ScriptJobHandler extends IJobHandler {
 
         if (exitValue == 0) {
             XxlJobHelper.handleSuccess();
-            return;
         } else {
             XxlJobHelper.handleFail("script exit value(" + exitValue + ") is failed");
-            return;
         }
     }
 }

@@ -15,9 +15,6 @@ public class FileUtil {
 
     /**
      * delete recursively
-     *
-     * @param root
-     * @return
      */
     public static boolean deleteRecursively(File root) {
         if (root != null && root.exists()) {
@@ -55,7 +52,10 @@ public class FileUtil {
         byte[] filecontent = new byte[(int) filelength];
 
         try (FileInputStream in = new FileInputStream(file)) {
-            in.read(filecontent);
+            int bytesRead = in.read(filecontent);
+            if (bytesRead != filelength) {
+                log.warn("Expected to read {} bytes but only read {} bytes from file: {}", filelength, bytesRead, file);
+            }
             return filecontent;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
