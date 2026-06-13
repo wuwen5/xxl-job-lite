@@ -183,6 +183,97 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
                 result.getResponse().getContentAsString());
     }
 
+    /**
+     * POST /jobgroup/save → AppName contains invalid characters (< or >) → code 500
+     */
+    @Test
+    public void testSaveAppnameWithInvalidChars() throws Exception {
+        MvcResult result = mockMvc.perform(post("/jobgroup/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("appname", "invalid<name")
+                        .param("title", "Some Title")
+                        .param("addressType", "0")
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info("testSaveAppnameWithInvalidChars: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/save → Title contains invalid characters → code 500
+     */
+    @Test
+    public void testSaveTitleWithInvalidChars() throws Exception {
+        MvcResult result = mockMvc.perform(post("/jobgroup/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("appname", "valid-name")
+                        .param("title", "Invalid>Title")
+                        .param("addressType", "0")
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info("testSaveTitleWithInvalidChars: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/save → AppName too long (>64 chars) → code 500
+     */
+    @Test
+    public void testSaveAppnameTooLong() throws Exception {
+        String longAppname = "a".repeat(65);
+        MvcResult result = mockMvc.perform(post("/jobgroup/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("appname", longAppname)
+                        .param("title", "Some Title")
+                        .param("addressType", "0")
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info("testSaveAppnameTooLong: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/save → Manual address type with empty item in address list → code 500
+     */
+    @Test
+    public void testSaveManualAddressWithEmptyItem() throws Exception {
+        MvcResult result = mockMvc.perform(post("/jobgroup/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("appname", "manual-exec3")
+                        .param("title", "Manual3")
+                        .param("addressType", "1")
+                        .param("addressList", "127.0.0.1:9999,,127.0.0.1:9998") // empty item
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info(
+                "testSaveManualAddressWithEmptyItem: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/save → Manual address type with invalid chars in address list → code 500
+     */
+    @Test
+    public void testSaveManualAddressWithInvalidChars() throws Exception {
+        MvcResult result = mockMvc.perform(post("/jobgroup/save")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("appname", "manual-exec4")
+                        .param("title", "Manual4")
+                        .param("addressType", "1")
+                        .param("addressList", "127.0.0.1:9999,<invalid>:9998")
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info(
+                "testSaveManualAddressWithInvalidChars: {}",
+                result.getResponse().getContentAsString());
+    }
+
     // ---------------------- update ----------------------
 
     @Test
@@ -213,6 +304,104 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
         logger.info("testUpdateAppnameEmpty: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/update → AppName too short → code 500
+     */
+    @Test
+    public void testUpdateAppnameTooShort() throws Exception {
+        MvcResult result = mockMvc.perform(post("/jobgroup/update")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", "1")
+                        .param("appname", "ab")
+                        .param("title", "Title")
+                        .param("addressType", "0")
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info("testUpdateAppnameTooShort: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/update → Title empty → code 500
+     */
+    @Test
+    public void testUpdateTitleEmpty() throws Exception {
+        MvcResult result = mockMvc.perform(post("/jobgroup/update")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", "1")
+                        .param("appname", "existing-executor")
+                        .param("title", "")
+                        .param("addressType", "0")
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info("testUpdateTitleEmpty: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/update → Manual address type with empty address list → code 500
+     */
+    @Test
+    public void testUpdateManualAddressEmpty() throws Exception {
+        MvcResult result = mockMvc.perform(post("/jobgroup/update")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", "1")
+                        .param("appname", "existing-executor")
+                        .param("title", "Updated Title")
+                        .param("addressType", "1")
+                        .param("addressList", "")
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info("testUpdateManualAddressEmpty: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/update → Manual address type with empty item → code 500
+     */
+    @Test
+    public void testUpdateManualAddressWithEmptyItem() throws Exception {
+        MvcResult result = mockMvc.perform(post("/jobgroup/update")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", "1")
+                        .param("appname", "existing-executor")
+                        .param("title", "Updated Title")
+                        .param("addressType", "1")
+                        .param("addressList", "127.0.0.1:9999,,127.0.0.1:9998")
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info(
+                "testUpdateManualAddressWithEmptyItem: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/update → Auto register type (addressType=0) with registry data
+     */
+    @Test
+    public void testUpdateAutoRegisterWithRegistry() throws Exception {
+        // Insert registry data for the appname
+        jdbcTemplate.execute("INSERT INTO xxl_job_registry(registry_group, registry_key, registry_value, update_time) "
+                + "VALUES ('EXECUTOR', 'existing-executor', '127.0.0.1:9999', NOW())");
+
+        MvcResult result = mockMvc.perform(post("/jobgroup/update")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", "1")
+                        .param("appname", "existing-executor")
+                        .param("title", "Updated With Registry")
+                        .param("addressType", "0")
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andReturn();
+        logger.info(
+                "testUpdateAutoRegisterWithRegistry: {}", result.getResponse().getContentAsString());
     }
 
     // ---------------------- remove ----------------------
@@ -262,6 +451,25 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
                 .andExpect(jsonPath("$.code").value(200))
                 .andReturn();
         logger.info("testRemoveSuccess: {}", result.getResponse().getContentAsString());
+    }
+
+    /**
+     * POST /jobgroup/remove → Remove non-existent group → code 500 (ret <= 0)
+     */
+    @Test
+    public void testRemoveNonExistentGroup() throws Exception {
+        // Insert a second group first to avoid "only one group" check
+        jdbcTemplate.execute("INSERT INTO xxl_job_group(id, app_name, title, address_type, address_list, update_time) "
+                + "VALUES (2, 'second-executor', 'Second Executor', 0, NULL, NOW())");
+
+        MvcResult result = mockMvc.perform(post("/jobgroup/remove")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("id", "9999") // non-existent
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andReturn();
+        logger.info("testRemoveNonExistentGroup: {}", result.getResponse().getContentAsString());
     }
 
     // ---------------------- loadById ----------------------
