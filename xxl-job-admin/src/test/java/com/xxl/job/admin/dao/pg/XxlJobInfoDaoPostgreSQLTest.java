@@ -56,11 +56,11 @@ public class XxlJobInfoDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         insertJobInfo(1, "beta-desc", "handlerBeta", "bob", 0, 2000L);
         insertJobInfo(2, "gamma-job", "handlerAlpha", "alice2", 1, 3000L);
 
-        assertEquals(2, xxlJobInfoDao.pageListCount(0, 10, 1, -1, null, null, null));
-        assertEquals(2, xxlJobInfoDao.pageListCount(0, 10, 0, 1, null, null, null));
-        assertEquals(1, xxlJobInfoDao.pageListCount(0, 10, 0, -1, "gamma", null, null));
-        assertEquals(2, xxlJobInfoDao.pageListCount(0, 10, 0, -1, null, "handlerAlpha", null));
-        assertEquals(2, xxlJobInfoDao.pageListCount(0, 10, 0, -1, null, null, "alice"));
+        assertEquals(2, xxlJobInfoDao.pageListCount(1, -1, null, null, null));
+        assertEquals(2, xxlJobInfoDao.pageListCount(0, 1, null, null, null));
+        assertEquals(1, xxlJobInfoDao.pageListCount(0, -1, "gamma", null, null));
+        assertEquals(2, xxlJobInfoDao.pageListCount(0, -1, null, "handlerAlpha", null));
+        assertEquals(2, xxlJobInfoDao.pageListCount(0, -1, null, null, "alice"));
     }
 
     @Test

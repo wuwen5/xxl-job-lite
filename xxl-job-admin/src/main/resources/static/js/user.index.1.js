@@ -119,8 +119,8 @@ $(function() {
 			layer.close(index);
 
 			$.ajax({
-				type : 'POST',
-				url : base_url + "/user/remove",
+				type : 'DELETE',
+				url : base_url + "/user/" + id,
 				data : {
 					"id" : id
 				},
@@ -207,7 +207,7 @@ $(function() {
                 "permission": permissionArr.join(',')
 			};
 
-        	$.post(base_url + "/user/add", paramData, function(data, status) {
+        	$.post(base_url + "/user", paramData, function(data, status) {
     			if (data.code == "200") {
 					$('#addModal').modal('hide');
 
@@ -298,20 +298,26 @@ $(function() {
                 "role": $("#updateModal .form input[name=role]:checked").val(),
                 "permission": permissionArr.join(',')
             };
-
-            $.post(base_url + "/user/update", paramData, function(data, status) {
-                if (data.code == "200") {
-                    $('#updateModal').modal('hide');
-
-                    layer.msg( I18n.system_update_suc );
-                    userListTable.fnDraw();
-                } else {
-                    layer.open({
-                        title: I18n.system_tips ,
-                        btn: [ I18n.system_ok ],
-                        content: (data.msg || I18n.system_update_fail),
-                        icon: '2'
-                    });
+            
+            $.ajax({
+                type : 'PUT',
+                url : base_url + "/user/" + $("#updateModal .form input[name=id]").val(),
+                data : paramData,
+                dataType : "json",
+                success : function(data){
+                    if (data.code == 200) {
+                        $('#updateModal').modal('hide');
+                        
+                        layer.msg( I18n.system_update_suc );
+                        userListTable.fnDraw();
+                    } else {
+                        layer.open({
+                                    title: I18n.system_tips ,
+                                    btn: [ I18n.system_ok ],
+                                    content: (data.msg || I18n.system_update_fail),
+                                    icon: '2'
+                                });
+                    }
                 }
             });
 		}

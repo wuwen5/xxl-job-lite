@@ -1,14 +1,22 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
+  timeout: 5000,   
+  expect: {
+    timeout: 3000, 
+  },
   testDir: './tests',
   fullyParallel: true,
-  retries: 1,
+  retries: 0,
   workers: 1,
-  reporter: 'html',
+  reporter: [
+      ['html', { open: 'never' }],
+      ['json', { outputFile: 'test-results/results.json' }],
+      ['junit', { outputFile: 'test-results/junit.xml' }]
+  ],
   use: {
     baseURL: 'http://xxl-job-admin:8080',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
   },
   projects: [
     {

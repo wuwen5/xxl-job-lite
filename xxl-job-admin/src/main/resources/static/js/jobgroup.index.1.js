@@ -163,9 +163,8 @@ $(function() {
 			layer.close(index);
 
 			$.ajax({
-				type : 'POST',
-				url : base_url + '/jobgroup/remove',
-				data : {"id":id},
+				type : 'DELETE',
+				url : base_url + '/jobgroup/' + id,
 				dataType : "json",
 				success : function(data){
 					if (data.code == 200) {
@@ -239,7 +238,7 @@ $(function() {
 			element.parent('div').append(error);
 		},
 		submitHandler : function(form) {
-			$.post(base_url + "/jobgroup/save",  $("#addModal .form").serialize(), function(data, status) {
+			$.post(base_url + "/jobgroup",  $("#addModal .form").serialize(), function(data, status) {
 				if (data.code == "200") {
 					$('#addModal').modal('hide');
 					layer.open({
@@ -336,28 +335,35 @@ $(function() {
 			element.parent('div').append(error);
 		},
 		submitHandler : function(form) {
-			$.post(base_url + "/jobgroup/update",  $("#updateModal .form").serialize(), function(data, status) {
-				if (data.code == "200") {
-					$('#updateModal').modal('hide');
-
-					layer.open({
-						title: I18n.system_tips ,
-                        btn: [ I18n.system_ok ],
-						content: I18n.system_update_suc ,
-						icon: '1',
-						end: function(layero, index){
-							jobGroupTable.fnDraw();
-						}
-					});
-				} else {
-					layer.open({
-						title: I18n.system_tips,
-                        btn: [ I18n.system_ok ],
-						content: (data.msg || I18n.system_update_fail  ),
-						icon: '2'
-					});
-				}
-			});
+			
+			$.ajax({
+                type : 'PUT',
+                url : base_url + "/jobgroup/" + $("#updateModal .form input[name='id']").val(),
+                data : $("#updateModal .form").serialize(),
+                dataType : "json",
+                success : function(data){
+                    if (data.code == 200) {
+                        $('#updateModal').modal('hide');
+                        
+                        layer.open({
+                            title: I18n.system_tips ,
+                            btn: [ I18n.system_ok ],
+                            content: I18n.system_update_suc ,
+                            icon: '1',
+                            end: function(layero, index){
+                                jobGroupTable.fnDraw();
+                            }
+                        });
+                    } else {
+                        layer.open({
+                                title: I18n.system_tips,
+                                btn: [ I18n.system_ok ],
+                                content: (data.msg || I18n.system_update_fail  ),
+                                icon: '2'
+                            });
+                    }
+                }
+            });
 		}
 	});
 	$("#updateModal").on('hide.bs.modal', function () {

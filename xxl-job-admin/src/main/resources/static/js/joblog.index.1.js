@@ -4,9 +4,9 @@ $(function() {
 	$("#jobGroup").on("change", function () {
 		var jobGroup = $(this).children('option:selected').val();
 		$.ajax({
-			type : 'POST',
+			type : 'GET',
             async: false,   // async, avoid js invoke pagelist before jobId data init
-			url : base_url + '/joblog/getJobsByGroup',
+			url : base_url + '/joblog/getJobsByGroup/' + jobGroup,
 			data : {"jobGroup":jobGroup},
 			dataType : "json",
 			success : function(data){
@@ -262,7 +262,7 @@ $(function() {
 	$('#joblog_list').on('click', '.logDetail', function(){
 		var _id = $(this).attr('_id');
 		
-		window.open(base_url + '/joblog/logDetailPage?id=' + _id);
+		window.open(base_url + '/joblog/logDetailPage/' + _id);
 		return;
 	});
 

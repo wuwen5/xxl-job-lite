@@ -1,6 +1,5 @@
 package com.xxl.job.admin.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,8 +36,7 @@ public class JobApiControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testGetMethodNotAllowed() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/callback").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(500))
+                .andExpect(status().isMethodNotAllowed())
                 .andReturn();
 
         logger.info("testGetMethodNotAllowed: {}", result.getResponse().getContentAsString());

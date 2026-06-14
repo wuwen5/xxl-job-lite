@@ -124,7 +124,7 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveSuccess() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobcode/save")
+        MvcResult result = mockMvc.perform(post("/jobcode")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", String.valueOf(glueJobId))
                         .param("glueSource", "// my groovy source code")
@@ -144,7 +144,7 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testSaveMultipleTimes() throws Exception {
         for (int i = 1; i <= 5; i++) {
-            mockMvc.perform(post("/jobcode/save")
+            mockMvc.perform(post("/jobcode")
                             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                             .param("id", String.valueOf(glueJobId))
                             .param("glueSource", "// version " + i)
@@ -167,7 +167,7 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
     public void testSaveUpdatesGlueSourceInDb() throws Exception {
         String newSource = "// updated groovy source code";
 
-        mockMvc.perform(post("/jobcode/save")
+        mockMvc.perform(post("/jobcode")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", String.valueOf(glueJobId))
                         .param("glueSource", newSource)
@@ -187,7 +187,7 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveNullGlueRemark() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobcode/save")
+        MvcResult result = mockMvc.perform(post("/jobcode")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", String.valueOf(glueJobId))
                         .param("glueSource", "// source code")
@@ -206,7 +206,7 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveRemarkTooShort() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobcode/save")
+        MvcResult result = mockMvc.perform(post("/jobcode")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", String.valueOf(glueJobId))
                         .param("glueSource", "// source code")
@@ -227,7 +227,7 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 101; i++) sb.append('a');
         String longRemark = sb.toString();
-        MvcResult result = mockMvc.perform(post("/jobcode/save")
+        MvcResult result = mockMvc.perform(post("/jobcode")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", String.valueOf(glueJobId))
                         .param("glueSource", "// source code")
@@ -245,7 +245,7 @@ public class JobCodeControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveJobNotFound() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobcode/save")
+        MvcResult result = mockMvc.perform(post("/jobcode")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "9999")
                         .param("glueSource", "// source code")

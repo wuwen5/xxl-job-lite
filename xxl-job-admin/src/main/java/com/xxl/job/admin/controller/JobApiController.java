@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -35,16 +36,12 @@ public class JobApiController {
      * @param data
      * @return
      */
-    @RequestMapping("/{uri}")
+    @PostMapping("/{uri}")
     @ResponseBody
     @PermissionLimit(limit = false)
     public ReturnT<String> api(
             HttpServletRequest request, @PathVariable("uri") String uri, @RequestBody(required = false) String data) {
 
-        // valid
-        if (!"POST".equalsIgnoreCase(request.getMethod())) {
-            return new ReturnT<>(ReturnT.FAIL_CODE, "invalid request, HttpMethod not support.");
-        }
         if (uri == null || uri.trim().isEmpty()) {
             return new ReturnT<>(ReturnT.FAIL_CODE, "invalid request, uri-mapping empty.");
         }

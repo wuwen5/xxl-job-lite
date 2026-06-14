@@ -37,8 +37,6 @@ public interface XxlJobInfoDao {
     /**
      * Counts the total number of job infos matching the filter criteria for pagination.
      *
-     * @param offset the offset (not used in count, but included for consistency)
-     * @param pagesize the pagesize (not used in count, but included for consistency)
      * @param jobGroup the job group ID to filter by
      * @param triggerStatus the trigger status to filter by
      * @param jobDesc the job description to filter by (optional)
@@ -47,8 +45,6 @@ public interface XxlJobInfoDao {
      * @return the total count of matching job infos
      */
     int pageListCount(
-            @Param("offset") int offset,
-            @Param("pagesize") int pagesize,
             @Param("jobGroup") int jobGroup,
             @Param("triggerStatus") int triggerStatus,
             @Param("jobDesc") String jobDesc,

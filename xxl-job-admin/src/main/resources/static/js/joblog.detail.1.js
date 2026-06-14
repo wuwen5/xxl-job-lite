@@ -21,9 +21,9 @@ $(function() {
         console.log("pullLog, fromLineNum:" + fromLineNum);
 
         $.ajax({
-            type : 'POST',
+            type : 'GET',
             async: false,   // sync, make log ordered
-            url : base_url + '/joblog/logDetailCat',
+            url : base_url + '/joblog/logDetailCat/' + logId,
             data : {
                 "logId":logId,
                 "fromLineNum":fromLineNum

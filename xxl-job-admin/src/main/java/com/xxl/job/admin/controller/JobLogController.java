@@ -19,15 +19,19 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.util.DateUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -39,8 +43,10 @@ import org.springframework.web.util.HtmlUtils;
  */
 @Controller
 @RequestMapping("/joblog")
+@Slf4j
 public class JobLogController {
-    private static Logger logger = LoggerFactory.getLogger(JobLogController.class);
+
+    private static final ZoneId DEFAULT_ZONE = ZoneId.systemDefault();
 
     @Resource
     private XxlJobGroupDao xxlJobGroupDao;
@@ -51,17 +57,17 @@ public class JobLogController {
     @Resource
     private XxlJobLogDao xxlJobLogDao;
 
-    @RequestMapping
+    @GetMapping
     public String index(
             HttpServletRequest request,
             Model model,
             @RequestParam(required = false, defaultValue = "0") Integer jobId) {
 
         // 执行器列表
-        List<XxlJobGroup> jobGroupList_all = xxlJobGroupDao.findAll();
+        List<XxlJobGroup> jobGroupListAll = xxlJobGroupDao.findAll();
 
         // filter group
-        List<XxlJobGroup> jobGroupList = PermissionInterceptor.filterJobGroupByRole(request, jobGroupList_all);
+        List<XxlJobGroup> jobGroupList = PermissionInterceptor.filterJobGroupByRole(request, jobGroupListAll);
         if (jobGroupList == null || jobGroupList.isEmpty()) {
             throw new XxlJobException(I18nUtil.getString("jobgroup_empty"));
         }
@@ -85,14 +91,14 @@ public class JobLogController {
         return "joblog/joblog.index";
     }
 
-    @RequestMapping("/getJobsByGroup")
+    @GetMapping("/getJobsByGroup/{id}")
     @ResponseBody
-    public ReturnT<List<XxlJobInfo>> getJobsByGroup(int jobGroup) {
-        List<XxlJobInfo> list = xxlJobInfoDao.getJobsByGroup(jobGroup);
+    public ReturnT<List<XxlJobInfo>> getJobsByGroup(@PathVariable int id) {
+        List<XxlJobInfo> list = xxlJobInfoDao.getJobsByGroup(id);
         return new ReturnT<>(list);
     }
 
-    @RequestMapping("/pageList")
+    @PostMapping("/pageList")
     @ResponseBody
     public Map<String, Object> pageList(
             HttpServletRequest request,
@@ -121,22 +127,22 @@ public class JobLogController {
         // page query
         List<XxlJobLog> list =
                 xxlJobLogDao.pageList(start, length, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus);
-        int list_count =
+        int listCount =
                 xxlJobLogDao.pageListCount(start, length, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus);
 
         // package result
-        Map<String, Object> maps = new HashMap<>();
+        Map<String, Object> maps = new HashMap<>(2);
         // 总记录数
-        maps.put("recordsTotal", list_count);
+        maps.put("recordsTotal", listCount);
         // 过滤后的总记录数
-        maps.put("recordsFiltered", list_count);
+        maps.put("recordsFiltered", listCount);
         // 分页列表
         maps.put("data", list);
         return maps;
     }
 
-    @RequestMapping("/logDetailPage")
-    public String logDetailPage(int id, Model model) {
+    @GetMapping("/logDetailPage/{id}")
+    public String logDetailPage(@PathVariable int id, Model model) {
 
         // base check
         XxlJobLog jobLog = xxlJobLogDao.load(id);
@@ -150,9 +156,9 @@ public class JobLogController {
         return "joblog/joblog.detail";
     }
 
-    @RequestMapping("/logDetailCat")
+    @GetMapping("/logDetailCat/{logId}")
     @ResponseBody
-    public ReturnT<LogResult> logDetailCat(long logId, int fromLineNum) {
+    public ReturnT<LogResult> logDetailCat(@PathVariable long logId, int fromLineNum) {
         try {
             // valid
             // todo, need to improve performance
@@ -185,47 +191,47 @@ public class JobLogController {
 
             return logResult;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return new ReturnT<>(ReturnT.FAIL_CODE, e.getMessage());
         }
     }
 
-    @RequestMapping("/logKill")
+    @PostMapping("/logKill")
     @ResponseBody
     public ReturnT<String> logKill(int id) {
         // base check
-        XxlJobLog log = xxlJobLogDao.load(id);
-        XxlJobInfo jobInfo = xxlJobInfoDao.loadById(log.getJobId());
+        XxlJobLog jobLog = xxlJobLogDao.load(id);
+        XxlJobInfo jobInfo = xxlJobInfoDao.loadById(jobLog.getJobId());
         if (jobInfo == null) {
             return new ReturnT<>(500, I18nUtil.getString("jobinfo_glue_jobid_unvalid"));
         }
-        if (ReturnT.SUCCESS_CODE != log.getTriggerCode()) {
+        if (ReturnT.SUCCESS_CODE != jobLog.getTriggerCode()) {
             return new ReturnT<>(500, I18nUtil.getString("joblog_kill_log_limit"));
         }
 
         // request of kill
         ReturnT<String> runResult;
         try {
-            ExecutorBiz executorBiz = XxlJobScheduler.getExecutorBiz(log.getExecutorAddress());
+            ExecutorBiz executorBiz = XxlJobScheduler.getExecutorBiz(jobLog.getExecutorAddress());
             runResult = executorBiz.kill(new KillParam(jobInfo.getId()));
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             runResult = new ReturnT<>(500, e.getMessage());
         }
 
         if (ReturnT.SUCCESS_CODE == runResult.getCode()) {
-            log.setHandleCode(ReturnT.FAIL_CODE);
-            log.setHandleMsg(I18nUtil.getString("joblog_kill_log_byman") + ":"
+            jobLog.setHandleCode(ReturnT.FAIL_CODE);
+            jobLog.setHandleMsg(I18nUtil.getString("joblog_kill_log_byman") + ":"
                     + (runResult.getMsg() != null ? runResult.getMsg() : ""));
-            log.setHandleTime(new Date());
-            XxlJobCompleter.updateHandleInfoAndFinish(log);
+            jobLog.setHandleTime(new Date());
+            XxlJobCompleter.updateHandleInfoAndFinish(jobLog);
             return new ReturnT<>(runResult.getMsg());
         } else {
             return new ReturnT<>(500, runResult.getMsg());
         }
     }
 
-    @RequestMapping("/clearLog")
+    @PostMapping("/clearLog")
     @ResponseBody
     public ReturnT<String> clearLog(HttpServletRequest request, int jobGroup, int jobId, int type) {
         // valid permission
@@ -233,19 +239,38 @@ public class JobLogController {
 
         // opt
         Date clearBeforeTime = null;
+
+        // 0 : 清理所有
         int clearBeforeNum = 0;
+
+        if (type < 1 || type > 9) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("joblog_clean_type_unvalid"));
+        }
+
         if (type == 1) {
             // 清理一个月之前日志数据
-            clearBeforeTime = DateUtil.addMonths(new Date(), -1);
+            clearBeforeTime = Date.from(LocalDateTime.now(DEFAULT_ZONE)
+                    .minusMonths(1)
+                    .atZone(DEFAULT_ZONE)
+                    .toInstant());
         } else if (type == 2) {
             // 清理三个月之前日志数据
-            clearBeforeTime = DateUtil.addMonths(new Date(), -3);
+            clearBeforeTime = Date.from(LocalDateTime.now(DEFAULT_ZONE)
+                    .minusMonths(3)
+                    .atZone(DEFAULT_ZONE)
+                    .toInstant());
         } else if (type == 3) {
             // 清理六个月之前日志数据
-            clearBeforeTime = DateUtil.addMonths(new Date(), -6);
+            clearBeforeTime = Date.from(LocalDateTime.now(DEFAULT_ZONE)
+                    .minusMonths(6)
+                    .atZone(DEFAULT_ZONE)
+                    .toInstant());
         } else if (type == 4) {
             // 清理一年之前日志数据
-            clearBeforeTime = DateUtil.addYears(new Date(), -1);
+            clearBeforeTime = Date.from(LocalDateTime.now(DEFAULT_ZONE)
+                    .minusYears(1)
+                    .atZone(DEFAULT_ZONE)
+                    .toInstant());
         } else if (type == 5) {
             // 清理一千条以前日志数据
             clearBeforeNum = 1000;
@@ -258,11 +283,6 @@ public class JobLogController {
         } else if (type == 8) {
             // 清理十万条以前日志数据
             clearBeforeNum = 100000;
-        } else if (type == 9) {
-            // 清理所有日志数据
-            clearBeforeNum = 0;
-        } else {
-            return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("joblog_clean_type_unvalid"));
         }
 
         List<Long> logIds;

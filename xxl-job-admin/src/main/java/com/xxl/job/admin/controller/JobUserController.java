@@ -17,6 +17,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -28,13 +33,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/user")
 public class JobUserController {
 
+    private static final int USERNAME_PASSWORD_MIN_LENGTH = 4;
+    private static final int USERNAME_PASSWORD_MAX_LENGTH = 20;
+
     @Resource
     private XxlJobUserDao xxlJobUserDao;
 
     @Resource
     private XxlJobGroupDao xxlJobGroupDao;
 
-    @RequestMapping
+    @GetMapping
     @PermissionLimit(adminuser = true)
     public String index(Model model) {
 
@@ -45,7 +53,7 @@ public class JobUserController {
         return "user/user.index";
     }
 
-    @RequestMapping("/pageList")
+    @PostMapping("/pageList")
     @ResponseBody
     @PermissionLimit(adminuser = true)
     public Map<String, Object> pageList(
@@ -56,24 +64,25 @@ public class JobUserController {
 
         // page list
         List<XxlJobUser> list = xxlJobUserDao.pageList(start, length, username, role);
-        int list_count = xxlJobUserDao.pageListCount(start, length, username, role);
+        int listCount = xxlJobUserDao.pageListCount(start, length, username, role);
 
         // filter
-        if (list != null && list.size() > 0) {
+        if (list != null && !list.isEmpty()) {
             for (XxlJobUser item : list) {
                 item.setPassword(null);
             }
         }
 
         // package result
-        Map<String, Object> maps = new HashMap<>();
-        maps.put("recordsTotal", list_count); // 总记录数
-        maps.put("recordsFiltered", list_count); // 过滤后的总记录数
-        maps.put("data", list); // 分页列表
+        Map<String, Object> maps = new HashMap<>(3);
+        maps.put("recordsTotal", listCount);
+        // 过滤后的总记录数
+        maps.put("recordsFiltered", listCount);
+        maps.put("data", list);
         return maps;
     }
 
-    @RequestMapping("/add")
+    @PostMapping
     @ResponseBody
     @PermissionLimit(adminuser = true)
     public ReturnT<String> add(XxlJobUser xxlJobUser) {
@@ -84,7 +93,8 @@ public class JobUserController {
                     ReturnT.FAIL_CODE, I18nUtil.getString("system_please_input") + I18nUtil.getString("user_username"));
         }
         xxlJobUser.setUsername(xxlJobUser.getUsername().trim());
-        if (!(xxlJobUser.getUsername().length() >= 4 && xxlJobUser.getUsername().length() <= 20)) {
+        if (!(xxlJobUser.getUsername().length() >= USERNAME_PASSWORD_MIN_LENGTH
+                && xxlJobUser.getUsername().length() <= USERNAME_PASSWORD_MAX_LENGTH)) {
             return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("system_lengh_limit") + "[4-20]");
         }
         // valid password
@@ -93,7 +103,8 @@ public class JobUserController {
                     ReturnT.FAIL_CODE, I18nUtil.getString("system_please_input") + I18nUtil.getString("user_password"));
         }
         xxlJobUser.setPassword(xxlJobUser.getPassword().trim());
-        if (!(xxlJobUser.getPassword().length() >= 4 && xxlJobUser.getPassword().length() <= 20)) {
+        if (!(xxlJobUser.getPassword().length() >= USERNAME_PASSWORD_MIN_LENGTH
+                && xxlJobUser.getPassword().length() <= USERNAME_PASSWORD_MAX_LENGTH)) {
             return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("system_lengh_limit") + "[4-20]");
         }
         // md5 password
@@ -111,10 +122,12 @@ public class JobUserController {
         return ReturnT.SUCCESS;
     }
 
-    @RequestMapping("/update")
+    @PutMapping("/{id}")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public ReturnT<String> update(HttpServletRequest request, XxlJobUser xxlJobUser) {
+    public ReturnT<String> update(HttpServletRequest request, XxlJobUser xxlJobUser, @PathVariable int id) {
+
+        xxlJobUser.setId(id);
 
         // avoid opt login seft
         XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
@@ -125,8 +138,8 @@ public class JobUserController {
         // valid password
         if (StringUtils.hasText(xxlJobUser.getPassword())) {
             xxlJobUser.setPassword(xxlJobUser.getPassword().trim());
-            if (!(xxlJobUser.getPassword().length() >= 4
-                    && xxlJobUser.getPassword().length() <= 20)) {
+            if (!(xxlJobUser.getPassword().length() >= USERNAME_PASSWORD_MIN_LENGTH
+                    && xxlJobUser.getPassword().length() <= USERNAME_PASSWORD_MAX_LENGTH)) {
                 return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("system_lengh_limit") + "[4-20]");
             }
             // md5 password
@@ -141,10 +154,10 @@ public class JobUserController {
         return ReturnT.SUCCESS;
     }
 
-    @RequestMapping("/remove")
+    @DeleteMapping("/{id}")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public ReturnT<String> remove(HttpServletRequest request, int id) {
+    public ReturnT<String> remove(HttpServletRequest request, @PathVariable int id) {
 
         // avoid opt login seft
         XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
@@ -156,23 +169,23 @@ public class JobUserController {
         return ReturnT.SUCCESS;
     }
 
-    @RequestMapping("/updatePwd")
+    @PostMapping("/updatePwd")
     @ResponseBody
     public ReturnT<String> updatePwd(HttpServletRequest request, String password, String oldPassword) {
 
         // valid
-        if (oldPassword == null || oldPassword.trim().length() == 0) {
+        if (oldPassword == null || oldPassword.trim().isEmpty()) {
             return new ReturnT<>(
                     ReturnT.FAIL.getCode(),
                     I18nUtil.getString("system_please_input") + I18nUtil.getString("change_pwd_field_oldpwd"));
         }
-        if (password == null || password.trim().length() == 0) {
+        if (password == null || password.trim().isEmpty()) {
             return new ReturnT<>(
                     ReturnT.FAIL.getCode(),
                     I18nUtil.getString("system_please_input") + I18nUtil.getString("change_pwd_field_oldpwd"));
         }
         password = password.trim();
-        if (!(password.length() >= 4 && password.length() <= 20)) {
+        if (!(password.length() >= USERNAME_PASSWORD_MIN_LENGTH && password.length() <= USERNAME_PASSWORD_MAX_LENGTH)) {
             return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("system_lengh_limit") + "[4-20]");
         }
 
