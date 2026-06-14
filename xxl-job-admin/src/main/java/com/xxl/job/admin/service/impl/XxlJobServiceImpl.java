@@ -61,15 +61,14 @@ public class XxlJobServiceImpl implements XxlJobService {
         // page list
         List<XxlJobInfo> list =
                 xxlJobInfoDao.pageList(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author);
-        int list_count =
-                xxlJobInfoDao.pageListCount(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author);
+        int listCount = xxlJobInfoDao.pageListCount(jobGroup, triggerStatus, jobDesc, executorHandler, author);
 
         // package result
         Map<String, Object> maps = new HashMap<>(3);
         // 总记录数
-        maps.put("recordsTotal", list_count);
+        maps.put("recordsTotal", listCount);
         // 过滤后的总记录数
-        maps.put("recordsFiltered", list_count);
+        maps.put("recordsFiltered", listCount);
         // 分页列表
         maps.put("data", list);
         return maps;

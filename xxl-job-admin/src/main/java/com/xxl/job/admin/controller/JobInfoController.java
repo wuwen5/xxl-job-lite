@@ -65,10 +65,10 @@ public class JobInfoController {
         model.addAttribute("MisfireStrategyEnum", MisfireStrategyEnum.values());
 
         // 执行器列表
-        List<XxlJobGroup> jobGroupList_all = xxlJobGroupDao.findAll();
+        List<XxlJobGroup> jobGroupListAll = xxlJobGroupDao.findAll();
 
         // filter group
-        List<XxlJobGroup> jobGroupList = PermissionInterceptor.filterJobGroupByRole(request, jobGroupList_all);
+        List<XxlJobGroup> jobGroupList = PermissionInterceptor.filterJobGroupByRole(request, jobGroupListAll);
         if (jobGroupList == null || jobGroupList.isEmpty()) {
             throw new XxlJobException(I18nUtil.getString("jobgroup_empty"));
         }
