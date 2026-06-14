@@ -28,6 +28,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -51,7 +54,7 @@ public class JobLogController {
     @Resource
     private XxlJobLogDao xxlJobLogDao;
 
-    @RequestMapping
+    @GetMapping
     public String index(
             HttpServletRequest request,
             Model model,
@@ -85,14 +88,14 @@ public class JobLogController {
         return "joblog/joblog.index";
     }
 
-    @RequestMapping("/getJobsByGroup")
+    @GetMapping("/getJobsByGroup/{id}")
     @ResponseBody
-    public ReturnT<List<XxlJobInfo>> getJobsByGroup(int jobGroup) {
-        List<XxlJobInfo> list = xxlJobInfoDao.getJobsByGroup(jobGroup);
+    public ReturnT<List<XxlJobInfo>> getJobsByGroup(@PathVariable int id) {
+        List<XxlJobInfo> list = xxlJobInfoDao.getJobsByGroup(id);
         return new ReturnT<>(list);
     }
 
-    @RequestMapping("/pageList")
+    @PostMapping("/pageList")
     @ResponseBody
     public Map<String, Object> pageList(
             HttpServletRequest request,
@@ -121,22 +124,22 @@ public class JobLogController {
         // page query
         List<XxlJobLog> list =
                 xxlJobLogDao.pageList(start, length, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus);
-        int list_count =
+        int listCount =
                 xxlJobLogDao.pageListCount(start, length, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus);
 
         // package result
-        Map<String, Object> maps = new HashMap<>();
+        Map<String, Object> maps = new HashMap<>(2);
         // 总记录数
-        maps.put("recordsTotal", list_count);
+        maps.put("recordsTotal", listCount);
         // 过滤后的总记录数
-        maps.put("recordsFiltered", list_count);
+        maps.put("recordsFiltered", listCount);
         // 分页列表
         maps.put("data", list);
         return maps;
     }
 
-    @RequestMapping("/logDetailPage")
-    public String logDetailPage(int id, Model model) {
+    @GetMapping("/logDetailPage/{id}")
+    public String logDetailPage(@PathVariable int id, Model model) {
 
         // base check
         XxlJobLog jobLog = xxlJobLogDao.load(id);
@@ -150,9 +153,9 @@ public class JobLogController {
         return "joblog/joblog.detail";
     }
 
-    @RequestMapping("/logDetailCat")
+    @GetMapping("/logDetailCat/{logId}")
     @ResponseBody
-    public ReturnT<LogResult> logDetailCat(long logId, int fromLineNum) {
+    public ReturnT<LogResult> logDetailCat(@PathVariable long logId, int fromLineNum) {
         try {
             // valid
             // todo, need to improve performance
@@ -190,7 +193,7 @@ public class JobLogController {
         }
     }
 
-    @RequestMapping("/logKill")
+    @PostMapping("/logKill")
     @ResponseBody
     public ReturnT<String> logKill(int id) {
         // base check
@@ -225,7 +228,7 @@ public class JobLogController {
         }
     }
 
-    @RequestMapping("/clearLog")
+    @PostMapping("/clearLog")
     @ResponseBody
     public ReturnT<String> clearLog(HttpServletRequest request, int jobGroup, int jobId, int type) {
         // valid permission

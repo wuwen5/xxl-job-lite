@@ -1,7 +1,9 @@
 package com.xxl.job.admin.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.xxl.job.admin.service.impl.LoginService;
@@ -99,7 +101,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testAddSuccess() throws Exception {
-        MvcResult result = mockMvc.perform(post("/user/add")
+        MvcResult result = mockMvc.perform(post("/user")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("username", "newuser")
                         .param("password", "password123")
@@ -113,7 +115,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testAddUsernameTooShort() throws Exception {
-        MvcResult result = mockMvc.perform(post("/user/add")
+        MvcResult result = mockMvc.perform(post("/user")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("username", "ab") // < 4 chars
                         .param("password", "password123")
@@ -127,7 +129,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testAddPasswordTooShort() throws Exception {
-        MvcResult result = mockMvc.perform(post("/user/add")
+        MvcResult result = mockMvc.perform(post("/user")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("username", "validuser")
                         .param("password", "ab") // < 4 chars
@@ -142,7 +144,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testAddDuplicateUsername() throws Exception {
         // 'admin' already exists
-        MvcResult result = mockMvc.perform(post("/user/add")
+        MvcResult result = mockMvc.perform(post("/user")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("username", "admin")
                         .param("password", "password123")
@@ -156,7 +158,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testAddUsernameEmpty() throws Exception {
-        MvcResult result = mockMvc.perform(post("/user/add")
+        MvcResult result = mockMvc.perform(post("/user")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("username", "")
                         .param("password", "password123")
@@ -172,7 +174,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdateSuccess() throws Exception {
-        MvcResult result = mockMvc.perform(post("/user/update")
+        MvcResult result = mockMvc.perform(put("/user/2")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "2")
                         .param("username", "normaluser")
@@ -187,7 +189,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdatePasswordTooShort() throws Exception {
-        MvcResult result = mockMvc.perform(post("/user/update")
+        MvcResult result = mockMvc.perform(put("/user/2")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "2")
                         .param("username", "normaluser")
@@ -203,7 +205,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testUpdateSelfNotAllowed() throws Exception {
         // admin tries to update themselves → should fail
-        MvcResult result = mockMvc.perform(post("/user/update")
+        MvcResult result = mockMvc.perform(put("/user/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .param("username", "admin")
@@ -219,7 +221,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testUpdateWithoutPassword() throws Exception {
         // empty password → keep existing password (password=null in update)
-        MvcResult result = mockMvc.perform(post("/user/update")
+        MvcResult result = mockMvc.perform(put("/user/2")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "2")
                         .param("username", "normaluser")
@@ -236,7 +238,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testRemoveSuccess() throws Exception {
-        MvcResult result = mockMvc.perform(post("/user/remove")
+        MvcResult result = mockMvc.perform(delete("/user/2")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "2")
                         .cookie(cookie))
@@ -252,7 +254,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testRemoveSelfNotAllowed() throws Exception {
         // admin tries to delete themselves → should fail
-        MvcResult result = mockMvc.perform(post("/user/remove")
+        MvcResult result = mockMvc.perform(delete("/user/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .cookie(cookie))

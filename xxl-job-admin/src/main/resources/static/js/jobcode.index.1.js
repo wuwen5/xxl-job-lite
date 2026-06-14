@@ -57,7 +57,7 @@ $(function() {
 
 		$.ajax({
 			type : 'POST',
-			url : base_url + '/jobcode/save',
+			url : base_url + '/jobcode',
 			data : {
 				'id' : id,
 				'glueSource' : glueSource,

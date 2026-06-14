@@ -22,6 +22,11 @@ import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -41,7 +46,7 @@ public class JobInfoController {
     @Resource
     private XxlJobService xxlJobService;
 
-    @RequestMapping
+    @GetMapping
     public String index(
             HttpServletRequest request,
             Model model,
@@ -74,7 +79,7 @@ public class JobInfoController {
         return "jobinfo/jobinfo.index";
     }
 
-    @RequestMapping("/pageList")
+    @PostMapping("/pageList")
     @ResponseBody
     public Map<String, Object> pageList(
             @RequestParam(required = false, defaultValue = "0") int start,
@@ -88,7 +93,7 @@ public class JobInfoController {
         return xxlJobService.pageList(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author);
     }
 
-    @RequestMapping("/add")
+    @PostMapping
     @ResponseBody
     public ReturnT<String> add(HttpServletRequest request, XxlJobInfo jobInfo) {
         // valid permission
@@ -99,9 +104,10 @@ public class JobInfoController {
         return xxlJobService.add(jobInfo, loginUser);
     }
 
-    @RequestMapping("/update")
+    @PutMapping("/{id}")
     @ResponseBody
-    public ReturnT<String> update(HttpServletRequest request, XxlJobInfo jobInfo) {
+    public ReturnT<String> update(@PathVariable int id, HttpServletRequest request, XxlJobInfo jobInfo) {
+        jobInfo.setId(id);
         // valid permission
         PermissionInterceptor.validJobGroupPermission(request, jobInfo.getJobGroup());
 
@@ -110,25 +116,25 @@ public class JobInfoController {
         return xxlJobService.update(jobInfo, loginUser);
     }
 
-    @RequestMapping("/remove")
+    @DeleteMapping("/{id}")
     @ResponseBody
-    public ReturnT<String> remove(int id) {
+    public ReturnT<String> remove(@PathVariable int id) {
         return xxlJobService.remove(id);
     }
 
-    @RequestMapping("/stop")
+    @PutMapping("/stop/{id}")
     @ResponseBody
-    public ReturnT<String> pause(int id) {
+    public ReturnT<String> pause(@PathVariable int id) {
         return xxlJobService.stop(id);
     }
 
-    @RequestMapping("/start")
+    @PutMapping("/start/{id}")
     @ResponseBody
-    public ReturnT<String> start(int id) {
+    public ReturnT<String> start(@PathVariable int id) {
         return xxlJobService.start(id);
     }
 
-    @RequestMapping("/trigger")
+    @PostMapping("/trigger")
     @ResponseBody
     public ReturnT<String> triggerJob(HttpServletRequest request, int id, String executorParam, String addressList) {
         // login user
@@ -137,7 +143,7 @@ public class JobInfoController {
         return xxlJobService.trigger(loginUser, id, executorParam, addressList);
     }
 
-    @RequestMapping("/nextTriggerTime")
+    @GetMapping("/nextTriggerTime")
     @ResponseBody
     public ReturnT<List<String>> nextTriggerTime(String scheduleType, String scheduleConf) {
 

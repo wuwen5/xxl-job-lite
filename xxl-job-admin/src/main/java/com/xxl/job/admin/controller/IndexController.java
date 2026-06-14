@@ -14,9 +14,9 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
@@ -34,7 +34,7 @@ public class IndexController {
     @Resource
     private LoginService loginService;
 
-    @RequestMapping("/")
+    @GetMapping("/")
     public String index(Model model) {
 
         Map<String, Object> dashboardMap = xxlJobService.dashboardInfo();
@@ -43,13 +43,13 @@ public class IndexController {
         return "index";
     }
 
-    @RequestMapping("/chartInfo")
+    @GetMapping("/chartInfo")
     @ResponseBody
     public ReturnT<Map<String, Object>> chartInfo(Date startDate, Date endDate) {
         return xxlJobService.chartInfo(startDate, endDate);
     }
 
-    @RequestMapping("/toLogin")
+    @GetMapping("/toLogin")
     @PermissionLimit(limit = false)
     public ModelAndView toLogin(HttpServletRequest request, HttpServletResponse response, ModelAndView modelAndView) {
         if (loginService.ifLogin(request, response) != null) {
@@ -59,7 +59,7 @@ public class IndexController {
         return new ModelAndView("login");
     }
 
-    @RequestMapping(value = "login", method = RequestMethod.POST)
+    @PostMapping(value = "login")
     @ResponseBody
     @PermissionLimit(limit = false)
     public ReturnT<String> loginDo(
@@ -72,14 +72,14 @@ public class IndexController {
         return loginService.login(request, response, userName, password, ifRem);
     }
 
-    @RequestMapping(value = "logout", method = RequestMethod.POST)
+    @PostMapping(value = "logout")
     @ResponseBody
     @PermissionLimit(limit = false)
     public ReturnT<String> logout(HttpServletRequest request, HttpServletResponse response) {
         return loginService.logout(request, response);
     }
 
-    @RequestMapping("/help")
+    @GetMapping("/help")
     public String help() {
         return "help";
     }

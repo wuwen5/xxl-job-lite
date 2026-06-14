@@ -1,8 +1,10 @@
 package com.xxl.job.admin.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.xxl.job.admin.core.model.XxlJobGroup;
 import com.xxl.job.admin.core.model.XxlJobInfo;
@@ -142,7 +144,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
         parameters.add("glueRemark", "GLUE代码初始化");
         parameters.add("childJobId", "");
 
-        MvcResult result = mockMvc.perform(post("/jobinfo/add")
+        MvcResult result = mockMvc.perform(post("/jobinfo")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .params(parameters)
                         .cookie(cookie))
@@ -186,7 +188,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
         parameters.add("executorBlockStrategy", "DISCARD_LATER");
         parameters.add("glueType", "BEAN");
 
-        MvcResult result = mockMvc.perform(post("/jobinfo/update")
+        MvcResult result = mockMvc.perform(put("/jobinfo/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .params(parameters)
                         .cookie(cookie))
@@ -199,7 +201,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testRemove() throws Exception {
         // 测试删除任务（使用不存在的ID避免实际删除）
-        MvcResult result = mockMvc.perform(post("/jobinfo/remove")
+        MvcResult result = mockMvc.perform(delete("/jobinfo/999999")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "999999")
                         .cookie(cookie))
@@ -214,7 +216,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testStop() throws Exception {
         // 测试停止任务
-        MvcResult result = mockMvc.perform(post("/jobinfo/stop")
+        MvcResult result = mockMvc.perform(put("/jobinfo/stop/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .cookie(cookie))
@@ -227,7 +229,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testStart() throws Exception {
         // 测试启动任务
-        MvcResult result = mockMvc.perform(post("/jobinfo/start")
+        MvcResult result = mockMvc.perform(put("/jobinfo/start/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .cookie(cookie))

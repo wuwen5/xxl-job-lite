@@ -120,7 +120,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testGetJobsByGroup() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/getJobsByGroup")
+        MvcResult result = mockMvc.perform(get("/joblog/getJobsByGroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("jobGroup", "1")
                         .cookie(cookie))
@@ -133,7 +133,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testGetJobsByGroupEmpty() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/getJobsByGroup")
+        MvcResult result = mockMvc.perform(get("/joblog/getJobsByGroup/999")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("jobGroup", "999")
                         .cookie(cookie))
@@ -199,7 +199,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
                         + "VALUES (1, 1, 1, NOW(), 200, 0, 0)");
 
         MvcResult result = mockMvc.perform(
-                        get("/joblog/logDetailPage").param("id", "1").cookie(cookie))
+                        get("/joblog/logDetailPage/1").param("id", "1").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(view().name("joblog/joblog.detail"))
                 .andExpect(model().attributeExists("triggerCode", "handleCode", "logId"))
@@ -214,7 +214,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testLogDetailPageNotFound() throws Exception {
-        mockMvc.perform(get("/joblog/logDetailPage").param("id", "9999").cookie(cookie))
+        mockMvc.perform(get("/joblog/logDetailPage/1").param("id", "9999").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(view().name("/common/common.exception"))
                 .andExpect(model().attributeExists("exceptionMsg"));
@@ -227,7 +227,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testLogDetailCatInvalidLogId() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/logDetailCat")
+        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/9999")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("logId", "9999")
                         .param("fromLineNum", "1")
@@ -248,7 +248,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
                 "INSERT INTO xxl_job_log(id, job_group, job_id, executor_address, trigger_time, trigger_code, handle_code, alarm_status) "
                         + "VALUES (10, 1, 1, 'http://127.0.0.1:9999', NOW(), 200, 0, 0)");
 
-        MvcResult result = mockMvc.perform(post("/joblog/logDetailCat")
+        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/10")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("logId", "10")
                         .param("fromLineNum", "1")
@@ -313,7 +313,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         mockRepo.put("http://mock-executor:9999", mockExecutorBiz);
         field.set(null, mockRepo);
 
-        MvcResult result = mockMvc.perform(post("/joblog/logDetailCat")
+        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/11")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("logId", "11")
                         .param("fromLineNum", "1")
@@ -375,7 +375,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         mockRepo.put("http://xss-executor:9999", mockExecutorBiz);
         field.set(null, mockRepo);
 
-        MvcResult result = mockMvc.perform(post("/joblog/logDetailCat")
+        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/12")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("logId", "12")
                         .param("fromLineNum", "1")
@@ -435,7 +435,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         mockRepo.put("http://error-executor:9999", mockExecutorBiz);
         field.set(null, mockRepo);
 
-        MvcResult result = mockMvc.perform(post("/joblog/logDetailCat")
+        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/13")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("logId", "13")
                         .param("fromLineNum", "1")

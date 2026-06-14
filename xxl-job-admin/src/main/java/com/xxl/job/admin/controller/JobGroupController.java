@@ -18,6 +18,11 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -39,13 +44,13 @@ public class JobGroupController {
     @Resource
     private XxlJobRegistryDao xxlJobRegistryDao;
 
-    @RequestMapping
+    @GetMapping
     @PermissionLimit(adminuser = true)
     public String index(Model model) {
         return "jobgroup/jobgroup.index";
     }
 
-    @RequestMapping("/pageList")
+    @PostMapping("/pageList")
     @ResponseBody
     @PermissionLimit(adminuser = true)
     public Map<String, Object> pageList(
@@ -69,7 +74,7 @@ public class JobGroupController {
         return maps;
     }
 
-    @RequestMapping("/save")
+    @PostMapping
     @ResponseBody
     @PermissionLimit(adminuser = true)
     public ReturnT<String> save(XxlJobGroup xxlJobGroup) {
@@ -118,10 +123,10 @@ public class JobGroupController {
         return (ret > 0) ? ReturnT.SUCCESS : ReturnT.FAIL;
     }
 
-    @RequestMapping("/update")
+    @PutMapping("/{id}")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public ReturnT<String> update(XxlJobGroup xxlJobGroup) {
+    public ReturnT<String> update(@PathVariable int id, XxlJobGroup xxlJobGroup) {
         // valid
         if (xxlJobGroup.getAppname() == null || xxlJobGroup.getAppname().trim().isEmpty()) {
             return new ReturnT<>(500, (I18nUtil.getString("system_please_input") + "AppName"));
@@ -133,6 +138,9 @@ public class JobGroupController {
             return new ReturnT<>(
                     500, (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobgroup_field_title")));
         }
+
+        xxlJobGroup.setId(id);
+
         if (xxlJobGroup.getAddressType() == 0) {
             // 0=自动注册
             List<String> registryList = findRegistryByAppName(xxlJobGroup.getAppname());
@@ -185,10 +193,10 @@ public class JobGroupController {
         return appAddressMap.get(appnameParam);
     }
 
-    @RequestMapping("/remove")
+    @DeleteMapping("/{id}")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public ReturnT<String> remove(int id) {
+    public ReturnT<String> remove(@PathVariable int id) {
 
         // valid
         int count = xxlJobInfoDao.pageListCount(0, 10, id, -1, null, null, null);
@@ -205,10 +213,10 @@ public class JobGroupController {
         return (ret > 0) ? ReturnT.SUCCESS : ReturnT.FAIL;
     }
 
-    @RequestMapping("/loadById")
+    @GetMapping("/{id}")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public ReturnT<XxlJobGroup> loadById(int id) {
+    public ReturnT<XxlJobGroup> loadById(@PathVariable int id) {
         XxlJobGroup jobGroup = xxlJobGroupDao.load(id);
         return jobGroup != null ? new ReturnT<>(jobGroup) : new ReturnT<>(ReturnT.FAIL_CODE, null);
     }

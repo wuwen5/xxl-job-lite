@@ -210,25 +210,31 @@ $(function() {
 		var typeName;
 		var url;
 		var needFresh = false;
+		var methodType = 'POST';
 
 		var type = $(this).attr("_type");
+		var id = $(this).parents('ul').attr("_id");
+		
 		if ("job_pause" == type) {
 			typeName = I18n.jobinfo_opt_stop ;
-			url = base_url + "/jobinfo/stop";
+			url = base_url + "/jobinfo/stop/" + id;
 			needFresh = true;
+			methodType = 'PUT';
 		} else if ("job_resume" == type) {
 			typeName = I18n.jobinfo_opt_start ;
-			url = base_url + "/jobinfo/start";
+			url = base_url + "/jobinfo/start/" + id;
 			needFresh = true;
+			methodType = 'PUT';
 		} else if ("job_del" == type) {
 			typeName = I18n.system_opt_del ;
-			url = base_url + "/jobinfo/remove";
+			url = base_url + "/jobinfo/" + id;
 			needFresh = true;
+			methodType = 'DELETE';
 		} else {
 			return;
 		}
 
-		var id = $(this).parents('ul').attr("_id");
+		
 
 		layer.confirm( I18n.system_ok + typeName + '?', {
 			icon: 3,
@@ -238,7 +244,7 @@ $(function() {
 			layer.close(index);
 
 			$.ajax({
-				type : 'POST',
+				type : methodType,
 				url : url,
 				data : {
 					"id" : id
@@ -303,11 +309,8 @@ $(function() {
         var jobGroup = row.jobGroup;
 
         $.ajax({
-            type : 'POST',
-            url : base_url + "/jobgroup/loadById",
-            data : {
-                "id" : jobGroup
-            },
+            type : 'GET',
+            url : base_url + "/jobgroup/" + jobGroup,
             dataType : "json",
             success : function(data){
 
@@ -336,7 +339,7 @@ $(function() {
         var row = tableData['key'+id];
 
         $.ajax({
-            type : 'POST',
+            type : 'GET',
             url : base_url + "/jobinfo/nextTriggerTime",
             data : {
                 "scheduleType" : row.scheduleType,
@@ -456,7 +459,7 @@ $(function() {
 			}
 			$("#addModal .form input[name='scheduleConf']").val( scheduleConf );
 
-        	$.post(base_url + "/jobinfo/add",  $("#addModal .form").serialize(), function(data, status) {
+        	$.post(base_url + "/jobinfo",  $("#addModal .form").serialize(), function(data, status) {
     			if (data.code == "200") {
 					$('#addModal').modal('hide');
 					layer.open({
@@ -639,29 +642,34 @@ $(function() {
 			}
 			$("#updateModal .form input[name='scheduleConf']").val( scheduleConf );
 
-			// post
-    		$.post(base_url + "/jobinfo/update", $("#updateModal .form").serialize(), function(data, status) {
-    			if (data.code == "200") {
-					$('#updateModal').modal('hide');
-					layer.open({
-						title: I18n.system_tips ,
-                        btn: [ I18n.system_ok ],
-						content: I18n.system_update_suc ,
-						icon: '1',
-						end: function(layero, index){
-							//window.location.reload();
-							jobTable.fnDraw();
-						}
-					});
-    			} else {
-					layer.open({
-						title: I18n.system_tips ,
-                        btn: [ I18n.system_ok ],
-						content: (data.msg || I18n.system_update_fail ),
-						icon: '2'
-					});
-    			}
-    		});
+    		$.ajax({
+                type : 'PUT',
+                url : base_url + "/jobinfo/" + $("#updateModal .form input[name='id']").val(),
+                data : $("#updateModal .form").serialize(),
+                dataType : "json",
+                success : function(data){
+                    if (data.code == 200) {
+                        $('#updateModal').modal('hide');
+                        layer.open({
+                            title: I18n.system_tips ,
+                            btn: [ I18n.system_ok ],
+                            content: I18n.system_update_suc ,
+                            icon: '1',
+                            end: function(layero, index){
+                                //window.location.reload();
+                                jobTable.fnDraw();
+                            }
+                        });
+                    } else {
+                        layer.open({
+                            title: I18n.system_tips ,
+                            btn: [ I18n.system_ok ],
+                            content: (data.msg || I18n.system_update_fail ),
+                            icon: '2'
+                        });
+                    }
+                }
+            });
 		}
 	});
 	$("#updateModal").on('hide.bs.modal', function () {
