@@ -12,14 +12,13 @@ import com.xxl.job.core.handler.impl.ScriptJobHandler;
 import com.xxl.job.core.log.XxlJobFileAppender;
 import com.xxl.job.core.thread.JobThread;
 import java.util.Date;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Created by xuxueli on 17/3/1.
  */
+@Slf4j
 public class ExecutorBizImpl implements ExecutorBiz {
-    private static Logger logger = LoggerFactory.getLogger(ExecutorBizImpl.class);
 
     @Override
     public ReturnT<String> beat() {
@@ -54,9 +53,8 @@ public class ExecutorBizImpl implements ExecutorBiz {
 
         // valid glue (non-BEAN) enabled
         if (glueTypeEnum != null && GlueTypeEnum.BEAN != glueTypeEnum) {
-            XxlJobExecutor executor = XxlJobExecutor.getInstance();
-            if (executor != null && !executor.isGlueEnabled()) {
-                logger.warn(
+            if (!XxlJobExecutor.getConfig().isGlueEnabled()) {
+                log.warn(
                         ">>>>>>>>>>> xxl-job executor not support current glue type[{}], please check executor configuration.",
                         glueTypeEnum.getDesc());
                 return new ReturnT<>(
@@ -108,7 +106,7 @@ public class ExecutorBizImpl implements ExecutorBiz {
                             GlueFactory.getInstance().loadNewInstance(triggerParam.getGlueSource());
                     jobHandler = new GlueJobHandler(originJobHandler, triggerParam.getGlueUpdatetime());
                 } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                     return new ReturnT<>(ReturnT.FAIL_CODE, e.getMessage());
                 }
             }

@@ -7,6 +7,7 @@ import com.xxl.job.core.biz.model.KillParam;
 import com.xxl.job.core.biz.model.LogParam;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.biz.model.TriggerParam;
+import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.thread.ExecutorRegistryThread;
 import com.xxl.job.core.util.GsonTool;
 import com.xxl.job.core.util.ThrowableUtil;
@@ -52,13 +53,8 @@ public class EmbedServer {
     private ExecutorBiz executorBiz;
     private Thread thread;
 
-    @Deprecated
-    public void start(final String address, final int port, final String appname, final String accessToken) {
-        start(address, port, appname, accessToken, null);
-    }
+    public void start(final String address, final int port, final String accessToken) {
 
-    public void start(
-            final String address, final int port, final String appname, final String accessToken, final String title) {
         executorBiz = new ExecutorBizImpl();
         thread = new Thread(() -> {
             // param
@@ -103,7 +99,7 @@ public class EmbedServer {
                         port);
 
                 // start registry
-                startRegistry(appname, address, title);
+                startRegistry(address);
 
                 // wait util stop
                 future.channel().closeFuture().sync();
@@ -162,7 +158,7 @@ public class EmbedServer {
         }
 
         @Override
-        protected void channelRead0(final ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
+        protected void channelRead0(final ChannelHandlerContext ctx, FullHttpRequest msg) {
             // request parse
             // final byte[] requestBytes = ByteBufUtil.getBytes(msg.content());    //
             // byteBuf.toString(io.netty.util.CharsetUtil.UTF_8);
@@ -267,14 +263,15 @@ public class EmbedServer {
         }
     }
 
-    @Deprecated
-    public void startRegistry(final String appname, final String address) {
-        startRegistry(appname, address, null);
-    }
+    public void startRegistry(final String address) {
+        final String appName = XxlJobExecutor.getConfig().getAppname();
+        // valid
+        if (appName == null || appName.trim().isEmpty()) {
+            log.warn(">>>>>>>>>>> xxl-job, executor registry config fail, appname is null.");
+            return;
+        }
 
-    public void startRegistry(final String appname, final String address, final String title) {
-        // start registry
-        ExecutorRegistryThread.getInstance().start(appname, address, title);
+        ExecutorRegistryThread.getInstance().start(appName, address);
     }
 
     public void stopRegistry() {

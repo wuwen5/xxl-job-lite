@@ -1,10 +1,10 @@
 package com.xxl.job.core.thread;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
-import com.xxl.job.core.biz.AdminBiz;
+import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.biz.model.TriggerParam;
 import com.xxl.job.core.executor.XxlJobExecutor;
@@ -12,14 +12,12 @@ import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.log.XxlJobFileAppender;
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedConstruction;
 
 /**
  * JobThread unit test
@@ -31,45 +29,30 @@ class JobThreadTest {
     @TempDir
     static File tempLogDir;
 
-    private List<AdminBiz> originalAdminBizList;
+    static MockedConstruction<AdminBizClient> adminBizClientMockedConstruction = null;
+    static AdminBizClient mock = null;
 
     @BeforeAll
-    static void setUpClass() {
-        // Set temp directory as log path for testing
+    static void setUpClass() throws Exception {
         XxlJobFileAppender.initLogPath(tempLogDir.getAbsolutePath());
+
+        XxlJobExecutor xxlJobExecutor = new XxlJobExecutor();
+        xxlJobExecutor.setAdminAddresses("http://localhost:8080");
+        xxlJobExecutor.setAccessToken("");
+        adminBizClientMockedConstruction = mockConstruction(AdminBizClient.class);
+        xxlJobExecutor.start();
+        mock = adminBizClientMockedConstruction.constructed().get(0);
     }
 
-    @BeforeEach
-    void setUp() throws Exception {
-
-        // Save original adminBizList using reflection
-        Field field = XxlJobExecutor.class.getDeclaredField("adminBizList");
-        field.setAccessible(true);
-        originalAdminBizList = (List<AdminBiz>) field.get(null);
-
-        // Setup mock AdminBiz
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.callback(any(List.class))).thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
+    @AfterAll
+    static void tearDownAll() {
+        TriggerCallbackThread.getInstance().toStop();
+        adminBizClientMockedConstruction.close();
     }
 
     @AfterEach
-    void tearDown() throws Exception {
-        // Restore original adminBizList using reflection
-        Field field = XxlJobExecutor.class.getDeclaredField("adminBizList");
-        field.setAccessible(true);
-        field.set(null, originalAdminBizList);
-    }
-
-    /**
-     * Helper method to set adminBizList using reflection
-     */
-    private void setAdminBizList(List<AdminBiz> adminBizList) throws Exception {
-        Field field = XxlJobExecutor.class.getDeclaredField("adminBizList");
-        field.setAccessible(true);
-        field.set(null, adminBizList);
+    void tearDown() {
+        reset(mock);
     }
 
     @Test
@@ -165,6 +148,8 @@ class JobThreadTest {
 
     @Test
     void testJobThreadExecution() throws InterruptedException {
+        doReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success")).when(mock).callback(anyList());
+
         IJobHandler handler = new SimpleTestHandler();
         JobThread jobThread = new JobThread(7, handler);
 
@@ -194,6 +179,8 @@ class JobThreadTest {
 
     @Test
     void testJobThreadWithTimeout() throws InterruptedException {
+        doReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success")).when(mock).callback(anyList());
+
         IJobHandler handler = new TimeoutTestHandler();
         JobThread jobThread = new JobThread(8, handler);
 
@@ -223,6 +210,8 @@ class JobThreadTest {
 
     @Test
     void testJobThreadWithException() throws InterruptedException {
+        doReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success")).when(mock).callback(anyList());
+
         IJobHandler handler = new ExceptionTestHandler();
         JobThread jobThread = new JobThread(9, handler);
 
@@ -253,6 +242,8 @@ class JobThreadTest {
 
     @Test
     void testJobThreadInitAndDestroy() throws InterruptedException {
+        doReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success")).when(mock).callback(anyList());
+
         InitDestroyTestHandler handler = new InitDestroyTestHandler();
         JobThread jobThread = new JobThread(10, handler);
 
@@ -274,6 +265,8 @@ class JobThreadTest {
 
     @Test
     void testMultipleTriggersInQueue() throws InterruptedException {
+        doReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success")).when(mock).callback(anyList());
+
         IJobHandler handler = new SimpleTestHandler();
         JobThread jobThread = new JobThread(11, handler);
 
@@ -305,6 +298,8 @@ class JobThreadTest {
 
     @Test
     void testJobThreadStopWithPendingTriggers() throws InterruptedException {
+        doReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success")).when(mock).callback(anyList());
+
         IJobHandler handler = new SlowTestHandler();
         JobThread jobThread = new JobThread(12, handler);
 

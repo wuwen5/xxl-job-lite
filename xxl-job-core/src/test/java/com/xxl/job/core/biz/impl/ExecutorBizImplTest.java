@@ -6,8 +6,6 @@ import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.glue.GlueTypeEnum;
 import com.xxl.job.core.handler.IJobHandler;
-import java.lang.reflect.Field;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,29 +17,11 @@ class ExecutorBizImplTest {
 
     private ExecutorBizImpl executorBizImpl;
 
+    static XxlJobExecutor executor = new XxlJobExecutor();
+
     @BeforeEach
     void setUp() {
         executorBizImpl = new ExecutorBizImpl();
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        // Reset the static instance so other tests are not affected
-        setInstance(null);
-    }
-
-    // ---------------------- helpers ----------------------
-
-    private static void setInstance(XxlJobExecutor executor) throws Exception {
-        Field instanceField = XxlJobExecutor.class.getDeclaredField("instance");
-        instanceField.setAccessible(true);
-        instanceField.set(null, executor);
-    }
-
-    private static XxlJobExecutor buildExecutor(boolean glueEnabled) {
-        XxlJobExecutor executor = new XxlJobExecutor();
-        executor.setGlueEnabled(glueEnabled);
-        return executor;
     }
 
     private static TriggerParam buildTriggerParam(GlueTypeEnum glueType) {
@@ -63,8 +43,8 @@ class ExecutorBizImplTest {
      * reject it immediately with FAIL_CODE.
      */
     @Test
-    void run_glueGroovy_whenGlueDisabled_shouldReturnFail() throws Exception {
-        setInstance(buildExecutor(false));
+    void run_glueGroovy_whenGlueDisabled_shouldReturnFail() {
+        executor.setGlueEnabled(false);
 
         TriggerParam param = buildTriggerParam(GlueTypeEnum.GLUE_GROOVY);
         ReturnT<String> result = executorBizImpl.run(param);
@@ -80,7 +60,7 @@ class ExecutorBizImplTest {
      */
     @Test
     void run_glueShell_whenGlueDisabled_shouldReturnFail() throws Exception {
-        setInstance(buildExecutor(false));
+        executor.setGlueEnabled(false);
 
         TriggerParam param = buildTriggerParam(GlueTypeEnum.GLUE_SHELL);
         ReturnT<String> result = executorBizImpl.run(param);
@@ -96,7 +76,7 @@ class ExecutorBizImplTest {
      */
     @Test
     void run_bean_whenGlueDisabled_shouldNotRejectOnGlueCheck() throws Exception {
-        setInstance(buildExecutor(false));
+        executor.setGlueEnabled(false);
 
         // Register a handler so the BEAN path can proceed past the handler-lookup check
         XxlJobExecutor.registJobHandler("glueDisabledBeanHandler", new IJobHandler() {
@@ -123,8 +103,8 @@ class ExecutorBizImplTest {
      * and proceeds to the next validation stage.
      */
     @Test
-    void run_glueGroovy_whenGlueEnabled_shouldPassGuard() throws Exception {
-        setInstance(buildExecutor(true));
+    void run_glueGroovy_whenGlueEnabled_shouldPassGuard() {
+        executor.setGlueEnabled(true);
 
         TriggerParam param = buildTriggerParam(GlueTypeEnum.GLUE_GROOVY);
         ReturnT<String> result = executorBizImpl.run(param);
@@ -134,22 +114,5 @@ class ExecutorBizImplTest {
         Assertions.assertFalse(
                 result.getMsg() != null && result.getMsg().contains("not supported"),
                 "Guard must not reject when glueEnabled=true");
-    }
-
-    /**
-     * When no executor instance is registered (getInstance() returns null), the guard
-     * must be skipped and execution continues normally (fail-open).
-     */
-    @Test
-    void run_glueGroovy_whenNoInstance_shouldSkipGuard() throws Exception {
-        // Leave instance null (default after tearDown)
-        setInstance(null);
-
-        TriggerParam param = buildTriggerParam(GlueTypeEnum.GLUE_GROOVY);
-        ReturnT<String> result = executorBizImpl.run(param);
-
-        Assertions.assertFalse(
-                result.getMsg() != null && result.getMsg().contains("not supported"),
-                "Guard must not reject when instance is null");
     }
 }
