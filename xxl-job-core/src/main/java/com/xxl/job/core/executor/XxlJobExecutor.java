@@ -44,8 +44,21 @@ public class XxlJobExecutor {
     private int port;
     private String logPath;
     private int logRetentionDays;
+    private boolean glueEnabled = true;
+
+    // ---------------------- instance ----------------------
+    private static XxlJobExecutor instance;
+
+    public static XxlJobExecutor getInstance() {
+        return instance;
+    }
+
+    public boolean getGlueEnabled() {
+        return glueEnabled;
+    }
 
     public void start() throws Exception {
+        instance = this;
 
         // init logpath
         XxlJobFileAppender.initLogPath(logPath);
