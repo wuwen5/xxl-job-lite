@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -148,7 +148,7 @@ public class XxlJobExecutor {
         updateConfig(config -> config.withGlueEnabled(glueEnabled));
     }
 
-    private void updateConfig(Function<XxlJobExecutorConfig, XxlJobExecutorConfig> updater) {
+    private void updateConfig(UnaryOperator<XxlJobExecutorConfig> updater) {
         XxlJobExecutorConfig current = CONFIG_REF.get();
         XxlJobExecutorConfig newConf = updater.apply(current);
         // 暂无并发更新场景，暂不使用CAS方式更新配置

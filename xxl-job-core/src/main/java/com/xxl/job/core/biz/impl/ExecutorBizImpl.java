@@ -52,14 +52,14 @@ public class ExecutorBizImpl implements ExecutorBiz {
         GlueTypeEnum glueTypeEnum = GlueTypeEnum.match(triggerParam.getGlueType());
 
         // valid glue (non-BEAN) enabled
-        if (glueTypeEnum != null && GlueTypeEnum.BEAN != glueTypeEnum) {
-            if (!XxlJobExecutor.getConfig().isGlueEnabled()) {
-                log.warn(
-                        ">>>>>>>>>>> xxl-job executor not support current glue type[{}], please check executor configuration.",
-                        glueTypeEnum.getDesc());
-                return new ReturnT<>(
-                        ReturnT.FAIL_CODE, "fail, current glue type [" + glueTypeEnum.getDesc() + "] not supported.");
-            }
+        if (glueTypeEnum != null
+                && GlueTypeEnum.BEAN != glueTypeEnum
+                && !XxlJobExecutor.getConfig().isGlueEnabled()) {
+            log.warn(
+                    ">>>>>>>>>>> xxl-job executor not support current glue type[{}], please check executor configuration.",
+                    glueTypeEnum.getDesc());
+            return new ReturnT<>(
+                    ReturnT.FAIL_CODE, "fail, current glue type [" + glueTypeEnum.getDesc() + "] not supported.");
         }
 
         if (GlueTypeEnum.BEAN == glueTypeEnum) {
