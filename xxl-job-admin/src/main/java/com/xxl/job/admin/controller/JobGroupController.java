@@ -209,4 +209,11 @@ public class JobGroupController {
         XxlJobGroup jobGroup = xxlJobGroupDao.load(id);
         return jobGroup != null ? new ReturnT<>(jobGroup) : new ReturnT<>(ReturnT.FAIL_CODE, null);
     }
+
+    @GetMapping("/all")
+    @ResponseBody
+    public ReturnT<List<XxlJobGroup>> all() {
+        List<XxlJobGroup> list = xxlJobGroupDao.findAll();
+        return new ReturnT<>(list);
+    }
 }

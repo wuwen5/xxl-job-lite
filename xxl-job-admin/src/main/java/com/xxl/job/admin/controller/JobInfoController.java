@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -84,18 +85,25 @@ public class JobInfoController {
     public Map<String, Object> pageList(
             @RequestParam(required = false, defaultValue = "0") int start,
             @RequestParam(required = false, defaultValue = "10") int length,
-            int jobGroup,
-            int triggerStatus,
+            Integer jobGroup,
+            Integer triggerStatus,
             String jobDesc,
             String executorHandler,
             String author) {
 
-        return xxlJobService.pageList(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author);
+        return xxlJobService.pageList(
+                start,
+                length,
+                jobGroup == null ? 0 : jobGroup,
+                triggerStatus == null ? -1 : triggerStatus,
+                jobDesc,
+                executorHandler,
+                author);
     }
 
     @PostMapping
     @ResponseBody
-    public ReturnT<String> add(HttpServletRequest request, XxlJobInfo jobInfo) {
+    public ReturnT<String> add(HttpServletRequest request, @RequestBody XxlJobInfo jobInfo) {
         // valid permission
         PermissionInterceptor.validJobGroupPermission(request, jobInfo.getJobGroup());
 
@@ -106,7 +114,7 @@ public class JobInfoController {
 
     @PutMapping("/{id}")
     @ResponseBody
-    public ReturnT<String> update(@PathVariable int id, HttpServletRequest request, XxlJobInfo jobInfo) {
+    public ReturnT<String> update(@PathVariable int id, HttpServletRequest request, @RequestBody XxlJobInfo jobInfo) {
         jobInfo.setId(id);
         // valid permission
         PermissionInterceptor.validJobGroupPermission(request, jobInfo.getJobGroup());

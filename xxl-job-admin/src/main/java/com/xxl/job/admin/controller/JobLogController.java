@@ -104,9 +104,9 @@ public class JobLogController {
             HttpServletRequest request,
             @RequestParam(required = false, defaultValue = "0") int start,
             @RequestParam(required = false, defaultValue = "10") int length,
-            int jobGroup,
-            int jobId,
-            int logStatus,
+            @RequestParam(required = false, defaultValue = "0") int jobGroup,
+            @RequestParam(required = false, defaultValue = "0") int jobId,
+            @RequestParam(required = false, defaultValue = "-1") int logStatus,
             String filterTime) {
 
         // valid permission

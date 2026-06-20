@@ -43,6 +43,12 @@ public class IndexController {
         return "index";
     }
 
+    @GetMapping("/dashboard")
+    @ResponseBody
+    public ReturnT<Map<String, Object>> dashboard() {
+        return new ReturnT<>(xxlJobService.dashboardInfo());
+    }
+
     @GetMapping("/chartInfo")
     @ResponseBody
     public ReturnT<Map<String, Object>> chartInfo(Date startDate, Date endDate) {

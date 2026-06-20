@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.xxl.job.admin.core.model.XxlJobGroup;
-import com.xxl.job.admin.core.model.XxlJobInfo;
 import com.xxl.job.admin.dao.XxlJobGroupDao;
 import com.xxl.job.admin.service.impl.LoginService;
 import jakarta.servlet.http.Cookie;
@@ -124,29 +123,33 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testAdd() throws Exception {
-        // 测试添加任务
-        MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.add("jobGroup", "1");
-        parameters.add("jobDesc", "测试任务");
-        parameters.add("author", "admin");
-        parameters.add("alarmEmail", "");
-        parameters.add("scheduleType", "CRON");
-        parameters.add("scheduleConf", "0 0 0 * * ? *");
-        parameters.add("misfireStrategy", "DO_NOTHING");
-        parameters.add("executorRouteStrategy", "FIRST");
-        parameters.add("executorHandler", "demoJobHandler");
-        parameters.add("executorParam", "");
-        parameters.add("executorBlockStrategy", "SERIAL_EXECUTION");
-        parameters.add("executorTimeout", "0");
-        parameters.add("executorFailRetryCount", "0");
-        parameters.add("glueType", "BEAN");
-        parameters.add("glueSource", "");
-        parameters.add("glueRemark", "GLUE代码初始化");
-        parameters.add("childJobId", "");
+        // 测试添加任务 - JSON格式
+        String json =
+                """
+                {
+                    "jobGroup": 1,
+                    "jobDesc": "测试任务",
+                    "author": "admin",
+                    "alarmEmail": "",
+                    "scheduleType": "CRON",
+                    "scheduleConf": "0 0 0 * * ? *",
+                    "misfireStrategy": "DO_NOTHING",
+                    "executorRouteStrategy": "FIRST",
+                    "executorHandler": "demoJobHandler",
+                    "executorParam": "",
+                    "executorBlockStrategy": "SERIAL_EXECUTION",
+                    "executorTimeout": 0,
+                    "executorFailRetryCount": 0,
+                    "glueType": "BEAN",
+                    "glueSource": "",
+                    "glueRemark": "GLUE代码初始化",
+                    "childJobId": ""
+                }
+                """;
 
         MvcResult result = mockMvc.perform(post("/jobinfo")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .params(parameters)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
                         .cookie(cookie))
                 .andReturn();
 
@@ -160,37 +163,26 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdate() throws Exception {
-        // 先添加一个任务用于更新测试
-        XxlJobInfo jobInfo = new XxlJobInfo();
-        jobInfo.setJobGroup(1);
-        jobInfo.setJobDesc("测试更新任务");
-        jobInfo.setAuthor("admin");
-        jobInfo.setScheduleType("CRON");
-        jobInfo.setScheduleConf("0 0 0 * * ? *");
-        jobInfo.setMisfireStrategy("DO_NOTHING");
-        jobInfo.setExecutorRouteStrategy("FIRST");
-        jobInfo.setExecutorHandler("demoJobHandler");
-        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
-        jobInfo.setGlueType("BEAN");
-
-        // 这里假设服务层已经添加了任务，实际应该先调用add获取ID
-        // 为了简化测试，我们直接测试更新接口格式
-        MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.add("id", "1");
-        parameters.add("jobGroup", "1");
-        parameters.add("jobDesc", "更新后的任务描述");
-        parameters.add("author", "admin");
-        parameters.add("scheduleType", "CRON");
-        parameters.add("scheduleConf", "0 0 12 * * ? *");
-        parameters.add("misfireStrategy", "FIRE_ONCE_NOW");
-        parameters.add("executorRouteStrategy", "ROUND");
-        parameters.add("executorHandler", "demoJobHandler");
-        parameters.add("executorBlockStrategy", "DISCARD_LATER");
-        parameters.add("glueType", "BEAN");
+        // 测试更新任务 - JSON格式
+        String json =
+                """
+                {
+                    "jobGroup": 1,
+                    "jobDesc": "更新后的任务描述",
+                    "author": "admin",
+                    "scheduleType": "CRON",
+                    "scheduleConf": "0 0 12 * * ? *",
+                    "misfireStrategy": "FIRE_ONCE_NOW",
+                    "executorRouteStrategy": "ROUND",
+                    "executorHandler": "demoJobHandler",
+                    "executorBlockStrategy": "DISCARD_LATER",
+                    "glueType": "BEAN"
+                }
+                """;
 
         MvcResult result = mockMvc.perform(put("/jobinfo/1")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .params(parameters)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
                         .cookie(cookie))
                 .andReturn();
 

@@ -70,9 +70,13 @@ public class LoginService {
 
         String loginToken = makeToken(xxlJobUser);
 
-        // do login
+        // do login (cookie for backward compatibility)
         CookieUtil.set(response, LOGIN_IDENTITY_KEY, loginToken, ifRemember);
-        return ReturnT.SUCCESS;
+
+        // return token in response header for frontend
+        response.setHeader("Authorization", "Bearer " + loginToken);
+
+        return new ReturnT<>(loginToken);
     }
 
     /**
@@ -93,6 +97,25 @@ public class LoginService {
      * @return
      */
     public XxlJobUser ifLogin(HttpServletRequest request, HttpServletResponse response) {
+        // 1. try to get token from Authorization header
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            XxlJobUser tokenUser = null;
+            try {
+                tokenUser = parseToken(token);
+            } catch (Exception e) {
+                // invalid token
+            }
+            if (tokenUser != null) {
+                XxlJobUser dbUser = xxlJobUserDao.loadByUserName(tokenUser.getUsername());
+                if (dbUser != null && tokenUser.getPassword().equals(dbUser.getPassword())) {
+                    return dbUser;
+                }
+            }
+        }
+
+        // 2. fallback to cookie
         String cookieToken = CookieUtil.getValue(request, LOGIN_IDENTITY_KEY);
         if (cookieToken != null) {
             XxlJobUser cookieUser = null;

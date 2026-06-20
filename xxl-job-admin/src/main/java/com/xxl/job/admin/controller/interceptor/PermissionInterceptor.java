@@ -46,8 +46,24 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
         if (needLogin) {
             XxlJobUser loginUser = loginService.ifLogin(request, response);
             if (loginUser == null) {
-                response.setStatus(302);
-                response.setHeader("location", request.getContextPath() + "/toLogin");
+                // check if it's an API request (Bearer token or AJAX)
+                String authHeader = request.getHeader("Authorization");
+                String xRequestedWith = request.getHeader("X-Requested-With");
+                boolean isApiRequest = (authHeader != null && authHeader.startsWith("Bearer "))
+                        || "XMLHttpRequest".equals(xRequestedWith);
+
+                if (isApiRequest) {
+                    response.setStatus(401);
+                    response.setContentType("application/json;charset=UTF-8");
+                    try {
+                        response.getWriter().write("{\"code\":401,\"msg\":\"未登录或登录已过期\",\"content\":null}");
+                    } catch (Exception ignored) {
+                        // ignore
+                    }
+                } else {
+                    response.setStatus(302);
+                    response.setHeader("location", request.getContextPath() + "/toLogin");
+                }
                 return false;
             }
             if (needAdminuser && loginUser.getRole() != 1) {
