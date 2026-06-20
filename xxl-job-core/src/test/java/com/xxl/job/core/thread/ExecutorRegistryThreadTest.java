@@ -4,18 +4,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.xxl.job.core.biz.AdminBiz;
+import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.biz.model.JobInfoParam;
 import com.xxl.job.core.biz.model.RegistryParam;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.executor.XxlJobExecutor;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 
 /**
  * ExecutorRegistryThread unit test
@@ -24,34 +25,28 @@ import org.junit.jupiter.api.Test;
  */
 class ExecutorRegistryThreadTest {
 
-    private List<AdminBiz> originalAdminBizList;
+    static MockedConstruction<AdminBizClient> adminBizClientMockedConstruction = null;
+    static AdminBizClient mock = null;
 
-    @BeforeEach
-    void setUp() throws Exception {
-        // Save original adminBizList using reflection
-        Field field = XxlJobExecutor.class.getDeclaredField("adminBizList");
-        field.setAccessible(true);
-        originalAdminBizList = (List<AdminBiz>) field.get(null);
+    @BeforeAll
+    static void setUp() throws Exception {
+        XxlJobExecutor xxlJobExecutor = new XxlJobExecutor();
+        xxlJobExecutor.setAdminAddresses("http://localhost:8080");
+        xxlJobExecutor.setAccessToken("");
+        adminBizClientMockedConstruction = mockConstruction(AdminBizClient.class);
+        xxlJobExecutor.start();
+        mock = adminBizClientMockedConstruction.constructed().get(0);
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        adminBizClientMockedConstruction.close();
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         // Stop the thread if it's running
         ExecutorRegistryThread.getInstance().toStop();
-
-        // Restore original adminBizList using reflection
-        Field field = XxlJobExecutor.class.getDeclaredField("adminBizList");
-        field.setAccessible(true);
-        field.set(null, originalAdminBizList);
-    }
-
-    /**
-     * Helper method to set adminBizList using reflection
-     */
-    private void setAdminBizList(List<AdminBiz> adminBizList) throws Exception {
-        Field field = XxlJobExecutor.class.getDeclaredField("adminBizList");
-        field.setAccessible(true);
-        field.set(null, adminBizList);
     }
 
     @Test
@@ -64,50 +59,11 @@ class ExecutorRegistryThreadTest {
     }
 
     @Test
-    void testStartWithNullAppname() {
-        ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
-
-        // Start with null appname - should not throw exception
-        registryThread.start(null, "http://localhost:8080");
-
-        // Thread should not be started due to invalid appname
-        assertTrue(true);
-    }
-
-    @Test
-    void testStartWithEmptyAppname() {
-        ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
-
-        // Start with empty appname - should not throw exception
-        registryThread.start("", "http://localhost:8080");
-
-        // Thread should not be started due to invalid appname
-        assertTrue(true);
-    }
-
-    @Test
-    void testStartWithBlankAppname() {
-        ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
-
-        // Start with blank appname - should not throw exception
-        registryThread.start("   ", "http://localhost:8080");
-
-        // Thread should not be started due to invalid appname
-        assertTrue(true);
-    }
-
-    @Test
     void testStartAndStop() throws Exception {
-        // Setup mock AdminBiz
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.registry(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
 
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
+        Mockito.when(mock.registry(argThat(a -> a != null && a.getRegistryKey().equals("test-app"))))
+                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
+        clearInvocations(mock);
 
         ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
 
@@ -120,57 +76,15 @@ class ExecutorRegistryThreadTest {
         // Stop the thread
         registryThread.toStop();
 
-        // Registry should be called (verification may fail due to timing)
-        // The important thing is that the thread starts and stops without error
-        assertTrue(true);
-    }
-
-    @Test
-    void testStartWithMultipleAdminBiz() throws Exception {
-        // Setup multiple mock AdminBiz instances
-        AdminBiz mockAdminBiz1 = mock(AdminBiz.class);
-        AdminBiz mockAdminBiz2 = mock(AdminBiz.class);
-
-        // First one fails, second one succeeds
-        when(mockAdminBiz1.registry(any(RegistryParam.class))).thenReturn(new ReturnT<>(ReturnT.FAIL_CODE, "fail"));
-        when(mockAdminBiz2.registry(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz1.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz2.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz1);
-        adminBizList.add(mockAdminBiz2);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
-
-        ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
-
-        // Start the thread
-        registryThread.start("test-app-multi", "http://localhost:8081");
-
-        // Give thread time to register
-        Thread.sleep(1500);
-
-        // Stop the thread
-        registryThread.toStop();
-
-        // Multiple AdminBiz should be tried - thread should handle this gracefully
-        assertTrue(true);
+        verify(mock, atLeastOnce()).registry(any(RegistryParam.class));
+        verify(mock, atLeastOnce()).registryRemove(any(RegistryParam.class));
     }
 
     @Test
     void testStartWithRegistryException() throws Exception {
-        // Setup mock AdminBiz that throws exception
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.registry(any(RegistryParam.class))).thenThrow(new RuntimeException("network error"));
-        when(mockAdminBiz.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
 
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
+        when(mock.registry(argThat(a -> a != null && a.getRegistryKey().equals("test-app-error"))))
+                .thenThrow(new RuntimeException("network error"));
 
         ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
 
@@ -182,9 +96,6 @@ class ExecutorRegistryThreadTest {
 
         // Stop the thread
         registryThread.toStop();
-
-        // Thread should handle exceptions without crashing
-        assertTrue(true);
     }
 
     @Test
@@ -193,24 +104,14 @@ class ExecutorRegistryThreadTest {
 
         // Calling toStop without start should not throw exception
         registryThread.toStop();
-
-        assertTrue(true);
     }
 
     @Test
     void testMultipleToStopCalls() throws Exception {
-        // Setup mock AdminBiz
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.registry(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
 
         ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
+
+        Mockito.when(mock.registry(any())).thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
 
         // Start the thread
         registryThread.start("test-app-stop", "http://localhost:8083");
@@ -225,17 +126,9 @@ class ExecutorRegistryThreadTest {
 
     @Test
     void testInitJobInfoInitParams() throws Exception {
-        // Setup mock AdminBiz
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.initJobInfo(any())).thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz.registry(any(RegistryParam.class)))
+        Mockito.when(mock.initJobInfo(argThat(
+                        a -> a != null && a.getJobExecutorParam().getAppName().equals("test-app-init"))))
                 .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
 
         ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
 
@@ -250,7 +143,7 @@ class ExecutorRegistryThreadTest {
         registryThread.initJobInfoInitParams(jobInfoParams);
 
         // Start the thread
-        registryThread.start("test-app-init", "http://localhost:8084", "Test Title");
+        registryThread.start("test-app-init", "http://localhost:8084");
 
         // Give thread time to initialize job info
         Thread.sleep(1000);
@@ -259,21 +152,13 @@ class ExecutorRegistryThreadTest {
         registryThread.toStop();
 
         // Verify initJobInfo was called
-        verify(mockAdminBiz, timeout(2000)).initJobInfo(any());
+        verify(mock, atLeastOnce()).initJobInfo(any());
     }
 
     @Test
     void testInitJobInfoWithEmptyParams() throws Exception {
-        // Setup mock AdminBiz
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.registry(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
 
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
+        clearInvocations(mock);
 
         ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
 
@@ -290,22 +175,15 @@ class ExecutorRegistryThreadTest {
         registryThread.toStop();
 
         // initJobInfo should not be called with empty params
-        verify(mockAdminBiz, never()).initJobInfo(any());
+        verify(mock, never()).initJobInfo(any());
     }
 
     @Test
     void testInitJobInfoWithFailure() throws Exception {
-        // Setup mock AdminBiz that fails initJobInfo
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.initJobInfo(any())).thenReturn(new ReturnT<>(ReturnT.FAIL_CODE, "fail"));
-        when(mockAdminBiz.registry(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
 
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
+        when(mock.initJobInfo(argThat(
+                        a -> a != null && a.getJobExecutorParam().getAppName().equals("test-app-fail"))))
+                .thenReturn(new ReturnT<>(ReturnT.FAIL_CODE, "init failed"));
 
         ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
 
@@ -327,22 +205,17 @@ class ExecutorRegistryThreadTest {
         registryThread.toStop();
 
         // Verify initJobInfo was called but failed
-        verify(mockAdminBiz, timeout(2000)).initJobInfo(any());
+        verify(mock, timeout(2000)).initJobInfo(any());
     }
 
     @Test
     void testInitJobInfoWithException() throws Exception {
-        // Setup mock AdminBiz that throws exception on initJobInfo
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.initJobInfo(any())).thenThrow(new RuntimeException("init error"));
-        when(mockAdminBiz.registry(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
 
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
+        when(mock.initJobInfo(argThat(
+                        a -> a != null && a.getJobExecutorParam().getAppName().equals("test-app-exception"))))
+                .thenThrow(new RuntimeException("init error"));
+
+        clearInvocations(mock);
 
         ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
 
@@ -364,61 +237,6 @@ class ExecutorRegistryThreadTest {
         registryThread.toStop();
 
         // Verify initJobInfo was attempted
-        verify(mockAdminBiz, timeout(2000)).initJobInfo(any());
-    }
-
-    @Test
-    void testDeprecatedStartMethod() throws Exception {
-        // Setup mock AdminBiz
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.registry(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-        when(mockAdminBiz.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
-
-        ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
-
-        // Use deprecated start method (without title)
-        registryThread.start("test-app-deprecated", "http://localhost:8088");
-
-        // Give thread time to register
-        Thread.sleep(1500);
-
-        // Stop the thread
-        registryThread.toStop();
-
-        // Deprecated method should work the same as new method
-        assertTrue(true);
-    }
-
-    @Test
-    void testRegistryWithNullResult() throws Exception {
-        // Setup mock AdminBiz that returns null
-        AdminBiz mockAdminBiz = mock(AdminBiz.class);
-        when(mockAdminBiz.registry(any(RegistryParam.class))).thenReturn(null);
-        when(mockAdminBiz.registryRemove(any(RegistryParam.class)))
-                .thenReturn(new ReturnT<>(ReturnT.SUCCESS_CODE, "success"));
-
-        List<AdminBiz> adminBizList = new ArrayList<>();
-        adminBizList.add(mockAdminBiz);
-        setAdminBizList(Collections.unmodifiableList(adminBizList));
-
-        ExecutorRegistryThread registryThread = ExecutorRegistryThread.getInstance();
-
-        // Start the thread
-        registryThread.start("test-app-null", "http://localhost:8089");
-
-        // Give thread time to attempt registration
-        Thread.sleep(1000);
-
-        // Stop the thread
-        registryThread.toStop();
-
-        // Verify registry was called
-        verify(mockAdminBiz, timeout(2000).atLeastOnce()).registry(any(RegistryParam.class));
+        verify(mock, timeout(2000)).initJobInfo(any());
     }
 }

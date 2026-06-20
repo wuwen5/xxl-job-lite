@@ -50,6 +50,7 @@ public class TriggerCallbackThread {
 
     public void start() {
 
+        toStop = false;
         // callback
         triggerCallbackThread = new Thread(() -> {
 

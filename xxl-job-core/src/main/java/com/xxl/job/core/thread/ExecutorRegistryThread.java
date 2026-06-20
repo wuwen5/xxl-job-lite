@@ -35,27 +35,22 @@ public class ExecutorRegistryThread {
         this.jobInfoParams.addAll(jobInfoParams);
     }
 
-    @Deprecated
-    public void start(final String appname, final String address) {
-        start(appname, address, null);
-    }
+    /**
+     * 执行器注册线程启动
+     * @param address 执行器地址
+     */
+    public void start(String appName, final String address) {
 
-    public void start(final String appname, final String address, final String title) {
-
-        // valid
-        if (appname == null || appname.trim().isEmpty()) {
-            log.warn(">>>>>>>>>>> xxl-job, executor registry config fail, appname is null.");
-            return;
-        }
+        toStop = false;
 
         registryThread = new Thread(() -> {
-            initJobInfo(appname, title);
+            initJobInfo(appName, XxlJobExecutor.getConfig().getTitle());
 
             // registry
             while (!toStop) {
                 try {
                     RegistryParam registryParam =
-                            new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appname, address);
+                            new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appName, address);
                     for (AdminBiz adminBiz : XxlJobExecutor.getAdminBizList()) {
                         try {
                             ReturnT<String> registryResult = adminBiz.registry(registryParam);
@@ -104,7 +99,7 @@ public class ExecutorRegistryThread {
             // registry remove
             try {
                 RegistryParam registryParam =
-                        new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appname, address);
+                        new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appName, address);
                 for (AdminBiz adminBiz : XxlJobExecutor.getAdminBizList()) {
                     try {
                         ReturnT<String> registryResult = adminBiz.registryRemove(registryParam);
