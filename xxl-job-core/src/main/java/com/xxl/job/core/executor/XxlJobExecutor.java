@@ -47,13 +47,13 @@ public class XxlJobExecutor {
     private boolean glueEnabled = true;
 
     // ---------------------- instance ----------------------
-    private static XxlJobExecutor instance;
+    private static volatile XxlJobExecutor instance;
 
     public static XxlJobExecutor getInstance() {
         return instance;
     }
 
-    public boolean getGlueEnabled() {
+    public boolean isGlueEnabled() {
         return glueEnabled;
     }
 
