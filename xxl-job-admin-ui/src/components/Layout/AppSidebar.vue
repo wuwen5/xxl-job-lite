@@ -22,7 +22,7 @@
           <el-icon><List /></el-icon>
           <template #title>{{ t('menu.jobinfo') }}</template>
         </el-menu-item>
-        <el-menu-item index="/jobgroup">
+        <el-menu-item index="/jobgroup" v-if="isAdmin">
           <el-icon><Connection /></el-icon>
           <template #title>{{ t('menu.jobgroup') }}</template>
         </el-menu-item>
@@ -30,7 +30,7 @@
           <el-icon><Document /></el-icon>
           <template #title>{{ t('menu.joblog') }}</template>
         </el-menu-item>
-        <el-menu-item index="/user">
+        <el-menu-item index="/user" v-if="isAdmin">
           <el-icon><User /></el-icon>
           <template #title>{{ t('menu.user') }}</template>
         </el-menu-item>
@@ -47,10 +47,13 @@
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const { t } = useI18n()
 const appStore = useAppStore()
+const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.isAdmin())
 </script>
 
 <style scoped lang="scss">

@@ -42,6 +42,7 @@ export default {
     password: '密碼',
     rememberMe: '記住密碼',
     login: '登 錄',
+    logout: '退出登錄',
     usernamePlaceholder: '請輸入用戶名',
     passwordPlaceholder: '請輸入密碼'
   },
@@ -142,6 +143,7 @@ export default {
     password: '密碼',
     role: '角色',
     permission: '權限',
+    permissionPlaceholder: '留空表示擁有全部權限',
     roleAdmin: '管理員',
     roleNormal: '普通用戶',
     addTitle: '新增用戶',

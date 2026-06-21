@@ -33,7 +33,7 @@ const router = createRouter({
           path: 'jobgroup',
           name: 'JobGroup',
           component: () => import('@/views/jobgroup/index.vue'),
-          meta: { title: 'menu.jobgroup' }
+          meta: { title: 'menu.jobgroup', adminOnly: true }
         },
         {
           path: 'joblog',
@@ -57,7 +57,7 @@ const router = createRouter({
           path: 'user',
           name: 'User',
           component: () => import('@/views/user/index.vue'),
-          meta: { title: 'menu.user' }
+          meta: { title: 'menu.user', adminOnly: true }
         },
         {
           path: 'help',
@@ -88,11 +88,14 @@ router.beforeEach(async (to, _from, next) => {
       if (!authStore.userInfo) {
         try {
           await authStore.getUserInfo()
-          next()
         } catch {
           authStore.logout()
           next('/login')
+          return
         }
+      }
+      if (to.meta.adminOnly && !authStore.isAdmin()) {
+        next('/')
       } else {
         next()
       }

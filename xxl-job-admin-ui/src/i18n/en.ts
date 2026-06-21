@@ -42,6 +42,7 @@ export default {
     password: 'Password',
     rememberMe: 'Remember me',
     login: 'Login',
+    logout: 'Logout',
     usernamePlaceholder: 'Please enter username',
     passwordPlaceholder: 'Please enter password'
   },
@@ -142,6 +143,7 @@ export default {
     password: 'Password',
     role: 'Role',
     permission: 'Permission',
+    permissionPlaceholder: 'Leave empty for full permissions',
     roleAdmin: 'Admin',
     roleNormal: 'Normal User',
     addTitle: 'Add User',

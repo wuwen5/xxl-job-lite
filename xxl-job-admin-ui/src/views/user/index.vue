@@ -16,7 +16,7 @@
           <el-input v-model="searchForm.username" clearable />
         </el-form-item>
         <el-form-item :label="t('user.role')">
-          <el-select v-model="searchForm.role" :placeholder="t('common.all')" clearable style="width: 120px">
+          <el-select v-model="searchForm.role" :placeholder="t('common.all')" style="width: 120px">
             <el-option :label="t('common.all')" :value="-1" />
             <el-option :label="t('user.roleAdmin')" :value="1" />
             <el-option :label="t('user.roleNormal')" :value="0" />
@@ -38,7 +38,6 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="permission" :label="t('user.permission')" min-width="200" show-overflow-tooltip />
         <el-table-column :label="t('common.operation')" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">
@@ -84,7 +83,14 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item :label="t('user.permission')" v-if="formData.role === 0">
-          <el-input v-model="formData.permission" type="textarea" :rows="3" placeholder="多个用逗号分隔，留空表示全部" />
+          <el-select v-model="formData.permissionIds" multiple clearable :placeholder="t('user.permissionPlaceholder')" style="width: 100%">
+            <el-option
+              v-for="item in jobGroups"
+              :key="item.id"
+              :label="item.title"
+              :value="item.id"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -101,12 +107,14 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { userApi, type JobUser } from '@/api/user'
+import { jobgroupApi, type JobGroup } from '@/api/jobgroup'
 
 const { t } = useI18n()
 
 const loading = ref(false)
 const submitting = ref(false)
 const tableData = ref<JobUser[]>([])
+const jobGroups = ref<JobGroup[]>([])
 const dialogVisible = ref(false)
 const editingId = ref<number | null>(null)
 const formRef = ref<FormInstance>()
@@ -127,7 +135,8 @@ const formData = reactive({
   username: '',
   password: '',
   role: 0,
-  permission: ''
+  permission: '',
+  permissionIds: [] as number[]
 })
 
 const formRules: FormRules = {
@@ -153,6 +162,15 @@ async function loadData() {
   }
 }
 
+async function loadJobGroups() {
+  try {
+    const res = await jobgroupApi.getAll()
+    jobGroups.value = res || []
+  } catch (error) {
+    console.error('Failed to load job groups:', error)
+  }
+}
+
 function handleSearch() {
   pagination.page = 1
   loadData()
@@ -171,7 +189,8 @@ function handleAdd() {
     username: '',
     password: '',
     role: 0,
-    permission: ''
+    permission: '',
+    permissionIds: []
   })
   dialogVisible.value = true
 }
@@ -183,7 +202,8 @@ function handleEdit(row: any) {
     username: row.username,
     password: '',
     role: row.role,
-    permission: row.permission
+    permission: row.permission,
+    permissionIds: row.permission ? row.permission.split(',').map(Number).filter(Boolean) : []
   })
   dialogVisible.value = true
 }
@@ -195,10 +215,14 @@ async function handleSubmit() {
     if (valid) {
       submitting.value = true
       try {
+        const submitData = {
+          ...formData,
+          permission: formData.role === 1 ? '' : formData.permissionIds.join(',')
+        }
         if (editingId.value) {
-          await userApi.update(editingId.value, formData)
+          await userApi.update(editingId.value, submitData)
         } else {
-          await userApi.add(formData)
+          await userApi.add(submitData)
         }
         ElMessage.success(t('common.success'))
         dialogVisible.value = false
@@ -221,6 +245,7 @@ async function handleDelete(row: any) {
 
 onMounted(() => {
   loadData()
+  loadJobGroups()
 })
 </script>
 

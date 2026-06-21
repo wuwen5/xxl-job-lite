@@ -4,8 +4,8 @@
     <el-card class="search-card">
       <el-form :model="searchForm" inline class="search-form">
         <el-form-item :label="t('jobinfo.jobGroup')">
-          <el-select v-model="searchForm.jobGroup" :placeholder="t('common.all')" clearable style="width: 200px">
-            <el-option :label="t('common.all')" :value="0" />
+          <el-select v-model="searchForm.jobGroup" :placeholder="t('common.all')" style="width: 200px">
+            <el-option v-if="isAdmin" :label="t('common.all')" :value="0" />
             <el-option
               v-for="item in jobGroups"
               :key="item.id"
@@ -15,7 +15,7 @@
           </el-select>
         </el-form-item>
         <el-form-item :label="t('jobinfo.triggerStatus')">
-          <el-select v-model="searchForm.triggerStatus" :placeholder="t('common.all')" clearable style="width: 120px">
+          <el-select v-model="searchForm.triggerStatus" :placeholder="t('common.all')" style="width: 120px">
             <el-option :label="t('common.all')" :value="-1" />
             <el-option :label="t('common.enable')" :value="1" />
             <el-option :label="t('common.disable')" :value="0" />
@@ -280,10 +280,13 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { jobinfoApi, type JobInfo } from '@/api/jobinfo'
 import { jobgroupApi, type JobGroup } from '@/api/jobgroup'
+import { useAuthStore } from '@/stores/auth'
 import CronInput from '@/components/CronInput/index.vue'
 
 const router = useRouter()
 const { t } = useI18n()
+const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.isAdmin())
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -389,6 +392,9 @@ async function loadJobGroups() {
   try {
     const res = await jobgroupApi.getAll()
     jobGroups.value = res || []
+    if (!isAdmin.value && jobGroups.value.length > 0 && searchForm.jobGroup === 0) {
+      searchForm.jobGroup = jobGroups.value[0].id
+    }
   } catch (error) {
     console.error('Failed to load job groups:', error)
   }
@@ -400,7 +406,7 @@ function handleSearch() {
 }
 
 function handleReset() {
-  searchForm.jobGroup = 0
+  searchForm.jobGroup = isAdmin.value ? 0 : (jobGroups.value[0]?.id || 0)
   searchForm.triggerStatus = -1
   searchForm.jobDesc = ''
   searchForm.executorHandler = ''
@@ -606,8 +612,8 @@ function handleScheduleTypeChange() {
   formData.scheduleConf = ''
 }
 
-onMounted(() => {
-  loadJobGroups()
+onMounted(async () => {
+  await loadJobGroups()
   loadData()
 })
 </script>

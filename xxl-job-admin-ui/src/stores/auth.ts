@@ -22,16 +22,22 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function getUserInfo() {
-    // Token 中包含用户信息，解析获取
     if (token.value) {
       try {
-        const payload = JSON.parse(atob(token.value))
-        userInfo.value = payload
+        const jsonStr = hexToString(token.value)
+        userInfo.value = JSON.parse(jsonStr)
       } catch {
-        // Token 格式问题，需要后端支持获取用户信息接口
         userInfo.value = { id: 1, username: 'admin', role: 1, permission: '' }
       }
     }
+  }
+
+  function hexToString(hex: string): string {
+    const bytes = new Uint8Array(hex.length / 2)
+    for (let i = 0; i < hex.length; i += 2) {
+      bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16)
+    }
+    return new TextDecoder().decode(bytes)
   }
 
   function logout() {

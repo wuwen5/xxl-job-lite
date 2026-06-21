@@ -40,6 +40,7 @@ public class JobInfoController {
 
     @PostMapping("/pageList")
     public Map<String, Object> pageList(
+            HttpServletRequest request,
             @RequestParam(required = false, defaultValue = "0") int start,
             @RequestParam(required = false, defaultValue = "10") int length,
             Integer jobGroup,
@@ -48,10 +49,11 @@ public class JobInfoController {
             String executorHandler,
             String author) {
 
+        PermissionInterceptor.validJobGroupPermission(request, jobGroup);
         return xxlJobService.pageList(
                 start,
                 length,
-                jobGroup == null ? 0 : jobGroup,
+                jobGroup,
                 triggerStatus == null ? -1 : triggerStatus,
                 jobDesc,
                 executorHandler,

@@ -3,8 +3,8 @@
     <el-card class="search-card">
       <el-form :model="searchForm" inline class="search-form">
         <el-form-item :label="t('joblog.jobGroup')">
-          <el-select v-model="searchForm.jobGroup" :placeholder="t('common.all')" clearable style="width: 200px" @change="handleJobGroupChange">
-            <el-option :label="t('common.all')" :value="0" />
+          <el-select v-model="searchForm.jobGroup" :placeholder="t('common.all')" style="width: 200px" @change="handleJobGroupChange">
+            <el-option v-if="isAdmin" :label="t('common.all')" :value="0" />
             <el-option
               v-for="item in jobGroups"
               :key="item.id"
@@ -14,7 +14,7 @@
           </el-select>
         </el-form-item>
         <el-form-item :label="t('joblog.job')">
-          <el-select v-model="searchForm.jobId" :placeholder="t('common.all')" clearable style="width: 200px">
+          <el-select v-model="searchForm.jobId" :placeholder="t('common.all')" style="width: 200px">
             <el-option :label="t('common.all')" :value="0" />
             <el-option
               v-for="item in jobList"
@@ -25,7 +25,7 @@
           </el-select>
         </el-form-item>
         <el-form-item :label="t('joblog.logStatus')">
-          <el-select v-model="searchForm.logStatus" :placeholder="t('common.all')" clearable style="width: 120px">
+          <el-select v-model="searchForm.logStatus" :placeholder="t('common.all')" style="width: 120px">
             <el-option :label="t('common.all')" :value="-1" />
             <el-option label="成功" :value="1" />
             <el-option label="失败" :value="2" />
@@ -170,17 +170,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { joblogApi, type JobLog } from '@/api/joblog'
 import { jobgroupApi, type JobGroup } from '@/api/jobgroup'
+import { useAuthStore } from '@/stores/auth'
 import dayjs from 'dayjs'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.isAdmin())
 
 const loading = ref(false)
 const tableData = ref<JobLog[]>([])
@@ -232,6 +235,9 @@ async function loadJobGroups() {
   try {
     const res = await jobgroupApi.getAll()
     jobGroups.value = res || []
+    if (!isAdmin.value && jobGroups.value.length > 0 && searchForm.jobGroup === 0) {
+      searchForm.jobGroup = jobGroups.value[0].id
+    }
   } catch (error) {
     console.error('Failed to load job groups:', error)
   }
@@ -262,7 +268,7 @@ function handleSearch() {
 }
 
 function handleReset() {
-  searchForm.jobGroup = 0
+  searchForm.jobGroup = isAdmin.value ? 0 : (jobGroups.value[0]?.id || 0)
   searchForm.jobId = 0
   searchForm.logStatus = -1
   handleSearch()
@@ -294,8 +300,8 @@ async function handleClearLogSubmit() {
   loadData()
 }
 
-onMounted(() => {
-  loadJobGroups()
+onMounted(async () => {
+  await loadJobGroups()
   
   // 从 URL 参数初始化搜索条件
   if (route.query.jobId) {
