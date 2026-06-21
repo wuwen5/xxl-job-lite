@@ -51,25 +51,13 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
         }
 
         // 登录获取cookie
-        MvcResult ret = mockMvc.perform(post("/login")
+        MvcResult ret = mockMvc.perform(post("/admin-api/v1/login")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("userName", "admin")
                         .param("password", "123456"))
                 .andReturn();
         cookie = ret.getResponse().getCookie(LoginService.LOGIN_IDENTITY_KEY);
         assertNotNull(cookie, "Login should return a cookie");
-    }
-
-    @Test
-    public void testIndex() throws Exception {
-        // 测试首页访问
-        MvcResult result = mockMvc.perform(get("/jobinfo").cookie(cookie).param("jobGroup", "-1"))
-                .andReturn();
-
-        assertEquals(200, result.getResponse().getStatus());
-        String content = result.getResponse().getContentAsString();
-        assertNotNull(content);
-        logger.info("Index page loaded successfully");
     }
 
     @Test
@@ -84,7 +72,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
         parameters.add("executorHandler", "");
         parameters.add("author", "");
 
-        MvcResult result = mockMvc.perform(post("/jobinfo/pageList")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo/pageList")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .params(parameters)
                         .cookie(cookie))
@@ -111,7 +99,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
         parameters.add("executorHandler", "");
         parameters.add("author", "admin");
 
-        MvcResult result = mockMvc.perform(post("/jobinfo/pageList")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo/pageList")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .params(parameters)
                         .cookie(cookie))
@@ -147,7 +135,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
                 }
                 """;
 
-        MvcResult result = mockMvc.perform(post("/jobinfo")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                         .cookie(cookie))
@@ -180,7 +168,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
                 }
                 """;
 
-        MvcResult result = mockMvc.perform(put("/jobinfo/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobinfo/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                         .cookie(cookie))
@@ -193,7 +181,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testRemove() throws Exception {
         // 测试删除任务（使用不存在的ID避免实际删除）
-        MvcResult result = mockMvc.perform(delete("/jobinfo/999999")
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/jobinfo/999999")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "999999")
                         .cookie(cookie))
@@ -208,7 +196,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testStop() throws Exception {
         // 测试停止任务
-        MvcResult result = mockMvc.perform(put("/jobinfo/stop/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobinfo/stop/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .cookie(cookie))
@@ -221,7 +209,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testStart() throws Exception {
         // 测试启动任务
-        MvcResult result = mockMvc.perform(put("/jobinfo/start/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobinfo/start/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .cookie(cookie))
@@ -234,7 +222,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testTrigger() throws Exception {
         // 测试手动触发任务
-        MvcResult result = mockMvc.perform(post("/jobinfo/trigger")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo/trigger")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .param("executorParam", "test param")
@@ -251,7 +239,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testNextTriggerTime() throws Exception {
         // 测试计算下次触发时间 - CRON类型
-        MvcResult result = mockMvc.perform(get("/jobinfo/nextTriggerTime")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo/nextTriggerTime")
                         .param("scheduleType", "CRON")
                         .param("scheduleConf", "0 0 12 * * ? *")
                         .cookie(cookie))
@@ -266,7 +254,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testNextTriggerTimeFixedRate() throws Exception {
         // 测试计算下次触发时间 - 固定速率类型
-        MvcResult result = mockMvc.perform(get("/jobinfo/nextTriggerTime")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo/nextTriggerTime")
                         .param("scheduleType", "FIX_RATE")
                         .param("scheduleConf", "60")
                         .cookie(cookie))
@@ -280,7 +268,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testNextTriggerTimeInvalidCron() throws Exception {
         // 测试无效的CRON表达式
-        MvcResult result = mockMvc.perform(get("/jobinfo/nextTriggerTime")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo/nextTriggerTime")
                         .param("scheduleType", "CRON")
                         .param("scheduleConf", "invalid cron")
                         .cookie(cookie))
@@ -296,7 +284,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testWithoutAuthentication() throws Exception {
         // 测试未登录访问（应该被拦截）
-        MvcResult result = mockMvc.perform(post("/jobinfo/pageList")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo/pageList")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("start", "0")
                         .param("length", "10")

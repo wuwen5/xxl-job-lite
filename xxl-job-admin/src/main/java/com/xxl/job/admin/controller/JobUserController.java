@@ -2,7 +2,6 @@ package com.xxl.job.admin.controller;
 
 import com.xxl.job.admin.controller.annotation.PermissionLimit;
 import com.xxl.job.admin.controller.interceptor.PermissionInterceptor;
-import com.xxl.job.admin.core.model.XxlJobGroup;
 import com.xxl.job.admin.core.model.XxlJobUser;
 import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.admin.dao.XxlJobGroupDao;
@@ -13,24 +12,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author xuxueli 2019-05-04 16:39:50
  */
-@Controller
-@RequestMapping("/user")
+@RestController
+@RequestMapping("/admin-api/v1/user")
 public class JobUserController {
 
     private static final int USERNAME_PASSWORD_MIN_LENGTH = 4;
@@ -42,19 +38,7 @@ public class JobUserController {
     @Resource
     private XxlJobGroupDao xxlJobGroupDao;
 
-    @GetMapping
-    @PermissionLimit(adminuser = true)
-    public String index(Model model) {
-
-        // 执行器列表
-        List<XxlJobGroup> groupList = xxlJobGroupDao.findAll();
-        model.addAttribute("groupList", groupList);
-
-        return "user/user.index";
-    }
-
     @PostMapping("/pageList")
-    @ResponseBody
     @PermissionLimit(adminuser = true)
     public Map<String, Object> pageList(
             @RequestParam(required = false, defaultValue = "0") int start,
@@ -83,7 +67,6 @@ public class JobUserController {
     }
 
     @PostMapping
-    @ResponseBody
     @PermissionLimit(adminuser = true)
     public ReturnT<String> add(XxlJobUser xxlJobUser) {
 
@@ -123,7 +106,6 @@ public class JobUserController {
     }
 
     @PutMapping("/{id}")
-    @ResponseBody
     @PermissionLimit(adminuser = true)
     public ReturnT<String> update(HttpServletRequest request, XxlJobUser xxlJobUser, @PathVariable int id) {
 
@@ -155,7 +137,6 @@ public class JobUserController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseBody
     @PermissionLimit(adminuser = true)
     public ReturnT<String> remove(HttpServletRequest request, @PathVariable int id) {
 
@@ -170,7 +151,6 @@ public class JobUserController {
     }
 
     @PostMapping("/updatePwd")
-    @ResponseBody
     public ReturnT<String> updatePwd(HttpServletRequest request, String password, String oldPassword) {
 
         // valid

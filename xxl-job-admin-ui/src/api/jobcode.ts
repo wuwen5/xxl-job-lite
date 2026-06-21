@@ -12,7 +12,7 @@ export interface JobCode {
 
 export const jobcodeApi = {
   save: (id: number, glueSource: string, glueRemark: string) =>
-    request.post<any, string>('/jobcode', null, {
-      params: { id, glueSource, glueRemark }
-    })
+    request.put<any, string>(`/jobcode/${id}`, { glueSource, glueRemark }),
+  getHistory: (id: number) =>
+    request.get<any, JobCode[]>(`/jobcode/${id}/history`)
 }

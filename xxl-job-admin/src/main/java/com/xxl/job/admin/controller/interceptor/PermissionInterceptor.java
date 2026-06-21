@@ -52,17 +52,12 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
                 boolean isApiRequest = (authHeader != null && authHeader.startsWith("Bearer "))
                         || "XMLHttpRequest".equals(xRequestedWith);
 
-                if (isApiRequest) {
-                    response.setStatus(401);
-                    response.setContentType("application/json;charset=UTF-8");
-                    try {
-                        response.getWriter().write("{\"code\":401,\"msg\":\"未登录或登录已过期\",\"content\":null}");
-                    } catch (Exception ignored) {
-                        // ignore
-                    }
-                } else {
-                    response.setStatus(302);
-                    response.setHeader("location", request.getContextPath() + "/toLogin");
+                response.setStatus(401);
+                response.setContentType("application/json;charset=UTF-8");
+                try {
+                    response.getWriter().write("{\"code\":401,\"msg\":\"未登录或登录已过期\",\"content\":null}");
+                } catch (Exception ignored) {
+                    // ignore
                 }
                 return false;
             }

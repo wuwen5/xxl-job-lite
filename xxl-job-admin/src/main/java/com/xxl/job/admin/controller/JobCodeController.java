@@ -7,24 +7,24 @@ import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.admin.dao.XxlJobInfoDao;
 import com.xxl.job.admin.dao.XxlJobLogGlueDao;
 import com.xxl.job.core.biz.model.ReturnT;
-import com.xxl.job.core.glue.GlueTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * job code controller
  * @author xuxueli 2015-12-19 16:13:16
  */
-@Controller
-@RequestMapping("/jobcode")
+@RestController
+@RequestMapping("/admin-api/v1/jobcode")
 public class JobCodeController {
 
     @Resource
@@ -33,32 +33,21 @@ public class JobCodeController {
     @Resource
     private XxlJobLogGlueDao xxlJobLogGlueDao;
 
-    @GetMapping
-    public String index(HttpServletRequest request, Model model, int jobId) {
-        XxlJobInfo jobInfo = xxlJobInfoDao.loadById(jobId);
-        List<XxlJobLogGlue> jobLogGlues = xxlJobLogGlueDao.findByJobId(jobId);
-
+    @GetMapping("/{id}/history")
+    public ReturnT<List<XxlJobLogGlue>> history(@PathVariable int id) {
+        XxlJobInfo jobInfo = xxlJobInfoDao.loadById(id);
         if (jobInfo == null) {
-            throw new RuntimeException(I18nUtil.getString("jobinfo_glue_jobid_unvalid"));
+            return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_glue_jobid_unvalid"));
         }
-        if (GlueTypeEnum.BEAN == GlueTypeEnum.match(jobInfo.getGlueType())) {
-            throw new RuntimeException(I18nUtil.getString("jobinfo_glue_gluetype_unvalid"));
-        }
-
-        // valid permission
-        PermissionInterceptor.validJobGroupPermission(request, jobInfo.getJobGroup());
-
-        // Glue类型-字典
-        model.addAttribute("GlueTypeEnum", GlueTypeEnum.values());
-
-        model.addAttribute("jobInfo", jobInfo);
-        model.addAttribute("jobLogGlues", jobLogGlues);
-        return "jobcode/jobcode.index";
+        List<XxlJobLogGlue> jobLogGlues = xxlJobLogGlueDao.findByJobId(id);
+        return new ReturnT<>(jobLogGlues);
     }
 
-    @PostMapping
-    @ResponseBody
-    public ReturnT<String> save(HttpServletRequest request, int id, String glueSource, String glueRemark) {
+    @PutMapping("/{id}")
+    public ReturnT<String> save(
+            HttpServletRequest request, @PathVariable int id, @RequestBody Map<String, String> body) {
+        String glueSource = body.get("glueSource");
+        String glueRemark = body.get("glueRemark");
         // valid
         if (glueRemark == null) {
             return new ReturnT<>(

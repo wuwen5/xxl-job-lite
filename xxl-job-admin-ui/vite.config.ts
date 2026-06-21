@@ -7,6 +7,20 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig({
+  optimizeDeps: {
+    include: [
+      '@codemirror/state',
+      '@codemirror/view',
+      '@codemirror/language',
+      '@codemirror/commands',
+      '@codemirror/autocomplete',
+      '@codemirror/search',
+      '@codemirror/lint'
+    ]
+  },
+  resolve: {
+    dedupe: ['@codemirror/state', '@codemirror/view', '@codemirror/language']
+  },
   plugins: [
     vue(),
     AutoImport({
@@ -34,7 +48,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/xxl-job-admin': {
+      '/admin-api/v1': {
         target: 'http://localhost:8080',
         changeOrigin: true
       }

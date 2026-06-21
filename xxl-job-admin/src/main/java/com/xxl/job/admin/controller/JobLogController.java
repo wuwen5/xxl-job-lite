@@ -2,8 +2,6 @@ package com.xxl.job.admin.controller;
 
 import com.xxl.job.admin.controller.interceptor.PermissionInterceptor;
 import com.xxl.job.admin.core.complete.XxlJobCompleter;
-import com.xxl.job.admin.core.exception.XxlJobException;
-import com.xxl.job.admin.core.model.XxlJobGroup;
 import com.xxl.job.admin.core.model.XxlJobInfo;
 import com.xxl.job.admin.core.model.XxlJobLog;
 import com.xxl.job.admin.core.scheduler.XxlJobScheduler;
@@ -26,23 +24,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
 /**
  * index controller
  * @author xuxueli 2015-12-19 16:13:16
  */
-@Controller
-@RequestMapping("/joblog")
+@RestController
+@RequestMapping("/admin-api/v1/joblog")
 @Slf4j
 public class JobLogController {
 
@@ -57,49 +53,13 @@ public class JobLogController {
     @Resource
     private XxlJobLogDao xxlJobLogDao;
 
-    @GetMapping
-    public String index(
-            HttpServletRequest request,
-            Model model,
-            @RequestParam(required = false, defaultValue = "0") Integer jobId) {
-
-        // 执行器列表
-        List<XxlJobGroup> jobGroupListAll = xxlJobGroupDao.findAll();
-
-        // filter group
-        List<XxlJobGroup> jobGroupList = PermissionInterceptor.filterJobGroupByRole(request, jobGroupListAll);
-        if (jobGroupList == null || jobGroupList.isEmpty()) {
-            throw new XxlJobException(I18nUtil.getString("jobgroup_empty"));
-        }
-
-        model.addAttribute("JobGroupList", jobGroupList);
-
-        // 任务
-        if (jobId > 0) {
-            XxlJobInfo jobInfo = xxlJobInfoDao.loadById(jobId);
-            if (jobInfo == null) {
-                throw new RuntimeException(
-                        I18nUtil.getString("jobinfo_field_id") + I18nUtil.getString("system_unvalid"));
-            }
-
-            model.addAttribute("jobInfo", jobInfo);
-
-            // valid permission
-            PermissionInterceptor.validJobGroupPermission(request, jobInfo.getJobGroup());
-        }
-
-        return "joblog/joblog.index";
-    }
-
     @GetMapping("/getJobsByGroup/{id}")
-    @ResponseBody
     public ReturnT<List<XxlJobInfo>> getJobsByGroup(@PathVariable int id) {
         List<XxlJobInfo> list = xxlJobInfoDao.getJobsByGroup(id);
         return new ReturnT<>(list);
     }
 
     @PostMapping("/pageList")
-    @ResponseBody
     public Map<String, Object> pageList(
             HttpServletRequest request,
             @RequestParam(required = false, defaultValue = "0") int start,
@@ -141,23 +101,7 @@ public class JobLogController {
         return maps;
     }
 
-    @GetMapping("/logDetailPage/{id}")
-    public String logDetailPage(@PathVariable int id, Model model) {
-
-        // base check
-        XxlJobLog jobLog = xxlJobLogDao.load(id);
-        if (jobLog == null) {
-            throw new RuntimeException(I18nUtil.getString("joblog_logid_unvalid"));
-        }
-
-        model.addAttribute("triggerCode", jobLog.getTriggerCode());
-        model.addAttribute("handleCode", jobLog.getHandleCode());
-        model.addAttribute("logId", jobLog.getId());
-        return "joblog/joblog.detail";
-    }
-
     @GetMapping("/logDetailCat/{logId}")
-    @ResponseBody
     public ReturnT<LogResult> logDetailCat(@PathVariable long logId, int fromLineNum) {
         try {
             // valid
@@ -197,7 +141,6 @@ public class JobLogController {
     }
 
     @PostMapping("/logKill")
-    @ResponseBody
     public ReturnT<String> logKill(int id) {
         // base check
         XxlJobLog jobLog = xxlJobLogDao.load(id);
@@ -232,7 +175,6 @@ public class JobLogController {
     }
 
     @PostMapping("/clearLog")
-    @ResponseBody
     public ReturnT<String> clearLog(HttpServletRequest request, int jobGroup, int jobId, int type) {
         // valid permission
         PermissionInterceptor.validJobGroupPermission(request, jobGroup);

@@ -11,21 +11,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * index controller
  * @author xuxueli 2015-12-19 16:13:16
  */
-@Controller
+@RestController
+@RequestMapping("/admin-api/v1")
 public class IndexController {
 
     @Resource
@@ -34,39 +32,17 @@ public class IndexController {
     @Resource
     private LoginService loginService;
 
-    @GetMapping("/")
-    public String index(Model model) {
-
-        Map<String, Object> dashboardMap = xxlJobService.dashboardInfo();
-        model.addAllAttributes(dashboardMap);
-
-        return "index";
-    }
-
     @GetMapping("/dashboard")
-    @ResponseBody
     public ReturnT<Map<String, Object>> dashboard() {
         return new ReturnT<>(xxlJobService.dashboardInfo());
     }
 
     @GetMapping("/chartInfo")
-    @ResponseBody
     public ReturnT<Map<String, Object>> chartInfo(Date startDate, Date endDate) {
         return xxlJobService.chartInfo(startDate, endDate);
     }
 
-    @GetMapping("/toLogin")
-    @PermissionLimit(limit = false)
-    public ModelAndView toLogin(HttpServletRequest request, HttpServletResponse response, ModelAndView modelAndView) {
-        if (loginService.ifLogin(request, response) != null) {
-            modelAndView.setView(new RedirectView("/", true, false));
-            return modelAndView;
-        }
-        return new ModelAndView("login");
-    }
-
     @PostMapping(value = "login")
-    @ResponseBody
     @PermissionLimit(limit = false)
     public ReturnT<String> loginDo(
             HttpServletRequest request,
@@ -79,15 +55,9 @@ public class IndexController {
     }
 
     @PostMapping(value = "logout")
-    @ResponseBody
     @PermissionLimit(limit = false)
     public ReturnT<String> logout(HttpServletRequest request, HttpServletResponse response) {
         return loginService.logout(request, response);
-    }
-
-    @GetMapping("/help")
-    public String help() {
-        return "help";
     }
 
     @InitBinder

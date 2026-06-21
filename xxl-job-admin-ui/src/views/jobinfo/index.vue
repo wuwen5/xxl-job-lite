@@ -552,7 +552,16 @@ function handleViewLog(row: any) {
 
 function handleGLUE() {
   if (editingId.value) {
-    router.push({ path: '/jobcode', query: { jobId: editingId.value } })
+    router.push({
+      path: '/jobcode',
+      query: { jobId: editingId.value },
+      state: {
+        glueType: formData.glueType,
+        glueSource: formData.glueSource,
+        glueRemark: formData.glueRemark,
+        jobDesc: formData.jobDesc
+      }
+    })
   }
 }
 

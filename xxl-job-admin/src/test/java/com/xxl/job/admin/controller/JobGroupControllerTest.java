@@ -43,7 +43,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
         jdbcTemplate.execute("INSERT INTO xxl_job_group(id, app_name, title, address_type, address_list, update_time) "
                 + "VALUES (1, 'existing-executor', 'Existing Executor', 0, NULL, NOW())");
 
-        MvcResult ret = mockMvc.perform(post("/login")
+        MvcResult ret = mockMvc.perform(post("/admin-api/v1/login")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("userName", "admin")
                         .param("password", "123456"))
@@ -51,20 +51,11 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
         cookie = ret.getResponse().getCookie(LoginService.LOGIN_IDENTITY_KEY);
     }
 
-    // ---------------------- index ----------------------
-
-    @Test
-    public void testIndex() throws Exception {
-        mockMvc.perform(get("/jobgroup").cookie(cookie))
-                .andExpect(status().isOk())
-                .andExpect(view().name("jobgroup/jobgroup.index"));
-    }
-
     // ---------------------- pageList ----------------------
 
     @Test
     public void testPageList() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup/pageList")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup/pageList")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("start", "0")
                         .param("length", "10")
@@ -80,7 +71,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testPageListWithFilter() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup/pageList")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup/pageList")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("start", "0")
                         .param("length", "10")
@@ -97,7 +88,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testSaveSuccess() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "new-executor")
                         .param("title", "New Executor")
@@ -111,7 +102,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testSaveAppnameTooShort() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "ab") // < 4 chars
                         .param("title", "Some Title")
@@ -125,7 +116,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testSaveAppnameEmpty() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "")
                         .param("title", "Some Title")
@@ -139,7 +130,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testSaveTitleEmpty() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "valid-name")
                         .param("title", "")
@@ -153,7 +144,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testSaveManualAddressTypeWithAddresses() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "manual-executor")
                         .param("title", "Manual Executor")
@@ -170,7 +161,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testSaveManualAddressTypeEmptyAddressList() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "manual-exec2")
                         .param("title", "Manual2")
@@ -190,7 +181,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveAppnameWithInvalidChars() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "invalid<name")
                         .param("title", "Some Title")
@@ -207,7 +198,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveTitleWithInvalidChars() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "valid-name")
                         .param("title", "Invalid>Title")
@@ -225,7 +216,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testSaveAppnameTooLong() throws Exception {
         String longAppname = "a".repeat(65);
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", longAppname)
                         .param("title", "Some Title")
@@ -242,7 +233,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveManualAddressWithEmptyItem() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "manual-exec3")
                         .param("title", "Manual3")
@@ -261,7 +252,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testSaveManualAddressWithInvalidChars() throws Exception {
-        MvcResult result = mockMvc.perform(post("/jobgroup")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobgroup")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("appname", "manual-exec4")
                         .param("title", "Manual4")
@@ -280,7 +271,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdateSuccess() throws Exception {
-        MvcResult result = mockMvc.perform(put("/jobgroup/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .param("appname", "existing-executor")
@@ -295,7 +286,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdateAppnameEmpty() throws Exception {
-        MvcResult result = mockMvc.perform(put("/jobgroup/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .param("appname", "")
@@ -313,7 +304,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testUpdateAppnameTooShort() throws Exception {
-        MvcResult result = mockMvc.perform(put("/jobgroup/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .param("appname", "ab")
@@ -331,7 +322,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testUpdateTitleEmpty() throws Exception {
-        MvcResult result = mockMvc.perform(put("/jobgroup/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .param("appname", "existing-executor")
@@ -349,7 +340,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testUpdateManualAddressEmpty() throws Exception {
-        MvcResult result = mockMvc.perform(put("/jobgroup/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .param("appname", "existing-executor")
@@ -368,7 +359,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testUpdateManualAddressWithEmptyItem() throws Exception {
-        MvcResult result = mockMvc.perform(put("/jobgroup/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .param("appname", "existing-executor")
@@ -392,7 +383,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
         jdbcTemplate.execute("INSERT INTO xxl_job_registry(registry_group, registry_key, registry_value, update_time) "
                 + "VALUES ('EXECUTOR', 'existing-executor', '127.0.0.1:9999', NOW())");
 
-        MvcResult result = mockMvc.perform(put("/jobgroup/1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .param("appname", "existing-executor")
@@ -416,7 +407,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
                         + "misfire_strategy, glue_type, trigger_status, trigger_last_time, trigger_next_time) "
                         + "VALUES (1, 1, 'Test Job', NOW(), NOW(), 'tester', 'NONE', 'DO_NOTHING', 'BEAN', 0, 0, 0)");
 
-        MvcResult result = mockMvc.perform(delete("/jobgroup/1")
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .cookie(cookie))
@@ -429,7 +420,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testRemoveFailWhenOnlyOneGroup() throws Exception {
         // group id=1 exists, no jobs → but it's the only group → should fail
-        MvcResult result = mockMvc.perform(delete("/jobgroup/1")
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .cookie(cookie))
@@ -445,7 +436,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
         jdbcTemplate.execute("INSERT INTO xxl_job_group(id, app_name, title, address_type, address_list, update_time) "
                 + "VALUES (2, 'second-executor', 'Second Executor', 0, NULL, NOW())");
 
-        MvcResult result = mockMvc.perform(delete("/jobgroup/1")
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .cookie(cookie))
@@ -464,7 +455,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
         jdbcTemplate.execute("INSERT INTO xxl_job_group(id, app_name, title, address_type, address_list, update_time) "
                 + "VALUES (2, 'second-executor', 'Second Executor', 0, NULL, NOW())");
 
-        MvcResult result = mockMvc.perform(delete("/jobgroup/9999")
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/jobgroup/9999")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "9999") // non-existent
                         .cookie(cookie))
@@ -478,7 +469,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testLoadByIdFound() throws Exception {
-        MvcResult result = mockMvc.perform(get("/jobgroup/1")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobgroup/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "1")
                         .cookie(cookie))
@@ -491,7 +482,7 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testLoadByIdNotFound() throws Exception {
-        MvcResult result = mockMvc.perform(get("/jobgroup/9999")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobgroup/9999")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("id", "9999")
                         .cookie(cookie))
