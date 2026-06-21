@@ -30,10 +30,6 @@
           <el-icon><Document /></el-icon>
           <template #title>{{ t('menu.joblog') }}</template>
         </el-menu-item>
-        <el-menu-item index="/jobcode">
-          <el-icon><Edit /></el-icon>
-          <template #title>{{ t('menu.jobcode') }}</template>
-        </el-menu-item>
         <el-menu-item index="/user">
           <el-icon><User /></el-icon>
           <template #title>{{ t('menu.user') }}</template>

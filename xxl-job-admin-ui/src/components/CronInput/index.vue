@@ -16,7 +16,7 @@
     <el-dialog
       v-model="showDialog"
       title="Cron 表达式生成器"
-      width="800px"
+      width="520px"
       :close-on-click-modal="false"
       class="cron-dialog"
     >
@@ -521,7 +521,7 @@
         </el-tab-pane>
       </el-tabs>
 
-      <el-divider />
+      <el-divider style="margin: 8px 0" />
 
       <div class="cron-preview">
         <div class="preview-header">
@@ -875,29 +875,28 @@ watch(showDialog, (val) => {
 
 .cron-dialog {
   .el-dialog__body {
-    padding: 10px 20px;
+    padding: 10px 15px;
   }
 }
 
 .tab-content {
-  padding: 10px 0;
-  min-height: 250px;
+  padding: 5px 0;
 }
 
 .option-item {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
-  gap: 8px;
+  margin-bottom: 8px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
 .input-short {
-  width: 75px;
+  width: 110px;
 }
 
 .input-medium {
-  width: 100px;
+  width: 120px;
 }
 
 .separator {
@@ -907,12 +906,12 @@ watch(showDialog, (val) => {
 
 .unit {
   color: #606266;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .checkbox-grid {
-  margin-top: 12px;
-  padding: 12px;
+  margin-top: 8px;
+  padding: 8px;
   background-color: #f5f7fa;
   border-radius: 4px;
   border: 1px solid #e4e7ed;
@@ -921,16 +920,16 @@ watch(showDialog, (val) => {
 .checkbox-row {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   
   &:last-child {
     margin-bottom: 0;
   }
 
   .el-checkbox {
-    margin-right: 15px;
-    margin-bottom: 4px;
-    min-width: 45px;
+    margin-right: 8px;
+    margin-bottom: 2px;
+    min-width: 38px;
   }
 }
 
@@ -938,29 +937,29 @@ watch(showDialog, (val) => {
   .preview-header {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 
   .preview-label {
     font-weight: 500;
     color: #303133;
-    margin-right: 10px;
-    font-size: 14px;
+    margin-right: 8px;
+    font-size: 13px;
   }
 
   .cron-tag {
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .next-trigger-times {
-    margin-top: 12px;
+    margin-top: 8px;
 
     .time-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 6px;
+      margin-top: 6px;
     }
   }
 }
