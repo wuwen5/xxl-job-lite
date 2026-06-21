@@ -155,20 +155,26 @@
           <el-tab-pane :label="t('jobinfo.scheduleType')" name="schedule">
             <el-form-item :label="t('jobinfo.scheduleType')" prop="scheduleType">
               <el-radio-group v-model="formData.scheduleType" @change="handleScheduleTypeChange">
-                <el-radio-button label="CRON">CRON</el-radio-button>
-                <el-radio-button label="FIX_RATE">{{ t('jobinfo.fixRate') }}</el-radio-button>
+                <el-radio-button value="CRON">CRON</el-radio-button>
+                <el-radio-button value="FIX_RATE">{{ t('jobinfo.fixRate') }}</el-radio-button>
               </el-radio-group>
             </el-form-item>
             <el-form-item :label="t('jobinfo.scheduleConf')" prop="scheduleConf">
-              <el-input v-model="formData.scheduleConf" :placeholder="scheduleConfPlaceholder" />
-              <el-button v-if="formData.scheduleType === 'CRON'" type="primary" link @click="showCronGenerator = true">
-                {{ t('jobinfo.cron') }}
-              </el-button>
+              <cron-input
+                v-if="formData.scheduleType === 'CRON'"
+                v-model="formData.scheduleConf"
+                placeholder="请输入 Cron 表达式"
+              />
+              <el-input
+                v-else
+                v-model="formData.scheduleConf"
+                :placeholder="scheduleConfPlaceholder"
+              />
             </el-form-item>
             <el-form-item :label="t('jobinfo.misfireStrategy')" prop="misfireStrategy">
               <el-radio-group v-model="formData.misfireStrategy">
-                <el-radio label="DO_NOTHING">{{ t('jobinfo.misfireDoNothing') }}</el-radio>
-                <el-radio label="FIRE_ONCE_NOW">{{ t('jobinfo.misfireFireOnceNow') }}</el-radio>
+                <el-radio value="DO_NOTHING">{{ t('jobinfo.misfireDoNothing') }}</el-radio>
+                <el-radio value="FIRE_ONCE_NOW">{{ t('jobinfo.misfireFireOnceNow') }}</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-tab-pane>
@@ -249,14 +255,6 @@
       </template>
     </el-dialog>
 
-    <!-- Cron 生成器对话框 -->
-    <el-dialog v-model="showCronGenerator" title="Cron" width="700px">
-      <div class="cron-generator">
-        <el-input v-model="cronExpression" placeholder="Cron 表达式" />
-        <el-button type="primary" @click="handleCronConfirm">{{ t('common.confirm') }}</el-button>
-      </div>
-    </el-dialog>
-
     <!-- 下次执行时间对话框 -->
     <el-dialog v-model="nextTriggerTimeVisible" :title="t('jobinfo.nextTriggerTime')" width="500px">
       <div v-loading="nextTriggerTimeLoading">
@@ -282,6 +280,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { jobinfoApi, type JobInfo } from '@/api/jobinfo'
 import { jobgroupApi, type JobGroup } from '@/api/jobgroup'
+import CronInput from '@/components/CronInput/index.vue'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -292,14 +291,12 @@ const tableData = ref<JobInfo[]>([])
 const jobGroups = ref<JobGroup[]>([])
 const dialogVisible = ref(false)
 const triggerDialogVisible = ref(false)
-const showCronGenerator = ref(false)
 const nextTriggerTimeVisible = ref(false)
 const nextTriggerTimeLoading = ref(false)
 const nextTriggerTimeList = ref<string[]>([])
 const activeTab = ref('basic')
 const editingId = ref<number | null>(null)
 const triggerJobId = ref<number>(0)
-const cronExpression = ref('')
 const formRef = ref<FormInstance>()
 
 const searchForm = reactive({
@@ -600,11 +597,6 @@ function handleScheduleTypeChange() {
   formData.scheduleConf = ''
 }
 
-function handleCronConfirm() {
-  formData.scheduleConf = cronExpression.value
-  showCronGenerator.value = false
-}
-
 onMounted(() => {
   loadJobGroups()
   loadData()
@@ -622,11 +614,6 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
   }
-}
-
-.cron-generator {
-  display: flex;
-  gap: 10px;
 }
 
 .next-trigger-time-list {
