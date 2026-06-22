@@ -2,13 +2,13 @@ import { test, expect } from './fixtures';
 
 test.describe('Job Management', () => {
   test.beforeEach(async ({ page }) => {
-    await page.getByRole('link', { name: /任务管理/ }).click();
+    await page.getByRole('menuitem', { name: '任务管理' }).click();
     await expect(page).toHaveURL(/.*jobinfo/);
   });
 
   test('should display job list with columns', async ({ page }) => {
     const headerRow = page.locator('thead tr').first();
-    await expect(headerRow).toContainText('任务ID');
+    await expect(headerRow).toContainText('ID');
     await expect(headerRow).toContainText('任务描述');
     await expect(headerRow).toContainText('调度类型');
     await expect(headerRow).toContainText('运行模式');
@@ -18,8 +18,8 @@ test.describe('Job Management', () => {
   });
 
   test('should search jobs by description', async ({ page }) => {
-    await page.locator('#jobDesc').fill('测试');
-    await page.getByRole('button', { name: '搜索' }).click();
+    await page.getByPlaceholder('任务描述').fill('测试');
+    await page.getByRole('button', { name: '查询' }).click();
 
     await expect(page.locator('tbody tr').first()).toBeVisible();
     await expect(page.locator('tbody tr').first()).toContainText('测试');
@@ -45,11 +45,11 @@ test.describe('Job Management', () => {
   });
 
   test('should edit existing job', async ({ page }) => {
-    await page.locator('#jobDesc').fill('E2E测试任务');
-    await page.getByRole('button', { name: '搜索' }).click();
+    await page.getByPlaceholder('任务描述').fill('E2E测试任务');
+    await page.getByRole('button', { name: '查询' }).click();
           
     const firstRow = page.locator('tbody tr').first();
-    await firstRow.getByRole('button', { name: 'Toggle Dropdown' }).first().click();
+    await firstRow.getByRole('button', { name: '更多' }).first().click();
     await page.getByRole('link', { name: '编辑' }).click();
 
     const dialog = page.locator('#updateModal');
@@ -66,15 +66,15 @@ test.describe('Job Management', () => {
 
   test('should stop and start job', async ({ page }) => {
       
-    await page.locator('#jobDesc').fill('E2E测试任务');
-    await page.getByRole('button', { name: '搜索' }).click();
+    await page.getByPlaceholder('任务描述').fill('E2E测试任务');
+    await page.getByRole('button', { name: '查询' }).click();
     
     const firstRow = page.locator('tbody tr').first();
     
     const runningRow = page.locator('tbody tr').filter({ hasText: 'STOP' }).first();
 
     if (await runningRow.count() > 0) {
-      await firstRow.getByRole('button', { name: 'Toggle Dropdown' }).first().click();
+      await firstRow.getByRole('button', { name: '更多' }).first().click();
       await page.getByRole('link', { name: '启动' }).click();
 
       await expect(page.getByText('系统提示')).toBeVisible();
@@ -84,12 +84,11 @@ test.describe('Job Management', () => {
   });
 
   test('should manually trigger job', async ({ page }) => {
-    await page.locator('#jobDesc').fill('E2E测试任务');
-    await page.getByRole('button', { name: '搜索' }).click();
+    await page.getByPlaceholder('任务描述').fill('E2E测试任务');
+    await page.getByRole('button', { name: '查询' }).click();
           
     const firstRow = page.locator('tbody tr').first();
-    await firstRow.getByRole('button', { name: 'Toggle Dropdown' }).first().click();
-    await page.getByRole('link', { name: '执行一次' }).click();
+    await firstRow.getByRole('button', { name: '执行' }).first().click();
 
     const dialog = page.locator('#jobTriggerModal');
     await expect(dialog).toBeVisible();
@@ -100,14 +99,14 @@ test.describe('Job Management', () => {
   });
 
   test('should delete job', async ({ page }) => {
-    await page.locator('#jobDesc').fill('E2E测试任务');
-    await page.getByRole('button', { name: '搜索' }).click();
+    await page.getByPlaceholder('任务描述').fill('E2E测试任务');
+    await page.getByRole('button', { name: '查询' }).click();
 
-    const testRow = page.getByRole('row', { name: 'E2E测试任务' }).getByRole('button').nth(1).click();
-
-      await page.getByRole('link', { name: '删除' }).click();
-      await page.getByText('确定取消').getByText('确定').click();
-      await expect(page.getByText('删除成功')).toBeVisible();
+    const firstRow = page.locator('tbody tr').first();
+    await firstRow.getByRole('button', { name: '更多' }).first().click();
+    await page.getByRole('link', { name: '删除' }).click();
+    await page.getByText('确定取消').getByText('确定').click();
+    await expect(page.getByText('删除成功')).toBeVisible();
   });
 
   test('should change page size', async ({ page }) => {

@@ -2,50 +2,46 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Login Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/xxl-job-admin/toLogin');
+    await page.goto('/login');
   });
 
   test('should display login page with correct title', async ({ page }) => {
-    await expect(page).toHaveTitle(/任务调度中心/);
+    await expect(page).toHaveTitle(/XXL-JOB/);
   });
 
   test('should display login form elements', async ({ page }) => {
-    await expect(page.locator('input[name="userName"]')).toBeVisible();
-    await expect(page.locator('input[name="password"]')).toBeVisible();
-    await expect(page.locator('button[type="submit"]')).toBeVisible();
+    await expect(page.getByPlaceholder('请输入用户名')).toBeVisible();
+    await expect(page.getByPlaceholder('请输入密码')).toBeVisible();
+    await expect(page.getByRole('button', { name: '登 录' })).toBeVisible();
     await expect(page.getByText('记住密码')).toBeVisible();
   });
 
   test('should login successfully with valid credentials', async ({ page }) => {
-    await page.fill('input[name="userName"]', 'admin');
-    await page.fill('input[name="password"]', '123456');
-    await page.click('button[type="submit"]');
+    await page.getByPlaceholder('请输入用户名').fill('admin');
+    await page.getByPlaceholder('请输入密码').fill('123456');
+    await page.getByRole('button', { name: '登 录' }).click();
 
-    await expect(page.locator('.sidebar-menu')).toBeVisible({ timeout: 10000 });
-    await expect(page).toHaveURL(/.*xxl-job-admin\//);
+    await expect(page.getByRole('menubar')).toBeVisible({ timeout: 10000 });
+    await expect(page).toHaveURL(/.*dashboard/);
   });
 
   test('should show error for invalid credentials', async ({ page }) => {
-    await page.fill('input[name="userName"]', 'admin');
-    await page.fill('input[name="password"]', 'wrongpassword');
-    await page.click('button[type="submit"]');
+    await page.getByPlaceholder('请输入用户名').fill('admin');
+    await page.getByPlaceholder('请输入密码').fill('wrongpassword');
+    await page.getByRole('button', { name: '登 录' }).click();
 
-    await expect(page.getByText('系统提示')).toBeVisible();
     await expect(page.getByText('账号或密码错误')).toBeVisible();
   });
 
   test('should logout successfully', async ({ page }) => {
-    await page.fill('input[name="userName"]', 'admin');
-    await page.fill('input[name="password"]', '123456');
-    await page.click('button[type="submit"]');
-    await expect(page.locator('.sidebar-menu')).toBeVisible();
+    await page.getByPlaceholder('请输入用户名').fill('admin');
+    await page.getByPlaceholder('请输入密码').fill('123456');
+    await page.getByRole('button', { name: '登 录' }).click();
+    await expect(page.getByRole('menubar')).toBeVisible();
 
-    await page.getByRole('link', { name: '欢迎 admin' }).click();
-    await page.getByRole('link', { name: '注销' }).click();
+    await page.getByRole('button', { name: 'admin' }).click();
+    await page.getByRole('menuitem', { name: '退出登录' }).click();
 
-    await expect(page.getByText('确认注销登录?')).toBeVisible();
-    await page.locator('.layui-layer-btn0').click();
-
-    await expect(page).toHaveURL(/.*toLogin/);
+    await expect(page).toHaveURL(/.*login/);
   });
 });

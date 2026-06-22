@@ -51,13 +51,7 @@ public class JobInfoController {
 
         PermissionInterceptor.validJobGroupPermission(request, jobGroup);
         return xxlJobService.pageList(
-                start,
-                length,
-                jobGroup,
-                triggerStatus == null ? -1 : triggerStatus,
-                jobDesc,
-                executorHandler,
-                author);
+                start, length, jobGroup, triggerStatus == null ? -1 : triggerStatus, jobDesc, executorHandler, author);
     }
 
     @PostMapping

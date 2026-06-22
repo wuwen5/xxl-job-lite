@@ -2,20 +2,21 @@ import { test, expect } from './fixtures';
 
 test.describe('User Management', () => {
   test.beforeEach(async ({ page }) => {
-    await page.getByRole('link', { name: /用户管理/ }).click();
+    await page.getByRole('menuitem', { name: '用户管理' }).click();
     await expect(page).toHaveURL(/.*user/);
   });
 
   test('should display user list with columns', async ({ page }) => {
-    await expect(page.getByRole('gridcell', { name: '账号' })).toBeVisible();
-    await expect(page.getByRole('gridcell', { name: '角色' })).toBeVisible();
-    await expect(page.getByRole('gridcell', { name: '操作' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'ID' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: '账号' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: '角色' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: '操作' })).toBeVisible();
   });
 
   test('should search users by role', async ({ page }) => {
     const roleSelect = page.locator('select').first();
     await roleSelect.selectOption({ label: '管理员' });
-    await page.getByRole('button', { name: '搜索' }).click();
+    await page.getByRole('button', { name: '查询' }).click();
 
     await expect(page.locator('tbody tr')).toHaveCount(1);
     await expect(page.locator('tbody tr').first()).toContainText('admin');
@@ -23,15 +24,15 @@ test.describe('User Management', () => {
   });
 
   test('should search users by username', async ({ page }) => {
-    await page.locator('#username').fill('admin');
-    await page.getByRole('button', { name: '搜索' }).click();
+    await page.getByPlaceholder('账号').fill('admin');
+    await page.getByRole('button', { name: '查询' }).click();
 
     await expect(page.locator('tbody tr')).toHaveCount(1);
     await expect(page.locator('tbody tr').first()).toContainText('admin');
   });
 
   test('should add new user', async ({ page }) => {
-    await page.getByRole('button', { name: '新增用户' }).click();
+    await page.getByRole('button', { name: '新增' }).click();
 
     const dialog = page.locator('#addModal');
     await expect(dialog).toBeVisible();
@@ -45,8 +46,8 @@ test.describe('User Management', () => {
   });
 
   test('should edit existing user', async ({ page }) => {
-    await page.locator('#username').fill('e2euser');
-    await page.getByRole('button', { name: '搜索' }).click();
+    await page.getByPlaceholder('账号').fill('e2euser');
+    await page.getByRole('button', { name: '查询' }).click();
 
     const testRow = page.locator('tbody tr').filter({ hasText: 'e2euser' });
 
@@ -65,13 +66,13 @@ test.describe('User Management', () => {
   });
 
   test('should delete user', async ({ page }) => {
-    await page.locator('#username').fill('e2euser');
-    await page.getByRole('button', { name: '搜索' }).click();
+    await page.getByPlaceholder('账号').fill('e2euser');
+    await page.getByRole('button', { name: '查询' }).click();
 
     const testRow = page.locator('tbody tr').filter({ hasText: 'e2euser' });
 
     if (await testRow.count() > 0) {
-      await testRow.getByText('删除', { exact: true }).click();
+      await testRow.getByRole('button', { name: '删除' }).click();
 
       page.on('dialog', dialog => dialog.accept());
 
