@@ -33,7 +33,7 @@ export interface PageResult<T> {
 
 export const jobinfoApi = {
   getPageList: (params: any) =>
-    request.post<any, PageResult<JobInfo>>('/jobinfo/pageList', null, { params }),
+    request.get<any, PageResult<JobInfo>>('/jobinfo', { params }),
 
   add: (data: Partial<JobInfo>) =>
     request.post<any, string>('/jobinfo', data),
@@ -45,18 +45,18 @@ export const jobinfoApi = {
     request.delete<any, string>(`/jobinfo/${id}`),
 
   start: (id: number) =>
-    request.put<any, string>(`/jobinfo/start/${id}`),
+    request.patch<any, string>(`/jobinfo/${id}`, null, { params: { action: 'start' } }),
 
   stop: (id: number) =>
-    request.put<any, string>(`/jobinfo/stop/${id}`),
+    request.patch<any, string>(`/jobinfo/${id}`, null, { params: { action: 'stop' } }),
 
   trigger: (id: number, executorParam?: string, addressList?: string) =>
-    request.post<any, string>('/jobinfo/trigger', null, {
-      params: { id, executorParam, addressList }
+    request.post<any, string>(`/jobinfo/${id}/trigger`, null, {
+      params: { executorParam, addressList }
     }),
 
   getNextTriggerTime: (scheduleType: string, scheduleConf: string) =>
-    request.get<any, string[]>('/jobinfo/nextTriggerTime', {
+    request.get<any, string[]>('/jobinfo/trigger-time/next', {
       params: { scheduleType, scheduleConf }
     })
 }

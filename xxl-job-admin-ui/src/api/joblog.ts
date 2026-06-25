@@ -31,21 +31,21 @@ export interface LogResult {
 
 export const joblogApi = {
   getPageList: (params: any) =>
-    request.post<any, PageResult<JobLog>>('/joblog/pageList', null, { params }),
+    request.get<any, PageResult<JobLog>>('/joblog', { params }),
 
   getJobsByGroup: (id: number) =>
-    request.get<any, any[]>(`/joblog/getJobsByGroup/${id}`),
+    request.get<any, any[]>(`/joblog/group/${id}/jobs`),
 
   getLogDetail: (logId: number, fromLineNum: number) =>
-    request.get<any, LogResult>(`/joblog/logDetailCat/${logId}`, {
+    request.get<any, LogResult>(`/joblog/${logId}/detail`, {
       params: { fromLineNum }
     }),
 
   kill: (id: number) =>
-    request.post<any, string>('/joblog/logKill', null, { params: { id } }),
+    request.post<any, string>(`/joblog/${id}/kill`),
 
   clearLog: (jobGroup: number, jobId: number, type: number) =>
-    request.post<any, string>('/joblog/clearLog', null, {
+    request.delete<any, string>('/joblog', {
       params: { jobGroup, jobId, type }
     })
 }

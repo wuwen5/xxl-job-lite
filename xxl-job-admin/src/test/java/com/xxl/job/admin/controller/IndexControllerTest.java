@@ -52,7 +52,7 @@ public class IndexControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testChartInfo() throws Exception {
-        MvcResult result = mockMvc.perform(get("/admin-api/v1/chartInfo")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/chart")
                         .cookie(cookie)
                         .param("startDate", "2026-04-12 00:00:00")
                         .param("endDate", "2026-04-19 23:59:59"))

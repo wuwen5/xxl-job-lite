@@ -16,13 +16,13 @@ export interface PageResult<T> {
 
 export const jobgroupApi = {
   getPageList: (params: any) =>
-    request.post<any, PageResult<JobGroup>>('/jobgroup/pageList', null, { params }),
+    request.get<any, PageResult<JobGroup>>('/jobgroup', { params }),
 
   add: (data: Partial<JobGroup>) =>
-    request.post<any, string>('/jobgroup', null, { params: data }),
+    request.post<any, string>('/jobgroup', data),
 
   update: (id: number, data: Partial<JobGroup>) =>
-    request.put<any, string>(`/jobgroup/${id}`, null, { params: data }),
+    request.put<any, string>(`/jobgroup/${id}`, data),
 
   remove: (id: number) =>
     request.delete<any, string>(`/jobgroup/${id}`),

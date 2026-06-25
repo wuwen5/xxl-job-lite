@@ -16,19 +16,17 @@ export interface PageResult<T> {
 
 export const userApi = {
   getPageList: (params: any) =>
-    request.post<any, PageResult<JobUser>>('/user/pageList', null, { params }),
+    request.get<any, PageResult<JobUser>>('/user', { params }),
 
   add: (data: Partial<JobUser>) =>
-    request.post<any, string>('/user', null, { params: data }),
+    request.post<any, string>('/user', data),
 
   update: (id: number, data: Partial<JobUser>) =>
-    request.put<any, string>(`/user/${id}`, null, { params: data }),
+    request.put<any, string>(`/user/${id}`, data),
 
   remove: (id: number) =>
     request.delete<any, string>(`/user/${id}`),
 
   updatePwd: (password: string, oldPassword: string) =>
-    request.post<any, string>('/user/updatePwd', null, {
-      params: { password, oldPassword }
-    })
+    request.put<any, string>('/user/me/password', { password, oldPassword })
 }

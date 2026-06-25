@@ -15,6 +15,7 @@ import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,7 +39,7 @@ public class JobInfoController {
     @Resource
     private XxlJobService xxlJobService;
 
-    @PostMapping("/pageList")
+    @GetMapping
     public Map<String, Object> pageList(
             HttpServletRequest request,
             @RequestParam(required = false, defaultValue = "0") int start,
@@ -80,25 +81,26 @@ public class JobInfoController {
         return xxlJobService.remove(id);
     }
 
-    @PutMapping("/stop/{id}")
-    public ReturnT<String> pause(@PathVariable int id) {
-        return xxlJobService.stop(id);
+    @PatchMapping("/{id}")
+    public ReturnT<String> updateStatus(@PathVariable int id, @RequestParam String action) {
+        if ("start".equalsIgnoreCase(action)) {
+            return xxlJobService.start(id);
+        } else if ("stop".equalsIgnoreCase(action)) {
+            return xxlJobService.stop(id);
+        }
+        return new ReturnT<>(ReturnT.FAIL_CODE, "invalid action: " + action);
     }
 
-    @PutMapping("/start/{id}")
-    public ReturnT<String> start(@PathVariable int id) {
-        return xxlJobService.start(id);
-    }
-
-    @PostMapping("/trigger")
-    public ReturnT<String> triggerJob(HttpServletRequest request, int id, String executorParam, String addressList) {
+    @PostMapping("/{id}/trigger")
+    public ReturnT<String> triggerJob(
+            HttpServletRequest request, @PathVariable int id, String executorParam, String addressList) {
         // login user
         XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
         // trigger
         return xxlJobService.trigger(loginUser, id, executorParam, addressList);
     }
 
-    @GetMapping("/nextTriggerTime")
+    @GetMapping("/trigger-time/next")
     public ReturnT<List<String>> nextTriggerTime(String scheduleType, String scheduleConf) {
 
         XxlJobInfo paramXxlJobInfo = new XxlJobInfo();

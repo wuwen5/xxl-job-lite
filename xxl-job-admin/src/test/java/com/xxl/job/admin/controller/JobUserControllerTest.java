@@ -1,6 +1,7 @@
 package com.xxl.job.admin.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -55,8 +56,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testPageList() throws Exception {
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/user/pageList")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/user")
                         .param("start", "0")
                         .param("length", "10")
                         .param("username", "")
@@ -71,8 +71,7 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testPageListPasswordIsHidden() throws Exception {
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/user/pageList")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/user")
                         .param("start", "0")
                         .param("length", "10")
                         .param("username", "admin")
@@ -90,10 +89,8 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testAddSuccess() throws Exception {
         MvcResult result = mockMvc.perform(post("/admin-api/v1/user")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("username", "newuser")
-                        .param("password", "password123")
-                        .param("role", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"newuser\",\"password\":\"password123\",\"role\":0}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
@@ -104,10 +101,8 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testAddUsernameTooShort() throws Exception {
         MvcResult result = mockMvc.perform(post("/admin-api/v1/user")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("username", "ab") // < 4 chars
-                        .param("password", "password123")
-                        .param("role", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"ab\",\"password\":\"password123\",\"role\":0}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
@@ -118,10 +113,8 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testAddPasswordTooShort() throws Exception {
         MvcResult result = mockMvc.perform(post("/admin-api/v1/user")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("username", "validuser")
-                        .param("password", "ab") // < 4 chars
-                        .param("role", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"validuser\",\"password\":\"ab\",\"role\":0}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
@@ -131,12 +124,9 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testAddDuplicateUsername() throws Exception {
-        // 'admin' already exists
         MvcResult result = mockMvc.perform(post("/admin-api/v1/user")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("username", "admin")
-                        .param("password", "password123")
-                        .param("role", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"admin\",\"password\":\"password123\",\"role\":0}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
@@ -147,10 +137,8 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testAddUsernameEmpty() throws Exception {
         MvcResult result = mockMvc.perform(post("/admin-api/v1/user")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("username", "")
-                        .param("password", "password123")
-                        .param("role", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"\",\"password\":\"password123\",\"role\":0}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
@@ -163,11 +151,8 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testUpdateSuccess() throws Exception {
         MvcResult result = mockMvc.perform(put("/admin-api/v1/user/2")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "2")
-                        .param("username", "normaluser")
-                        .param("password", "newpassword")
-                        .param("role", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"normaluser\",\"password\":\"newpassword\",\"role\":0}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
@@ -178,11 +163,8 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testUpdatePasswordTooShort() throws Exception {
         MvcResult result = mockMvc.perform(put("/admin-api/v1/user/2")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "2")
-                        .param("username", "normaluser")
-                        .param("password", "ab") // < 4 chars
-                        .param("role", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"normaluser\",\"password\":\"ab\",\"role\":0}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
@@ -192,13 +174,9 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdateSelfNotAllowed() throws Exception {
-        // admin tries to update themselves → should fail
         MvcResult result = mockMvc.perform(put("/admin-api/v1/user/1")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "1")
-                        .param("username", "admin")
-                        .param("password", "newpassword")
-                        .param("role", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"admin\",\"password\":\"newpassword\",\"role\":1}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
@@ -208,13 +186,9 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdateWithoutPassword() throws Exception {
-        // empty password → keep existing password (password=null in update)
         MvcResult result = mockMvc.perform(put("/admin-api/v1/user/2")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "2")
-                        .param("username", "normaluser")
-                        .param("password", "")
-                        .param("role", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"normaluser\",\"role\":0}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
@@ -256,10 +230,9 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdatePwdSuccess() throws Exception {
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/user/updatePwd")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("oldPassword", "123456")
-                        .param("password", "newpass1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/user/me/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"oldPassword\":\"123456\",\"password\":\"newpass1\"}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
@@ -269,10 +242,9 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdatePwdWrongOldPassword() throws Exception {
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/user/updatePwd")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("oldPassword", "wrongpassword")
-                        .param("password", "newpass1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/user/me/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"oldPassword\":\"wrongpassword\",\"password\":\"newpass1\"}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
@@ -282,10 +254,9 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdatePwdNewPasswordTooShort() throws Exception {
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/user/updatePwd")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("oldPassword", "123456")
-                        .param("password", "ab") // < 4 chars
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/user/me/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"oldPassword\":\"123456\",\"password\":\"ab\"}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
@@ -295,10 +266,9 @@ public class JobUserControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testUpdatePwdOldPasswordEmpty() throws Exception {
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/user/updatePwd")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("oldPassword", "")
-                        .param("password", "newpass1")
+        MvcResult result = mockMvc.perform(put("/admin-api/v1/user/me/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"oldPassword\":\"\",\"password\":\"newpass1\"}")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))

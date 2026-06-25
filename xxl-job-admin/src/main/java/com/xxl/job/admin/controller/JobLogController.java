@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,13 +54,13 @@ public class JobLogController {
     @Resource
     private XxlJobLogDao xxlJobLogDao;
 
-    @GetMapping("/getJobsByGroup/{id}")
+    @GetMapping("/group/{id}/jobs")
     public ReturnT<List<XxlJobInfo>> getJobsByGroup(@PathVariable int id) {
         List<XxlJobInfo> list = xxlJobInfoDao.getJobsByGroup(id);
         return new ReturnT<>(list);
     }
 
-    @PostMapping("/pageList")
+    @GetMapping
     public Map<String, Object> pageList(
             HttpServletRequest request,
             @RequestParam(required = false, defaultValue = "0") int start,
@@ -101,7 +102,7 @@ public class JobLogController {
         return maps;
     }
 
-    @GetMapping("/logDetailCat/{logId}")
+    @GetMapping("/{logId}/detail")
     public ReturnT<LogResult> logDetailCat(@PathVariable long logId, int fromLineNum) {
         try {
             // valid
@@ -140,8 +141,8 @@ public class JobLogController {
         }
     }
 
-    @PostMapping("/logKill")
-    public ReturnT<String> logKill(int id) {
+    @PostMapping("/{id}/kill")
+    public ReturnT<String> logKill(@PathVariable int id) {
         // base check
         XxlJobLog jobLog = xxlJobLogDao.load(id);
         XxlJobInfo jobInfo = xxlJobInfoDao.loadById(jobLog.getJobId());
@@ -174,7 +175,7 @@ public class JobLogController {
         }
     }
 
-    @PostMapping("/clearLog")
+    @DeleteMapping
     public ReturnT<String> clearLog(HttpServletRequest request, int jobGroup, int jobId, int type) {
         // valid permission
         PermissionInterceptor.validJobGroupPermission(request, jobGroup);

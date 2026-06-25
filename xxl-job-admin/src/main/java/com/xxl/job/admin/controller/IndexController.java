@@ -37,7 +37,7 @@ public class IndexController {
         return new ReturnT<>(xxlJobService.dashboardInfo());
     }
 
-    @GetMapping("/chartInfo")
+    @GetMapping("/chart")
     public ReturnT<Map<String, Object>> chartInfo(Date startDate, Date endDate) {
         return xxlJobService.chartInfo(startDate, endDate);
     }

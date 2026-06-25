@@ -3,6 +3,7 @@ package com.xxl.job.admin.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
@@ -19,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 public class JobInfoControllerTest extends AbstractSpringMvcTest {
     private static Logger logger = LoggerFactory.getLogger(JobInfoControllerTest.class);
@@ -63,18 +62,14 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testPageList() throws Exception {
         // 测试分页查询
-        MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.add("start", "0");
-        parameters.add("length", "10");
-        parameters.add("jobGroup", "-1");
-        parameters.add("triggerStatus", "-1");
-        parameters.add("jobDesc", "");
-        parameters.add("executorHandler", "");
-        parameters.add("author", "");
-
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo/pageList")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .params(parameters)
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo")
+                        .param("start", "0")
+                        .param("length", "10")
+                        .param("jobGroup", "-1")
+                        .param("triggerStatus", "-1")
+                        .param("jobDesc", "")
+                        .param("executorHandler", "")
+                        .param("author", "")
                         .cookie(cookie))
                 .andReturn();
 
@@ -90,18 +85,14 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testPageListWithFilters() throws Exception {
         // 测试带过滤条件的分页查询
-        MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.add("start", "0");
-        parameters.add("length", "5");
-        parameters.add("jobGroup", "-1");
-        parameters.add("triggerStatus", "1");
-        parameters.add("jobDesc", "test");
-        parameters.add("executorHandler", "");
-        parameters.add("author", "admin");
-
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo/pageList")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .params(parameters)
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo")
+                        .param("start", "0")
+                        .param("length", "5")
+                        .param("jobGroup", "-1")
+                        .param("triggerStatus", "1")
+                        .param("jobDesc", "test")
+                        .param("executorHandler", "")
+                        .param("author", "admin")
                         .cookie(cookie))
                 .andReturn();
 
@@ -196,10 +187,8 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testStop() throws Exception {
         // 测试停止任务
-        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobinfo/stop/1")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "1")
-                        .cookie(cookie))
+        MvcResult result = mockMvc.perform(
+                        patch("/admin-api/v1/jobinfo/1").param("action", "stop").cookie(cookie))
                 .andReturn();
 
         assertEquals(200, result.getResponse().getStatus());
@@ -209,9 +198,8 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testStart() throws Exception {
         // 测试启动任务
-        MvcResult result = mockMvc.perform(put("/admin-api/v1/jobinfo/start/1")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "1")
+        MvcResult result = mockMvc.perform(patch("/admin-api/v1/jobinfo/1")
+                        .param("action", "start")
                         .cookie(cookie))
                 .andReturn();
 
@@ -222,9 +210,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testTrigger() throws Exception {
         // 测试手动触发任务
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo/trigger")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "1")
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo/1/trigger")
                         .param("executorParam", "test param")
                         .param("addressList", "")
                         .cookie(cookie))
@@ -239,7 +225,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testNextTriggerTime() throws Exception {
         // 测试计算下次触发时间 - CRON类型
-        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo/nextTriggerTime")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo/trigger-time/next")
                         .param("scheduleType", "CRON")
                         .param("scheduleConf", "0 0 12 * * ? *")
                         .cookie(cookie))
@@ -254,7 +240,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testNextTriggerTimeFixedRate() throws Exception {
         // 测试计算下次触发时间 - 固定速率类型
-        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo/nextTriggerTime")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo/trigger-time/next")
                         .param("scheduleType", "FIX_RATE")
                         .param("scheduleConf", "60")
                         .cookie(cookie))
@@ -268,7 +254,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testNextTriggerTimeInvalidCron() throws Exception {
         // 测试无效的CRON表达式
-        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo/nextTriggerTime")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo/trigger-time/next")
                         .param("scheduleType", "CRON")
                         .param("scheduleConf", "invalid cron")
                         .cookie(cookie))
@@ -284,8 +270,7 @@ public class JobInfoControllerTest extends AbstractSpringMvcTest {
     @Test
     public void testWithoutAuthentication() throws Exception {
         // 测试未登录访问（应该被拦截）
-        MvcResult result = mockMvc.perform(post("/admin-api/v1/jobinfo/pageList")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobinfo")
                         .param("start", "0")
                         .param("length", "10")
                         .param("jobGroup", "-1")

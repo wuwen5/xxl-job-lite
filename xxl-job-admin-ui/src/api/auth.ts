@@ -17,5 +17,5 @@ export function getDashboardInfo() {
 }
 
 export function getChartInfo(startDate: string, endDate: string) {
-  return request.get<any, any>('/chartInfo', { params: { startDate, endDate } })
+  return request.get<any, any>('/chart', { params: { startDate, endDate } })
 }
