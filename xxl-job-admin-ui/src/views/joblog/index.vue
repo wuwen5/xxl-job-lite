@@ -3,7 +3,7 @@
     <el-card class="search-card">
       <el-form :model="searchForm" inline class="search-form">
         <el-form-item :label="t('joblog.jobGroup')">
-          <el-select v-model="searchForm.jobGroup" :placeholder="t('common.all')" style="width: 200px" @change="handleJobGroupChange">
+          <el-select v-model="searchForm.jobGroup" :placeholder="jobGroups.length > 0 ? t('common.all') : t('common.noData')" style="width: 200px" @change="handleJobGroupChange">
             <el-option v-if="isAdmin" :label="t('common.all')" :value="0" />
             <el-option
               v-for="item in jobGroups"
@@ -235,8 +235,12 @@ async function loadJobGroups() {
   try {
     const res = await jobgroupApi.getAll()
     jobGroups.value = res || []
-    if (!isAdmin.value && jobGroups.value.length > 0 && searchForm.jobGroup === 0) {
-      searchForm.jobGroup = jobGroups.value[0].id
+    if (!isAdmin.value) {
+      if (jobGroups.value.length > 0 && searchForm.jobGroup === 0) {
+        searchForm.jobGroup = jobGroups.value[0].id
+      } else if (jobGroups.value.length === 0) {
+        searchForm.jobGroup = undefined as any
+      }
     }
   } catch (error) {
     console.error('Failed to load job groups:', error)
@@ -268,7 +272,7 @@ function handleSearch() {
 }
 
 function handleReset() {
-  searchForm.jobGroup = isAdmin.value ? 0 : (jobGroups.value[0]?.id || 0)
+  searchForm.jobGroup = isAdmin.value ? 0 : (jobGroups.value[0]?.id || undefined as any)
   searchForm.jobId = 0
   searchForm.logStatus = -1
   handleSearch()

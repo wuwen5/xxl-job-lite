@@ -143,7 +143,7 @@ export default {
     password: 'Password',
     role: 'Role',
     permission: 'Permission',
-    permissionPlaceholder: 'Leave empty for full permissions',
+    permissionPlaceholder: 'Leave empty for no permissions',
     roleAdmin: 'Admin',
     roleNormal: 'Normal User',
     addTitle: 'Add User',

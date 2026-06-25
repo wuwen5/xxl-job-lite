@@ -4,7 +4,7 @@
     <el-card class="search-card">
       <el-form :model="searchForm" inline class="search-form">
         <el-form-item :label="t('jobinfo.jobGroup')">
-          <el-select v-model="searchForm.jobGroup" :placeholder="t('common.all')" style="width: 200px">
+          <el-select v-model="searchForm.jobGroup" :placeholder="jobGroups.length > 0 ? t('common.all') : t('common.noData')" style="width: 200px">
             <el-option v-if="isAdmin" :label="t('common.all')" :value="0" />
             <el-option
               v-for="item in jobGroups"
@@ -132,7 +132,7 @@
         <el-tabs v-model="activeTab">
           <el-tab-pane :label="t('jobinfo.jobDesc')" name="basic">
             <el-form-item :label="t('jobinfo.jobGroup')" prop="jobGroup">
-              <el-select v-model="formData.jobGroup" style="width: 100%">
+              <el-select v-model="formData.jobGroup" :placeholder="jobGroups.length > 0 ? '' : t('common.noData')" style="width: 100%">
                 <el-option
                   v-for="item in jobGroups"
                   :key="item.id"
@@ -392,8 +392,12 @@ async function loadJobGroups() {
   try {
     const res = await jobgroupApi.getAll()
     jobGroups.value = res || []
-    if (!isAdmin.value && jobGroups.value.length > 0 && searchForm.jobGroup === 0) {
-      searchForm.jobGroup = jobGroups.value[0].id
+    if (!isAdmin.value) {
+      if (jobGroups.value.length > 0 && searchForm.jobGroup === 0) {
+        searchForm.jobGroup = jobGroups.value[0].id
+      } else if (jobGroups.value.length === 0) {
+        searchForm.jobGroup = undefined as any
+      }
     }
   } catch (error) {
     console.error('Failed to load job groups:', error)
@@ -406,7 +410,7 @@ function handleSearch() {
 }
 
 function handleReset() {
-  searchForm.jobGroup = isAdmin.value ? 0 : (jobGroups.value[0]?.id || 0)
+  searchForm.jobGroup = isAdmin.value ? 0 : (jobGroups.value[0]?.id || undefined as any)
   searchForm.triggerStatus = -1
   searchForm.jobDesc = ''
   searchForm.executorHandler = ''

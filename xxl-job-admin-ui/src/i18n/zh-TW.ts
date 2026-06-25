@@ -143,7 +143,7 @@ export default {
     password: '密碼',
     role: '角色',
     permission: '權限',
-    permissionPlaceholder: '留空表示擁有全部權限',
+    permissionPlaceholder: '留空表示沒有任何權限',
     roleAdmin: '管理員',
     roleNormal: '普通用戶',
     addTitle: '新增用戶',

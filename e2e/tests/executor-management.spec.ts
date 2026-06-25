@@ -41,7 +41,8 @@ test.describe('Executor Management', () => {
 
     await dialog.getByRole('button', { name: '确定' }).click();
 
-    await expect(page.getByText('操作成功')).toBeVisible();
+    await expect(page.getByText('操作成功')).toBeVisible()
+    await expect(dialog).toBeVisible();
   });
 
   test('should edit existing executor', async ({ page }) => {

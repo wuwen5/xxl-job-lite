@@ -15,7 +15,7 @@ export default defineConfig({
       ['junit', { outputFile: 'test-results/junit.xml' }]
   ],
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://xxl-job-admin:8080',
     trace: 'retain-on-failure',
   },
   projects: [
