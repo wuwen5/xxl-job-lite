@@ -162,7 +162,7 @@
             </goals>
             <phase>generate-resources</phase>
             <configuration>
-              <arguments>install --sass_binary_site=https://registry.npmmirror.com/-/binary/node-sass/</arguments>
+              <arguments>install</arguments>
             </configuration>
           </execution>
           <execution>
