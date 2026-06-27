@@ -34,11 +34,13 @@ public class JobCodeController {
     private XxlJobLogGlueDao xxlJobLogGlueDao;
 
     @GetMapping("/{id}/history")
-    public ReturnT<List<XxlJobLogGlue>> history(@PathVariable int id) {
+    public ReturnT<List<XxlJobLogGlue>> history(HttpServletRequest request, @PathVariable int id) {
         XxlJobInfo jobInfo = xxlJobInfoDao.loadById(id);
         if (jobInfo == null) {
             return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_glue_jobid_unvalid"));
         }
+        // valid permission
+        PermissionInterceptor.validJobGroupPermission(request, jobInfo.getJobGroup());
         List<XxlJobLogGlue> jobLogGlues = xxlJobLogGlueDao.findByJobId(id);
         return new ReturnT<>(jobLogGlues);
     }

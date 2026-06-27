@@ -3,7 +3,7 @@ import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 
 const request = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/xxl-job-admin',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/admin-api/v1',
   timeout: 30000
 })
 

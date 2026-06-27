@@ -25,7 +25,6 @@ English version: [README.en.md](./README.en.md)
 - [设计目标](#设计目标)
 - [功能亮点](#功能亮点)
 - [环境要求](#环境要求)
-- [架构](#架构)
 - [数据库支持](#数据库支持)
 - [快速开始](#快速开始)
   - [A. Docker Compose 启动（推荐试用）](#a-docker-compose-启动推荐试用)
@@ -62,13 +61,45 @@ English version: [README.en.md](./README.en.md)
 
 ## 功能亮点
 
+**🔧 核心能力**
 - ✂️ **精简依赖**：移除 xxl 系列自研组件，基于 Netty / Gson / MyBatis / Spring 等主流开源组件构建。
+- ☕ **双 JDK 策略**：客户端 JDK 8 + 管理端 JDK 17，平衡生态兼容与现代化基础设施。
+- 🗄️ **多数据库支持**：MySQL、PostgreSQL、Oracle、达梦均可作为调度中心存储，DAO 层不依赖特定方言。
+- ⚡ **任务自动注册**：通过 `@XxlJob` 注解声明 cron / fixedRate，启动时自动向调度中心注册，代码即配置。
+
+**🖥️ 管理端**
+- 🎨 **前端 Vue 3 重写**：Vue 3 + TypeScript + Vite + Element Plus，现代化开发体验。
+- 🔌 **RESTful API 重构**：统一 `/admin-api/v1/` 接口风格，支持前后端分离部署。
+- 🌍 **国际化支持**：内置简体中文、繁体中文、英文三语，一键切换。
+
+**🧪 质量保障**
+- ✅ **E2E 自动化测试**：基于 Playwright 的端到端测试，覆盖登录、任务管理、执行器管理等核心流程。
+- 📊 **代码质量**：SonarQube 静态分析，清理 3K+ issue，单测覆盖率持续跟踪。
+- 🎯 **代码格式化**：Spotless + palantir-java-format 统一代码风格。
+
+**🔗 集成能力**
 - 🔧 **易集成**：客户端基于 Spring 生态，天然兼容 Spring Boot / Cloud；提供 Spring 与无框架两种接入示例。
-- 🧱 **稳定调度能力**：继承 2.5.x 成熟模型，支持分片广播、多种路由策略（首个、最后一个、轮询、随机、LFU、LRU、一致性哈希、故障转移、忙碌转移）、失败重试、阻塞策略。
-- ☕ **双 JDK 支持**：客户端 JDK 8 + 管理端 JDK 17，平衡生态兼容与现代化基础设施。
-- 🗄️ **多数据库支持**：MySQL、PostgreSQL、Oracle、达梦均可作为调度中心存储。
 - 🔍 **服务发现扩展**：支持自定义 `ServiceAddressResolver`，可集成 Nacos、Consul 等注册中心。
-- ⚡ **任务自动注册**：通过 `@XxlJob` 注解即可自动注册定时任务，无需在管理端手动创建。
+
+### 技术栈速览
+
+| 组件 | 技术栈 |
+|------|--------|
+| 前端 | Vue 3 + TypeScript + Vite + Element Plus |
+| 后端 | Spring Boot 3.5 + MyBatis + Netty |
+| 数据库 | MySQL / PostgreSQL / Oracle / 达梦 |
+| 测试 | JUnit 5 + Playwright + JaCoCo |
+| CI/CD | GitHub Actions + SonarCloud + Codecov |
+
+### 界面预览
+
+| 仪表盘 | 任务管理 |
+|:------:|:------:|
+| ![仪表盘](doc/images/dashboard.jpg) | ![任务列表](doc/images/jobinfo.jpg) |
+
+| 新建任务 | 执行日志 |
+|:------:|:------:|
+| ![新建任务](doc/images/jobinfo_new.jpg) | ![执行日志](doc/images/joblog.jpg) |
 
 ## 环境要求
 
@@ -83,18 +114,6 @@ English version: [README.en.md](./README.en.md)
 - **构建工具**：使用仓库自带的 Maven Wrapper（`./mvnw`），无需本地安装 Maven。
 - **Docker**（可选）：使用 Docker Compose 路径时需要。
 - **数据库**：本地开发可使用 MySQL 8.x；管理端默认指向 `127.0.0.1:3306`，可通过环境变量覆盖。
-
-## 架构
-
-项目是一个 Maven 多模块工程，三个模块各司其职：
-
-| 模块 | 类型 | 包根 | 关键能力 |
-| --- | --- | --- | --- |
-| `xxl-job-core` | 客户端库（JDK 8） | `com.xxl.job.core.*` | 嵌入式 Netty 服务、注册/心跳、任务执行线程、回调线程、`@XxlJob` 注解 |
-| `xxl-job-admin` | 调度中心（Spring Boot 3，JDK 17） | `com.xxl.job.admin.*` | 调度线程、路由策略、注册中心、MyBatis DAO、Freemarker 管理端、告警、国际化 |
-| `xxl-job-executor-samples` | 示例（JDK 17） | `com.xxl.job.executor.*` | Spring Boot 接入示例 + 无框架接入示例 |
-
-模块依赖关系：`xxl-job-admin` 依赖 `xxl-job-core`；`xxl-job-executor-samples` 依赖 `xxl-job-core`。
 
 ## 数据库支持
 
@@ -123,7 +142,7 @@ docker compose -f docker-compose-e2e.yml up --build xxl-job-admin mysql executor
 
 启动完成后：
 
-- 管理端：[http://localhost:8080/xxl-job-admin](http://localhost:8080/xxl-job-admin)
+- 管理端：[http://localhost:8080](http://localhost:8080)
 - Actuator 健康检查：[http://localhost:9001/actuator/health/readiness](http://localhost:9001/actuator/health/readiness)
 - 示例 Executor：监听 8081
 - MySQL：监听 3306，账号 `root / root_pwd`，库 `xxl_job`，初始化脚本来自 `doc/db/tables_xxl_job.sql`
@@ -140,7 +159,7 @@ docker compose -f docker-compose-e2e.yml up --build xxl-job-admin mysql executor
 java -jar xxl-job-admin/target/xxl-job-admin.jar
 ```
 
-启动后访问 [http://localhost:8080/xxl-job-admin](http://localhost:8080/xxl-job-admin)，使用 `admin / 123456` 登录。
+启动后访问 [http://localhost:8080](http://localhost:8080)，使用 `admin / 123456` 登录。
 
 构建前请确保：
 
@@ -163,7 +182,7 @@ java -jar xxl-job-admin/target/xxl-job-admin.jar
 
 ```properties
 ### 调度中心地址
-xxl.job.admin.addresses=http://127.0.0.1:8080/xxl-job-admin
+xxl.job.admin.addresses=http://127.0.0.1:8080
 ### 调度中心 access token，与 admin 端 xxl.job.accessToken 保持一致
 xxl.job.admin.accessToken=default_token
 ### 执行器应用名（用于注册到调度中心）
@@ -192,7 +211,7 @@ public void demoJobHandler() {
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
 | `server.port` | `8080` | Web 端口 |
-| `server.servlet.context-path` | `/xxl-job-admin` | 管理端上下文路径 |
+| `server.servlet.context-path` | `/` | 管理端上下文路径 |
 | `management.server.port` | `9001` | Actuator 端口 |
 | `management.endpoints.web.exposure.include` | `health,info` | Actuator 暴露端点 |
 | `management.endpoint.health.probes.enabled` | `true` | 启用 liveness / readiness 探针 |
@@ -216,9 +235,21 @@ public void demoJobHandler() {
 
 ## 兼容性说明
 
-- 兼容目标：以 `xxl-job 2.5.0` 为基准，尽量兼容常用 API、Handler 约定、数据库表结构与管理 UI 的核心交互。
-- 内部实现、模块划分、默认配置与依赖在重构中可能发生变化。
-- 升级到生产环境前，请在测试环境完成回归验证并备份数据。
+以 `xxl-job 2.5.0` 为基准，重构后的兼容性如下：
+
+**✅ 保持兼容**
+- **执行器接口**：`AdminBiz`、`ExecutorBiz` 等核心 RPC 接口保持不变，现有执行器可直接接入。
+- **Handler 约定**：`@XxlJob` 注解、`IJobHandler` 生命周期、GLUE 模式等使用方式不变。
+- **数据库表结构**：8 张核心表结构保持兼容，现有数据可直接使用。
+- **操作习惯**：任务配置、调度策略、路由规则、阻塞策略等核心概念和操作方式不变。
+
+**🔄 重构变化**
+- **管理端 API**：RESTful 重构为 `/admin-api/v1/` 路径，原有 API 不再兼容。
+- **前端界面**：Vue 3 + TypeScript 重写，UI 交互细节可能有差异。
+- **依赖调整**：`xxl-job-core` 移除了 Groovy 的传递性依赖，如需使用 GLUE(Groovy) 模式，请自行引入 `org.apache.groovy:groovy` 依赖。
+- **内部实现**：模块划分、依赖、部分默认配置可能发生变化。
+
+升级前请在测试环境完成回归验证并备份数据。
 
 ## 开发与测试
 

@@ -44,7 +44,7 @@ public class JobInfoController {
             HttpServletRequest request,
             @RequestParam(required = false, defaultValue = "0") int start,
             @RequestParam(required = false, defaultValue = "10") int length,
-            Integer jobGroup,
+            int jobGroup,
             Integer triggerStatus,
             String jobDesc,
             String executorHandler,

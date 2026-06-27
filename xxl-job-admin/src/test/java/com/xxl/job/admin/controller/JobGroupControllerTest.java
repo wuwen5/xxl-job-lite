@@ -417,4 +417,63 @@ public class JobGroupControllerTest extends AbstractSpringMvcTest {
                 .andReturn();
         logger.info("testLoadByIdNotFound: {}", result.getResponse().getContentAsString());
     }
+
+    // ---------------------- all ----------------------
+
+    @Test
+    public void testAllReturnsAllGroups() throws Exception {
+        jdbcTemplate.execute("INSERT INTO xxl_job_group(id, app_name, title, address_type, address_list, update_time) "
+                + "VALUES (2, 'second-executor', 'Second Executor', 0, NULL, NOW())");
+
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobgroup/all").cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andReturn();
+        logger.info("testAllReturnsAllGroups: {}", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testAllReturnsEmptyList() throws Exception {
+        jdbcTemplate.execute("DELETE FROM xxl_job_group WHERE id > 0");
+
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobgroup/all").cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andReturn();
+        logger.info("testAllReturnsEmptyList: {}", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testAllContainsGroupFields() throws Exception {
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobgroup/all").cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.content[0].appname").value("existing-executor"))
+                .andExpect(jsonPath("$.content[0].title").value("Existing Executor"))
+                .andReturn();
+        logger.info("testAllContainsGroupFields: {}", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testAllWithAuthorizationHeader() throws Exception {
+        MvcResult loginResult = mockMvc.perform(post("/admin-api/v1/login")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("userName", "admin")
+                        .param("password", "123456"))
+                .andReturn();
+        String bearerToken = loginResult.getResponse().getHeader("Authorization");
+
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/jobgroup/all").header("Authorization", bearerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andReturn();
+        logger.info("testAllWithAuthorizationHeader: {}", result.getResponse().getContentAsString());
+    }
 }

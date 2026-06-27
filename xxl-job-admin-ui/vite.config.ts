@@ -18,9 +18,6 @@ export default defineConfig({
       '@codemirror/lint'
     ]
   },
-  resolve: {
-    dedupe: ['@codemirror/state', '@codemirror/view', '@codemirror/language']
-  },
   plugins: [
     vue(),
     AutoImport({
@@ -34,6 +31,7 @@ export default defineConfig({
     })
   ],
   resolve: {
+    dedupe: ['@codemirror/state', '@codemirror/view', '@codemirror/language'],
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }

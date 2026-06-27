@@ -22,13 +22,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function getUserInfo() {
-    if (token.value) {
-      try {
-        const jsonStr = hexToString(token.value)
-        userInfo.value = JSON.parse(jsonStr)
-      } catch {
-        userInfo.value = { id: 1, username: 'admin', role: 1, permission: '' }
-      }
+    if (!token.value) return
+    try {
+      const jsonStr = hexToString(token.value)
+      userInfo.value = JSON.parse(jsonStr)
+    } catch {
+      logout()
     }
   }
 

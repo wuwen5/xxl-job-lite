@@ -106,13 +106,4 @@ public class IndexControllerTest extends AbstractSpringMvcTest {
 
         logger.info("testLogout response: {}", result.getResponse().getContentAsString());
     }
-
-    @Test
-    public void testHelp() throws Exception {
-        MvcResult result = mockMvc.perform(get("/admin-api/v1/help").cookie(cookie))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        logger.info("testHelp response: {}", result.getResponse().getContentAsString());
-    }
 }

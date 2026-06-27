@@ -170,6 +170,7 @@
             <goals>
               <goal>npm</goal>
             </goals>
+            <phase>generate-resources</phase>
             <configuration>
               <arguments>run build</arguments>
               <environmentVariables>
@@ -197,6 +198,17 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project.basedir}/../xxl-job-admin-ui/dist</directory>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
 
     </plugins>

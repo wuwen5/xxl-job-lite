@@ -99,38 +99,30 @@ public class LoginService {
     public XxlJobUser ifLogin(HttpServletRequest request, HttpServletResponse response) {
         // 1. try to get token from Authorization header
         String authHeader = request.getHeader("Authorization");
+        XxlJobUser user = null;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            XxlJobUser tokenUser = null;
             try {
-                tokenUser = parseToken(token);
+                user = parseToken(token);
             } catch (Exception e) {
                 // invalid token
-            }
-            if (tokenUser != null) {
-                XxlJobUser dbUser = xxlJobUserDao.loadByUserName(tokenUser.getUsername());
-                if (dbUser != null && tokenUser.getPassword().equals(dbUser.getPassword())) {
-                    return dbUser;
-                }
             }
         }
 
         // 2. fallback to cookie
         String cookieToken = CookieUtil.getValue(request, LOGIN_IDENTITY_KEY);
         if (cookieToken != null) {
-            XxlJobUser cookieUser = null;
             try {
-                cookieUser = parseToken(cookieToken);
+                user = parseToken(cookieToken);
             } catch (Exception e) {
                 logout(request, response);
             }
-            if (cookieUser != null) {
-                XxlJobUser dbUser = xxlJobUserDao.loadByUserName(cookieUser.getUsername());
-                if (dbUser != null) {
-                    if (cookieUser.getPassword().equals(dbUser.getPassword())) {
-                        return dbUser;
-                    }
-                }
+        }
+
+        if (user != null) {
+            XxlJobUser dbUser = xxlJobUserDao.loadByUserName(user.getUsername());
+            if (dbUser != null && user.getPassword().equals(dbUser.getPassword())) {
+                return dbUser;
             }
         }
         return null;

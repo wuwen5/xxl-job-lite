@@ -1,7 +1,7 @@
 package com.xxl.job.admin.controller.interceptor;
 
 import java.io.IOException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -17,13 +17,12 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
  * @author xuxueli 2018-04-02 20:48:20
  */
 @Configuration
+@AllArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Autowired
-    private PermissionInterceptor permissionInterceptor;
+    private final PermissionInterceptor permissionInterceptor;
 
-    @Autowired
-    private CookieInterceptor cookieInterceptor;
+    private final CookieInterceptor cookieInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -33,7 +32,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
+        registry.addMapping("/admin-api/v1/**")
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

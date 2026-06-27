@@ -46,11 +46,6 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
         if (needLogin) {
             XxlJobUser loginUser = loginService.ifLogin(request, response);
             if (loginUser == null) {
-                // check if it's an API request (Bearer token or AJAX)
-                String authHeader = request.getHeader("Authorization");
-                String xRequestedWith = request.getHeader("X-Requested-With");
-                boolean isApiRequest = (authHeader != null && authHeader.startsWith("Bearer "))
-                        || "XMLHttpRequest".equals(xRequestedWith);
 
                 response.setStatus(401);
                 response.setContentType("application/json;charset=UTF-8");
@@ -76,9 +71,6 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
 
     /**
      * get loginUser
-     *
-     * @param request
-     * @return
      */
     public static XxlJobUser getLoginUser(HttpServletRequest request) {
         // get loginUser, with request
@@ -87,9 +79,6 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
 
     /**
      * valid permission by JobGroup
-     *
-     * @param request
-     * @param jobGroup
      */
     public static void validJobGroupPermission(HttpServletRequest request, int jobGroup) {
         XxlJobUser loginUser = getLoginUser(request);
@@ -101,25 +90,21 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
 
     /**
      * filter XxlJobGroup by role
-     *
-     * @param request
-     * @param jobGroupList_all
-     * @return
      */
     public static List<XxlJobGroup> filterJobGroupByRole(
-            HttpServletRequest request, List<XxlJobGroup> jobGroupList_all) {
+            HttpServletRequest request, List<XxlJobGroup> jobGroupListAll) {
         List<XxlJobGroup> jobGroupList = new ArrayList<>();
-        if (jobGroupList_all != null && !jobGroupList_all.isEmpty()) {
+        if (jobGroupListAll != null && !jobGroupListAll.isEmpty()) {
             XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
             if (loginUser.getRole() == 1) {
-                jobGroupList = jobGroupList_all;
+                jobGroupList = jobGroupListAll;
             } else {
                 List<String> groupIdStrs = new ArrayList<>();
                 if (loginUser.getPermission() != null
                         && !loginUser.getPermission().trim().isEmpty()) {
                     groupIdStrs = Arrays.asList(loginUser.getPermission().trim().split(","));
                 }
-                for (XxlJobGroup groupItem : jobGroupList_all) {
+                for (XxlJobGroup groupItem : jobGroupListAll) {
                     if (groupIdStrs.contains(String.valueOf(groupItem.getId()))) {
                         jobGroupList.add(groupItem);
                     }
