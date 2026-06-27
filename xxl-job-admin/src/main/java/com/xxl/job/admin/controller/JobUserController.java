@@ -8,7 +8,6 @@ import com.xxl.job.admin.dao.XxlJobGroupDao;
 import com.xxl.job.admin.dao.XxlJobUserDao;
 import com.xxl.job.core.biz.model.ReturnT;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,13 +108,12 @@ public class JobUserController {
 
     @PutMapping("/{id}")
     @PermissionLimit(adminuser = true)
-    public ReturnT<String> update(
-            HttpServletRequest request, @RequestBody XxlJobUser xxlJobUser, @PathVariable int id) {
+    public ReturnT<String> update(@RequestBody XxlJobUser xxlJobUser, @PathVariable int id) {
 
         xxlJobUser.setId(id);
 
         // avoid opt login seft
-        XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
+        XxlJobUser loginUser = PermissionInterceptor.getLoginUser();
         if (loginUser.getUsername().equals(xxlJobUser.getUsername())) {
             return new ReturnT<>(ReturnT.FAIL.getCode(), I18nUtil.getString("user_update_loginuser_limit"));
         }
@@ -141,10 +139,10 @@ public class JobUserController {
 
     @DeleteMapping("/{id}")
     @PermissionLimit(adminuser = true)
-    public ReturnT<String> remove(HttpServletRequest request, @PathVariable int id) {
+    public ReturnT<String> remove(@PathVariable int id) {
 
         // avoid opt login seft
-        XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
+        XxlJobUser loginUser = PermissionInterceptor.getLoginUser();
         if (loginUser.getId() == id) {
             return new ReturnT<>(ReturnT.FAIL.getCode(), I18nUtil.getString("user_update_loginuser_limit"));
         }
@@ -154,7 +152,7 @@ public class JobUserController {
     }
 
     @PutMapping("/me/password")
-    public ReturnT<String> updatePwd(HttpServletRequest request, @RequestBody Map<String, String> body) {
+    public ReturnT<String> updatePwd(@RequestBody Map<String, String> body) {
         String oldPassword = body.get("oldPassword");
         String password = body.get("password");
 
@@ -179,7 +177,7 @@ public class JobUserController {
         String md5Password = DigestUtils.md5DigestAsHex(password.getBytes());
 
         // valid old pwd
-        XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
+        XxlJobUser loginUser = PermissionInterceptor.getLoginUser();
         XxlJobUser existUser = xxlJobUserDao.loadByUserName(loginUser.getUsername());
         if (!md5OldPassword.equals(existUser.getPassword())) {
             return new ReturnT<>(

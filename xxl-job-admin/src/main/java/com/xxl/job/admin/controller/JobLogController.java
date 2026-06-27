@@ -16,7 +16,6 @@ import com.xxl.job.core.biz.model.LogResult;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.util.DateUtil;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -62,7 +61,6 @@ public class JobLogController {
 
     @GetMapping
     public Map<String, Object> pageList(
-            HttpServletRequest request,
             @RequestParam(required = false, defaultValue = "0") int start,
             @RequestParam(required = false, defaultValue = "10") int length,
             @RequestParam(required = false, defaultValue = "0") int jobGroup,
@@ -72,7 +70,7 @@ public class JobLogController {
 
         // valid permission
         // 仅管理员支持查询全部；普通用户仅支持查询有权限的 jobGroup
-        PermissionInterceptor.validJobGroupPermission(request, jobGroup);
+        PermissionInterceptor.validJobGroupPermission(jobGroup);
 
         // parse param
         Date triggerTimeStart = null;
@@ -176,9 +174,9 @@ public class JobLogController {
     }
 
     @DeleteMapping
-    public ReturnT<String> clearLog(HttpServletRequest request, int jobGroup, int jobId, int type) {
+    public ReturnT<String> clearLog(int jobGroup, int jobId, int type) {
         // valid permission
-        PermissionInterceptor.validJobGroupPermission(request, jobGroup);
+        PermissionInterceptor.validJobGroupPermission(jobGroup);
 
         // opt
         Date clearBeforeTime = null;

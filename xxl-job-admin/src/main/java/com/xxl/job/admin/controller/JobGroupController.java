@@ -11,7 +11,6 @@ import com.xxl.job.admin.dao.XxlJobRegistryDao;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.RegistryConfig;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -201,11 +200,11 @@ public class JobGroupController {
     }
 
     @GetMapping("/all")
-    public ReturnT<List<XxlJobGroup>> all(HttpServletRequest request) {
+    public ReturnT<List<XxlJobGroup>> all() {
         // 执行器列表
         List<XxlJobGroup> list = xxlJobGroupDao.findAll();
         // filter group
-        List<XxlJobGroup> jobGroupList = PermissionInterceptor.filterJobGroupByRole(request, list);
+        List<XxlJobGroup> jobGroupList = PermissionInterceptor.filterJobGroupByRole(list);
         return new ReturnT<>(jobGroupList);
     }
 }

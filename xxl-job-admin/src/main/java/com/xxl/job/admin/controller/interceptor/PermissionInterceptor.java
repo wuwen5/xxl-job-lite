@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
@@ -72,16 +74,17 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
     /**
      * get loginUser
      */
-    public static XxlJobUser getLoginUser(HttpServletRequest request) {
+    public static XxlJobUser getLoginUser() {
         // get loginUser, with request
-        return (XxlJobUser) request.getAttribute(LoginService.LOGIN_IDENTITY_KEY);
+        return (XxlJobUser) RequestContextHolder.currentRequestAttributes()
+                .getAttribute(LoginService.LOGIN_IDENTITY_KEY, RequestAttributes.SCOPE_REQUEST);
     }
 
     /**
      * valid permission by JobGroup
      */
-    public static void validJobGroupPermission(HttpServletRequest request, int jobGroup) {
-        XxlJobUser loginUser = getLoginUser(request);
+    public static void validJobGroupPermission(int jobGroup) {
+        XxlJobUser loginUser = getLoginUser();
         if (!loginUser.validPermission(jobGroup)) {
             throw new RuntimeException(
                     I18nUtil.getString("system_permission_limit") + "[username=" + loginUser.getUsername() + "]");
@@ -91,11 +94,10 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
     /**
      * filter XxlJobGroup by role
      */
-    public static List<XxlJobGroup> filterJobGroupByRole(
-            HttpServletRequest request, List<XxlJobGroup> jobGroupListAll) {
+    public static List<XxlJobGroup> filterJobGroupByRole(List<XxlJobGroup> jobGroupListAll) {
         List<XxlJobGroup> jobGroupList = new ArrayList<>();
         if (jobGroupListAll != null && !jobGroupListAll.isEmpty()) {
-            XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
+            XxlJobUser loginUser = PermissionInterceptor.getLoginUser();
             if (loginUser.getRole() == 1) {
                 jobGroupList = jobGroupListAll;
             } else {

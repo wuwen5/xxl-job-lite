@@ -6,12 +6,15 @@ import com.xxl.job.admin.core.model.XxlJobUser;
 import com.xxl.job.admin.core.thread.JobScheduleHelper;
 import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.admin.dao.XxlJobGroupDao;
+import com.xxl.job.admin.dao.XxlJobInfoDao;
 import com.xxl.job.admin.service.XxlJobService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.util.DateUtil;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,11 +40,13 @@ public class JobInfoController {
     private XxlJobGroupDao xxlJobGroupDao;
 
     @Resource
+    private XxlJobInfoDao xxlJobInfoDao;
+
+    @Resource
     private XxlJobService xxlJobService;
 
     @GetMapping
     public Map<String, Object> pageList(
-            HttpServletRequest request,
             @RequestParam(required = false, defaultValue = "0") int start,
             @RequestParam(required = false, defaultValue = "10") int length,
             int jobGroup,
@@ -50,39 +55,49 @@ public class JobInfoController {
             String executorHandler,
             String author) {
 
-        PermissionInterceptor.validJobGroupPermission(request, jobGroup);
+        PermissionInterceptor.validJobGroupPermission(jobGroup);
         return xxlJobService.pageList(
                 start, length, jobGroup, triggerStatus == null ? -1 : triggerStatus, jobDesc, executorHandler, author);
     }
 
     @PostMapping
-    public ReturnT<String> add(HttpServletRequest request, @RequestBody XxlJobInfo jobInfo) {
+    public ReturnT<String> add(@RequestBody XxlJobInfo jobInfo) {
         // valid permission
-        PermissionInterceptor.validJobGroupPermission(request, jobInfo.getJobGroup());
+        PermissionInterceptor.validJobGroupPermission(jobInfo.getJobGroup());
 
         // opt
-        XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
+        XxlJobUser loginUser = PermissionInterceptor.getLoginUser();
         return xxlJobService.add(jobInfo, loginUser);
     }
 
     @PutMapping("/{id}")
-    public ReturnT<String> update(@PathVariable int id, HttpServletRequest request, @RequestBody XxlJobInfo jobInfo) {
+    public ReturnT<String> update(@PathVariable int id, @RequestBody XxlJobInfo jobInfo) {
         jobInfo.setId(id);
         // valid permission
-        PermissionInterceptor.validJobGroupPermission(request, jobInfo.getJobGroup());
+        PermissionInterceptor.validJobGroupPermission(jobInfo.getJobGroup());
 
         // opt
-        XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
+        XxlJobUser loginUser = PermissionInterceptor.getLoginUser();
         return xxlJobService.update(jobInfo, loginUser);
     }
 
     @DeleteMapping("/{id}")
     public ReturnT<String> remove(@PathVariable int id) {
+        XxlJobInfo jobInfo = xxlJobInfoDao.loadById(id);
+        if (jobInfo == null) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_glue_jobid_unvalid"));
+        }
+        PermissionInterceptor.validJobGroupPermission(jobInfo.getJobGroup());
         return xxlJobService.remove(id);
     }
 
     @PatchMapping("/{id}")
     public ReturnT<String> updateStatus(@PathVariable int id, @RequestParam String action) {
+        XxlJobInfo jobInfo = xxlJobInfoDao.loadById(id);
+        if (jobInfo == null) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_glue_jobid_unvalid"));
+        }
+        PermissionInterceptor.validJobGroupPermission(jobInfo.getJobGroup());
         if ("start".equalsIgnoreCase(action)) {
             return xxlJobService.start(id);
         } else if ("stop".equalsIgnoreCase(action)) {
@@ -92,10 +107,9 @@ public class JobInfoController {
     }
 
     @PostMapping("/{id}/trigger")
-    public ReturnT<String> triggerJob(
-            HttpServletRequest request, @PathVariable int id, String executorParam, String addressList) {
+    public ReturnT<String> triggerJob(@PathVariable int id, String executorParam, String addressList) {
         // login user
-        XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
+        XxlJobUser loginUser = PermissionInterceptor.getLoginUser();
         // trigger
         return xxlJobService.trigger(loginUser, id, executorParam, addressList);
     }

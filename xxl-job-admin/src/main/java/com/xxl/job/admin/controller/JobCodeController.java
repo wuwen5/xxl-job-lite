@@ -8,7 +8,6 @@ import com.xxl.job.admin.dao.XxlJobInfoDao;
 import com.xxl.job.admin.dao.XxlJobLogGlueDao;
 import com.xxl.job.core.biz.model.ReturnT;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,20 +33,19 @@ public class JobCodeController {
     private XxlJobLogGlueDao xxlJobLogGlueDao;
 
     @GetMapping("/{id}/history")
-    public ReturnT<List<XxlJobLogGlue>> history(HttpServletRequest request, @PathVariable int id) {
+    public ReturnT<List<XxlJobLogGlue>> history(@PathVariable int id) {
         XxlJobInfo jobInfo = xxlJobInfoDao.loadById(id);
         if (jobInfo == null) {
             return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_glue_jobid_unvalid"));
         }
         // valid permission
-        PermissionInterceptor.validJobGroupPermission(request, jobInfo.getJobGroup());
+        PermissionInterceptor.validJobGroupPermission(jobInfo.getJobGroup());
         List<XxlJobLogGlue> jobLogGlues = xxlJobLogGlueDao.findByJobId(id);
         return new ReturnT<>(jobLogGlues);
     }
 
     @PutMapping("/{id}")
-    public ReturnT<String> save(
-            HttpServletRequest request, @PathVariable int id, @RequestBody Map<String, String> body) {
+    public ReturnT<String> save(@PathVariable int id, @RequestBody Map<String, String> body) {
         String glueSource = body.get("glueSource");
         String glueRemark = body.get("glueRemark");
         // valid
@@ -64,7 +62,7 @@ public class JobCodeController {
         }
 
         // valid permission
-        PermissionInterceptor.validJobGroupPermission(request, existsJobInfo.getJobGroup());
+        PermissionInterceptor.validJobGroupPermission(existsJobInfo.getJobGroup());
 
         // update new code
         existsJobInfo.setGlueSource(glueSource);
