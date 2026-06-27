@@ -28,8 +28,18 @@ test.describe('Trigger Log', () => {
 
     const triggerDialog = page.getByRole('dialog', { name: '执行任务' });
     await expect(triggerDialog).toBeVisible();
-    await triggerDialog.getByRole('button', { name: '确定' }).click();
-    await expect(page.getByText('操作成功')).toBeVisible();
+    const [response] = await Promise.all([
+      page.waitForResponse(resp => 
+        resp.url().includes('/admin-api/v1/jobinfo/') && 
+        resp.url().includes('/trigger') &&
+        resp.status() === 200
+      ),
+      triggerDialog.getByRole('button', { name: '确定' }).click()
+    ]);
+
+    const json = await response.json();
+    expect(json.code).toBe(200);
+    await expect(triggerDialog).not.toBeVisible();
 
     await page.getByRole('menuitem', { name: '调度日志' }).click();
     await expect(page).toHaveURL(/.*joblog/);
@@ -51,8 +61,18 @@ test.describe('Trigger Log', () => {
 
     const triggerDialog = page.getByRole('dialog', { name: '执行任务' });
     await expect(triggerDialog).toBeVisible();
-    await triggerDialog.getByRole('button', { name: '确定' }).click();
-    await expect(page.getByText('操作成功')).toBeVisible();
+    const [response] = await Promise.all([
+      page.waitForResponse(resp => 
+        resp.url().includes('/admin-api/v1/jobinfo/') && 
+        resp.url().includes('/trigger') &&
+        resp.status() === 200
+      ),
+      triggerDialog.getByRole('button', { name: '确定' }).click()
+    ]);
+    await expect(triggerDialog).not.toBeVisible();
+
+    const json = await response.json();
+    expect(json.code).toBe(200);
 
     await page.getByRole('menuitem', { name: '调度日志' }).click();
     await expect(page).toHaveURL(/.*joblog/);

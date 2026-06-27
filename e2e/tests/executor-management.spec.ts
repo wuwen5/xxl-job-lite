@@ -39,9 +39,18 @@ test.describe('Executor Management', () => {
     await dialog.getByPlaceholder('执行器AppName').fill('e2e-test-executor');
     await dialog.getByPlaceholder('执行器名称').fill('E2E测试执行器');
 
-    await dialog.getByRole('button', { name: '确定' }).click();
+    const [response] = await Promise.all([
+    page.waitForResponse(resp => 
+      resp.url().includes('/admin-api/v1/jobgroup') && 
+      resp.request().method() === 'POST' &&
+      resp.status() === 200
+    ),
+      dialog.getByRole('button', { name: '确定' }).click()
+    ]);
+    const json = await response.json();
+    expect(json.code).toBe(200);
 
-    await expect(page.getByText('操作成功')).toBeVisible()
+    await expect(page.getByText('操作成功').first()).toBeVisible()
     await expect(dialog).toBeVisible();
   });
 
@@ -59,9 +68,18 @@ test.describe('Executor Management', () => {
       await dialog.getByPlaceholder('执行器名称').clear();
       await dialog.getByPlaceholder('执行器名称').fill('E2E测试执行器-更新');
 
-      await dialog.getByRole('button', { name: '确定' }).click();
+      const [response] = await Promise.all([
+        page.waitForResponse(resp => 
+          resp.url().includes('/admin-api/v1/jobgroup/') && 
+          resp.request().method() === 'PUT' &&
+          resp.status() === 200
+        ),
+        dialog.getByRole('button', { name: '确定' }).click()
+      ]);
+      const json = await response.json();
+      expect(json.code).toBe(200);
 
-      await expect(page.getByText('操作成功')).toBeVisible();
+      await expect(page.getByText('操作成功').first()).toBeVisible();
     }
   });
 
@@ -77,9 +95,18 @@ test.describe('Executor Management', () => {
       await expect(dialog).toBeVisible();
       await expect(dialog.getByText('确认删除？')).toBeVisible();
 
-      await dialog.getByRole('button', { name: '确定' }).click();
-
-      await expect(page.getByText('操作成功')).toBeVisible();
+      const [response] = await Promise.all([
+          page.waitForResponse(resp => 
+            resp.url().includes('/admin-api/v1/jobgroup/') && 
+            resp.request().method() === 'DELETE' &&
+            resp.status() === 200
+          ),
+          dialog.getByRole('button', { name: '确定' }).click()
+        ]);
+      const json = await response.json();
+      expect(json.code).toBe(200);
+            
+      await expect(page.getByText('操作成功').first()).toBeVisible();
     }
   });
 
