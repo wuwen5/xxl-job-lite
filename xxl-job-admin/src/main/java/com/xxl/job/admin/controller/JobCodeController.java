@@ -7,6 +7,7 @@ import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.admin.dao.XxlJobInfoDao;
 import com.xxl.job.admin.dao.XxlJobLogGlueDao;
 import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.core.glue.GlueTypeEnum;
 import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,7 @@ public class JobCodeController {
     @GetMapping("/{id}/history")
     public ReturnT<List<XxlJobLogGlue>> history(@PathVariable int id) {
         XxlJobInfo jobInfo = xxlJobInfoDao.loadById(id);
-        if (jobInfo == null) {
+        if (jobInfo == null || GlueTypeEnum.BEAN == GlueTypeEnum.match(jobInfo.getGlueType())) {
             return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_glue_jobid_unvalid"));
         }
         // valid permission

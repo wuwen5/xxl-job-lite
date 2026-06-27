@@ -49,6 +49,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResolver(new PathResourceResolver() {
                     @Override
                     protected Resource getResource(String resourcePath, Resource location) throws IOException {
+                        // Don't route API 404s to SPA index.html
+                        if (resourcePath.startsWith("admin-api/") || resourcePath.startsWith("api/")) {
+                            return null;
+                        }
                         Resource requestedResource = location.createRelative(resourcePath);
                         // 如果请求的资源存在，直接返回；否则返回 index.html
                         return requestedResource.exists() && requestedResource.isReadable()

@@ -153,8 +153,8 @@ public class JobUserController {
 
     @PutMapping("/me/password")
     public ReturnT<String> updatePwd(@RequestBody Map<String, String> body) {
-        String oldPassword = body.get("oldPassword");
-        String password = body.get("password");
+        String oldPassword = body == null ? null : body.get("oldPassword");
+        String password = body == null ? null : body.get("password");
 
         // valid
         if (oldPassword == null || oldPassword.trim().isEmpty()) {
