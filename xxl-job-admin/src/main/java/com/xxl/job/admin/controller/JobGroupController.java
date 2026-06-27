@@ -1,6 +1,7 @@
 package com.xxl.job.admin.controller;
 
 import com.xxl.job.admin.controller.annotation.PermissionLimit;
+import com.xxl.job.admin.controller.interceptor.PermissionInterceptor;
 import com.xxl.job.admin.core.model.XxlJobGroup;
 import com.xxl.job.admin.core.model.XxlJobRegistry;
 import com.xxl.job.admin.core.util.I18nUtil;
@@ -17,23 +18,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * job group controller
  * @author xuxueli 2016-10-02 20:52:56
  */
-@Controller
-@RequestMapping("/jobgroup")
+@RestController
+@RequestMapping("/admin-api/v1/jobgroup")
 public class JobGroupController {
 
     @Resource
@@ -46,13 +46,6 @@ public class JobGroupController {
     private XxlJobRegistryDao xxlJobRegistryDao;
 
     @GetMapping
-    @PermissionLimit(adminuser = true)
-    public String index(Model model) {
-        return "jobgroup/jobgroup.index";
-    }
-
-    @PostMapping("/pageList")
-    @ResponseBody
     @PermissionLimit(adminuser = true)
     public Map<String, Object> pageList(
             @RequestParam(required = false, defaultValue = "0") int start,
@@ -76,9 +69,8 @@ public class JobGroupController {
     }
 
     @PostMapping
-    @ResponseBody
     @PermissionLimit(adminuser = true)
-    public ReturnT<String> save(XxlJobGroup xxlJobGroup) {
+    public ReturnT<String> save(@RequestBody XxlJobGroup xxlJobGroup) {
 
         // valid
         Optional<String> failedMsg = validate(xxlJobGroup);
@@ -94,9 +86,8 @@ public class JobGroupController {
     }
 
     @PutMapping("/{id}")
-    @ResponseBody
     @PermissionLimit(adminuser = true)
-    public ReturnT<String> update(@PathVariable int id, XxlJobGroup xxlJobGroup) {
+    public ReturnT<String> update(@PathVariable int id, @RequestBody XxlJobGroup xxlJobGroup) {
         // valid
         Optional<String> failedMsg = validate(xxlJobGroup);
         if (failedMsg.isPresent()) {
@@ -183,7 +174,6 @@ public class JobGroupController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseBody
     @PermissionLimit(adminuser = true)
     public ReturnT<String> remove(@PathVariable int id) {
 
@@ -203,10 +193,18 @@ public class JobGroupController {
     }
 
     @GetMapping("/{id}")
-    @ResponseBody
     @PermissionLimit(adminuser = true)
     public ReturnT<XxlJobGroup> loadById(@PathVariable int id) {
         XxlJobGroup jobGroup = xxlJobGroupDao.load(id);
         return jobGroup != null ? new ReturnT<>(jobGroup) : new ReturnT<>(ReturnT.FAIL_CODE, null);
+    }
+
+    @GetMapping("/all")
+    public ReturnT<List<XxlJobGroup>> all() {
+        // 执行器列表
+        List<XxlJobGroup> list = xxlJobGroupDao.findAll();
+        // filter group
+        List<XxlJobGroup> jobGroupList = PermissionInterceptor.filterJobGroupByRole(list);
+        return new ReturnT<>(jobGroupList);
     }
 }

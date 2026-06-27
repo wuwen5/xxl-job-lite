@@ -70,9 +70,13 @@ public class LoginService {
 
         String loginToken = makeToken(xxlJobUser);
 
-        // do login
+        // do login (cookie for backward compatibility)
         CookieUtil.set(response, LOGIN_IDENTITY_KEY, loginToken, ifRemember);
-        return ReturnT.SUCCESS;
+
+        // return token in response header for frontend
+        response.setHeader("Authorization", "Bearer " + loginToken);
+
+        return new ReturnT<>(loginToken);
     }
 
     /**
@@ -93,21 +97,32 @@ public class LoginService {
      * @return
      */
     public XxlJobUser ifLogin(HttpServletRequest request, HttpServletResponse response) {
+        // 1. try to get token from Authorization header
+        String authHeader = request.getHeader("Authorization");
+        XxlJobUser user = null;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            try {
+                user = parseToken(token);
+            } catch (Exception e) {
+                // invalid token
+            }
+        }
+
+        // 2. fallback to cookie
         String cookieToken = CookieUtil.getValue(request, LOGIN_IDENTITY_KEY);
         if (cookieToken != null) {
-            XxlJobUser cookieUser = null;
             try {
-                cookieUser = parseToken(cookieToken);
+                user = parseToken(cookieToken);
             } catch (Exception e) {
                 logout(request, response);
             }
-            if (cookieUser != null) {
-                XxlJobUser dbUser = xxlJobUserDao.loadByUserName(cookieUser.getUsername());
-                if (dbUser != null) {
-                    if (cookieUser.getPassword().equals(dbUser.getPassword())) {
-                        return dbUser;
-                    }
-                }
+        }
+
+        if (user != null) {
+            XxlJobUser dbUser = xxlJobUserDao.loadByUserName(user.getUsername());
+            if (dbUser != null && user.getPassword().equals(dbUser.getPassword())) {
+                return dbUser;
             }
         }
         return null;

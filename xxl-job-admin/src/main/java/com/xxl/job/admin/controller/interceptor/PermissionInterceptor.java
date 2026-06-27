@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
@@ -46,8 +48,14 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
         if (needLogin) {
             XxlJobUser loginUser = loginService.ifLogin(request, response);
             if (loginUser == null) {
-                response.setStatus(302);
-                response.setHeader("location", request.getContextPath() + "/toLogin");
+
+                response.setStatus(401);
+                response.setContentType("application/json;charset=UTF-8");
+                try {
+                    response.getWriter().write("{\"code\":401,\"msg\":\"未登录或登录已过期\",\"content\":null}");
+                } catch (Exception ignored) {
+                    // ignore
+                }
                 return false;
             }
             if (needAdminuser && loginUser.getRole() != 1) {
@@ -65,23 +73,18 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
 
     /**
      * get loginUser
-     *
-     * @param request
-     * @return
      */
-    public static XxlJobUser getLoginUser(HttpServletRequest request) {
+    public static XxlJobUser getLoginUser() {
         // get loginUser, with request
-        return (XxlJobUser) request.getAttribute(LoginService.LOGIN_IDENTITY_KEY);
+        return (XxlJobUser) RequestContextHolder.currentRequestAttributes()
+                .getAttribute(LoginService.LOGIN_IDENTITY_KEY, RequestAttributes.SCOPE_REQUEST);
     }
 
     /**
      * valid permission by JobGroup
-     *
-     * @param request
-     * @param jobGroup
      */
-    public static void validJobGroupPermission(HttpServletRequest request, int jobGroup) {
-        XxlJobUser loginUser = getLoginUser(request);
+    public static void validJobGroupPermission(int jobGroup) {
+        XxlJobUser loginUser = getLoginUser();
         if (!loginUser.validPermission(jobGroup)) {
             throw new RuntimeException(
                     I18nUtil.getString("system_permission_limit") + "[username=" + loginUser.getUsername() + "]");
@@ -90,25 +93,20 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
 
     /**
      * filter XxlJobGroup by role
-     *
-     * @param request
-     * @param jobGroupList_all
-     * @return
      */
-    public static List<XxlJobGroup> filterJobGroupByRole(
-            HttpServletRequest request, List<XxlJobGroup> jobGroupList_all) {
+    public static List<XxlJobGroup> filterJobGroupByRole(List<XxlJobGroup> jobGroupListAll) {
         List<XxlJobGroup> jobGroupList = new ArrayList<>();
-        if (jobGroupList_all != null && !jobGroupList_all.isEmpty()) {
-            XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);
+        if (jobGroupListAll != null && !jobGroupListAll.isEmpty()) {
+            XxlJobUser loginUser = PermissionInterceptor.getLoginUser();
             if (loginUser.getRole() == 1) {
-                jobGroupList = jobGroupList_all;
+                jobGroupList = jobGroupListAll;
             } else {
                 List<String> groupIdStrs = new ArrayList<>();
                 if (loginUser.getPermission() != null
                         && !loginUser.getPermission().trim().isEmpty()) {
                     groupIdStrs = Arrays.asList(loginUser.getPermission().trim().split(","));
                 }
-                for (XxlJobGroup groupItem : jobGroupList_all) {
+                for (XxlJobGroup groupItem : jobGroupListAll) {
                     if (groupIdStrs.contains(String.valueOf(groupItem.getId()))) {
                         jobGroupList.add(groupItem);
                     }

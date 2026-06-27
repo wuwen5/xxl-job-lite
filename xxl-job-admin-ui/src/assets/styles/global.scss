@@ -1,0 +1,60 @@
+@use './variables.scss' as *;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+}
+
+// NProgress 自定义样式
+#nprogress .bar {
+  background: $primary-color !important;
+}
+
+// 通用页面容器
+.page-container {
+  padding: 20px;
+}
+
+// 表格操作按钮间距
+.table-actions {
+  .el-button {
+    margin-right: 5px;
+  }
+}
+
+// 搜索表单
+.search-form {
+  margin-bottom: 20px;
+  .el-form-item {
+    margin-bottom: 10px;
+  }
+}
+
+// 卡片样式
+.el-card {
+  margin-bottom: 20px;
+}
+
+// 分页组件
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+// 状态标签
+.status-tag {
+  &.running {
+    color: $success-color;
+  }
+  &.stopped {
+    color: $info-color;
+  }
+}

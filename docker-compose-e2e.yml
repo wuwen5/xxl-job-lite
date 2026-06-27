@@ -52,7 +52,7 @@ services:
       no_cache: true
     environment:
       SERVER_PORT: 8081
-      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080
     healthcheck:
       test: [ "CMD-SHELL", "curl -fsS http://127.0.0.1:8081 | grep -q 'running'" ]
       interval: 5s

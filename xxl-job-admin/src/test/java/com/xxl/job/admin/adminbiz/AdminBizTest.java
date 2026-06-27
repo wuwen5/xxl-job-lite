@@ -30,7 +30,7 @@ import org.springframework.core.env.Environment;
 public class AdminBizTest extends AbstractTest {
 
     // admin-client
-    private static String addressUrl = "http://127.0.0.1:%d/xxl-job-admin";
+    private static String addressUrl = "http://127.0.0.1:%d/";
     private static String accessToken = null;
     private static int timeoutSecond = 3;
 

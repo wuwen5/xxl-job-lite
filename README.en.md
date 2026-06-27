@@ -25,7 +25,6 @@ Upstream: [xuxueli/xxl-job](https://github.com/xuxueli/xxl-job)
 - [Design Goals](#design-goals)
 - [Highlights](#highlights)
 - [Requirements](#requirements)
-- [Architecture](#architecture)
 - [Database Support](#database-support)
 - [Quick Start](#quick-start)
   - [A. Docker Compose (recommended for trying it out)](#a-docker-compose-recommended-for-trying-it-out)
@@ -62,13 +61,45 @@ Upstream: [xuxueli/xxl-job](https://github.com/xuxueli/xxl-job)
 
 ## Highlights
 
+**🔧 Core Capabilities**
 - ✂️ **Trimmed dependencies**: built on mainstream components (Netty / Gson / MyBatis / Spring); no more xxl-branded in-house modules.
+- ☕ **Dual JDK strategy**: client on JDK 8, admin on JDK 17 — balancing ecosystem compatibility with a modern infrastructure baseline.
+- 🗄️ **Multi-database support**: MySQL, PostgreSQL, Oracle, and DaMeng (DM) are all supported as the admin's backing store. The DAO layer does not rely on database-specific syntax.
+- ⚡ **Auto-registered jobs**: declare cron / fixedRate via `@XxlJob` annotation, jobs are registered automatically on startup — code as configuration.
+
+**🖥️ Admin**
+- 🎨 **Vue 3 frontend rewrite**: Vue 3 + TypeScript + Vite + Element Plus for a modern development experience.
+- 🔌 **RESTful API refactor**: unified `/admin-api/v1/` endpoint style, supporting frontend-backend separation.
+- 🌍 **Internationalization**: built-in Simplified Chinese, Traditional Chinese, and English with one-click switching.
+
+**🧪 Quality Assurance**
+- ✅ **E2E automated testing**: Playwright-based end-to-end tests covering login, job management, executor management, and other core workflows.
+- 📊 **Code quality**: SonarQube static analysis with 3K+ issues resolved, continuous test coverage tracking.
+- 🎯 **Code formatting**: Spotless + palantir-java-format for unified code style.
+
+**🔗 Integration**
 - 🔧 **Easy to integrate**: client side fits naturally into the Spring ecosystem; samples cover both Spring Boot and frameless usage.
-- 🧱 **Mature scheduling**: inherited from 2.5.x — sharding broadcast, multiple routing strategies (FIRST / LAST / ROUND / RANDOM / LFU / LRU / CONSISTENT_HASH / FAILOVER / BUSYOVER), failure retry, and block strategies.
-- ☕ **Dual JDK**: client on JDK 8, admin on JDK 17 — balancing ecosystem compatibility with a modern infrastructure baseline.
-- 🗄️ **Multi-database**: MySQL, PostgreSQL, Oracle, and DaMeng (DM) are all supported as the admin's backing store.
 - 🔍 **Service discovery extension**: pluggable `ServiceAddressResolver` to integrate with registries such as Nacos or Consul.
-- ⚡ **Auto-registered jobs**: declare a job with `@XxlJob` and it is registered automatically — no manual setup in the admin UI.
+
+### Tech Stack Overview
+
+| Component | Tech Stack |
+|-----------|------------|
+| Frontend | Vue 3 + TypeScript + Vite + Element Plus |
+| Backend | Spring Boot 3.5 + MyBatis + Netty |
+| Database | MySQL / PostgreSQL / Oracle / DaMeng |
+| Testing | JUnit 5 + Playwright + JaCoCo |
+| CI/CD | GitHub Actions + SonarCloud + Codecov |
+
+### UI Preview
+
+| Dashboard | Job Management |
+|:---------:|:--------------:|
+| ![Dashboard](doc/images/dashboard.jpg) | ![Job List](doc/images/jobinfo.jpg) |
+
+| Create Job | Execution Logs |
+|:----------:|:--------------:|
+| ![Create Job](doc/images/jobinfo_new.jpg) | ![Execution Logs](doc/images/joblog.jpg) |
 
 ## Requirements
 
@@ -83,18 +114,6 @@ Additional:
 - **Build tool**: use the bundled Maven Wrapper (`./mvnw`); no local Maven install required.
 - **Docker** (optional): required only if you take the Docker Compose path.
 - **Database**: for local development, MySQL 8.x works out of the box. The admin defaults to `127.0.0.1:3306`; override via environment variables.
-
-## Architecture
-
-The project is a Maven multi-module build. The three modules have clear responsibilities:
-
-| Module | Kind | Package root | Key capabilities |
-| --- | --- | --- | --- |
-| `xxl-job-core` | Client library (JDK 8) | `com.xxl.job.core.*` | Embedded Netty server, registry / heartbeat, job thread, callback thread, `@XxlJob` annotation |
-| `xxl-job-admin` | Scheduling center (Spring Boot 3, JDK 17) | `com.xxl.job.admin.*` | Scheduler thread, routing strategies, registry, MyBatis DAOs, Freemarker admin UI, alarm, i18n |
-| `xxl-job-executor-samples` | Samples (JDK 17) | `com.xxl.job.executor.*` | Spring Boot sample + frameless sample |
-
-Module dependencies: `xxl-job-admin` depends on `xxl-job-core`; `xxl-job-executor-samples` depends on `xxl-job-core`.
 
 ## Database Support
 
@@ -123,7 +142,7 @@ docker compose -f docker-compose-e2e.yml up --build xxl-job-admin mysql executor
 
 Once it is up:
 
-- Admin UI: [http://localhost:8080/xxl-job-admin](http://localhost:8080/xxl-job-admin)
+- Admin UI: [http://localhost:8080](http://localhost:8080)
 - Actuator health: [http://localhost:9001/actuator/health/readiness](http://localhost:9001/actuator/health/readiness)
 - Sample executor: port `8081`
 - MySQL: port `3306`, user `root` / password `root_pwd`, database `xxl_job`, schema seeded from `doc/db/tables_xxl_job.sql`
@@ -140,7 +159,7 @@ Default login: `admin / 123456` (seeded by `tables_xxl_job.sql`).
 java -jar xxl-job-admin/target/xxl-job-admin.jar
 ```
 
-Then open [http://localhost:8080/xxl-job-admin](http://localhost:8080/xxl-job-admin) and log in with `admin / 123456`.
+Then open [http://localhost:8080](http://localhost:8080) and log in with `admin / 123456`.
 
 Before starting, make sure:
 
@@ -163,7 +182,7 @@ Configure the executor (`application.yml` / `application.properties`):
 
 ```properties
 ### Admin address
-xxl.job.admin.addresses=http://127.0.0.1:8080/xxl-job-admin
+xxl.job.admin.addresses=http://127.0.0.1:8080
 ### Access token, must match xxl.job.accessToken on the admin side
 xxl.job.admin.accessToken=default_token
 ### Executor app name (used for registration)
@@ -192,7 +211,7 @@ Key admin defaults (see `xxl-job-admin/src/main/resources/application.properties
 | Key | Default | Description |
 | --- | --- | --- |
 | `server.port` | `8080` | Web port |
-| `server.servlet.context-path` | `/xxl-job-admin` | Admin context path |
+| `server.servlet.context-path` | `/` | Admin context path |
 | `management.server.port` | `9001` | Actuator port |
 | `management.endpoints.web.exposure.include` | `health,info` | Actuator endpoints exposed |
 | `management.endpoint.health.probes.enabled` | `true` | Enables liveness / readiness probes |
@@ -216,9 +235,21 @@ Common executor keys (see `xxl-job-executor-samples/xxl-job-executor-sample-spri
 
 ## Compatibility
 
-- The compatibility target is `xxl-job 2.5.0`. Public APIs, handler conventions, the database schema, and the main admin UI flows are kept compatible where possible.
-- Internal implementation, module layout, default configuration, and dependencies may change during the refactor.
-- Validate the upgrade in a staging environment and back up data before rolling into production.
+Based on `xxl-job 2.5.0`, the refactored version maintains compatibility as follows:
+
+**✅ Compatible**
+- **Executor interfaces**: Core RPC interfaces like `AdminBiz` and `ExecutorBiz` remain unchanged — existing executors can connect directly.
+- **Handler conventions**: `@XxlJob` annotation, `IJobHandler` lifecycle, GLUE mode, and other usage patterns are unchanged.
+- **Database schema**: The 8 core tables remain compatible — existing data can be used as-is.
+- **Operation habits**: Task configuration, scheduling strategies, routing rules, blocking strategies, and other core concepts and workflows are unchanged.
+
+**🔄 Refactored**
+- **Admin API**: RESTful refactor to `/admin-api/v1/` endpoints — the original API is no longer compatible.
+- **Frontend UI**: Rewritten with Vue 3 + TypeScript — UI interaction details may differ.
+- **Dependencies**: `xxl-job-core` no longer transitively depends on Groovy. If you need GLUE(Groovy) mode, add `org.apache.groovy:groovy` dependency yourself.
+- **Internals**: Module layout, dependencies, and some default configurations may have changed.
+
+Validate the upgrade in a staging environment and back up data before rolling into production.
 
 ## Development & Testing
 

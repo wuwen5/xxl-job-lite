@@ -1,6 +1,7 @@
 package com.xxl.job.admin.controller;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -60,7 +61,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
                         + "VALUES (1, 1, 'Test Job', NOW(), NOW(), 'tester', 'NONE', 'DO_NOTHING', 'BEAN', 0, 0, 0)");
 
         // login
-        MvcResult ret = mockMvc.perform(post("/login")
+        MvcResult ret = mockMvc.perform(post("/admin-api/v1/login")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("userName", "admin")
                         .param("password", "123456"))
@@ -80,39 +81,6 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
 
     // ---------------------- index ----------------------
 
-    /**
-     * GET /joblog → returns joblog index view with group list
-     */
-    @Test
-    public void testIndex() throws Exception {
-        mockMvc.perform(get("/joblog").cookie(cookie))
-                .andExpect(status().isOk())
-                .andExpect(view().name("joblog/joblog.index"))
-                .andExpect(model().attributeExists("JobGroupList"));
-    }
-
-    /**
-     * GET /joblog?jobId=1 → returns view with jobInfo model attribute
-     */
-    @Test
-    public void testIndexWithJobId() throws Exception {
-        mockMvc.perform(get("/joblog").param("jobId", "1").cookie(cookie))
-                .andExpect(status().isOk())
-                .andExpect(view().name("joblog/joblog.index"))
-                .andExpect(model().attributeExists("jobInfo"));
-    }
-
-    /**
-     * GET /joblog?jobId=9999 → job not found → WebExceptionResolver → common.exception view
-     */
-    @Test
-    public void testIndexJobNotFound() throws Exception {
-        mockMvc.perform(get("/joblog").param("jobId", "9999").cookie(cookie))
-                .andExpect(status().isOk())
-                .andExpect(view().name("/common/common.exception"))
-                .andExpect(model().attributeExists("exceptionMsg"));
-    }
-
     // ---------------------- getJobsByGroup ----------------------
 
     /**
@@ -120,10 +88,8 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testGetJobsByGroup() throws Exception {
-        MvcResult result = mockMvc.perform(get("/joblog/getJobsByGroup/1")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("jobGroup", "1")
-                        .cookie(cookie))
+        MvcResult result = mockMvc.perform(
+                        get("/admin-api/v1/joblog/group/1/jobs").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.content").isArray())
@@ -133,10 +99,8 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
 
     @Test
     public void testGetJobsByGroupEmpty() throws Exception {
-        MvcResult result = mockMvc.perform(get("/joblog/getJobsByGroup/999")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("jobGroup", "999")
-                        .cookie(cookie))
+        MvcResult result = mockMvc.perform(
+                        get("/admin-api/v1/joblog/group/999/jobs").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andReturn();
@@ -150,8 +114,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testPageList() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/pageList")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/joblog")
                         .param("start", "0")
                         .param("length", "10")
                         .param("jobGroup", "1")
@@ -166,13 +129,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testPageList: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/pageList with filterTime range → parses dates correctly
-     */
     @Test
     public void testPageListWithTimeFilter() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/pageList")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/joblog")
                         .param("start", "0")
                         .param("length", "10")
                         .param("jobGroup", "1")
@@ -186,40 +145,6 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testPageListWithTimeFilter: {}", result.getResponse().getContentAsString());
     }
 
-    // ---------------------- logDetailPage ----------------------
-
-    /**
-     * GET /joblog/logDetailPage?id=1 → returns log detail view
-     */
-    @Test
-    public void testLogDetailPage() throws Exception {
-        // insert a log entry
-        jdbcTemplate.execute(
-                "INSERT INTO xxl_job_log(id, job_group, job_id, trigger_time, trigger_code, handle_code, alarm_status) "
-                        + "VALUES (1, 1, 1, NOW(), 200, 0, 0)");
-
-        MvcResult result = mockMvc.perform(
-                        get("/joblog/logDetailPage/1").param("id", "1").cookie(cookie))
-                .andExpect(status().isOk())
-                .andExpect(view().name("joblog/joblog.detail"))
-                .andExpect(model().attributeExists("triggerCode", "handleCode", "logId"))
-                .andReturn();
-        logger.info(
-                "testLogDetailPage view: {}",
-                result.getModelAndView() != null ? result.getModelAndView().getViewName() : null);
-    }
-
-    /**
-     * GET /joblog/logDetailPage?id=9999 → log not found → exception view
-     */
-    @Test
-    public void testLogDetailPageNotFound() throws Exception {
-        mockMvc.perform(get("/joblog/logDetailPage/1").param("id", "9999").cookie(cookie))
-                .andExpect(status().isOk())
-                .andExpect(view().name("/common/common.exception"))
-                .andExpect(model().attributeExists("exceptionMsg"));
-    }
-
     // ---------------------- logDetailCat ----------------------
 
     /**
@@ -227,9 +152,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
      */
     @Test
     public void testLogDetailCatInvalidLogId() throws Exception {
-        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/9999")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("logId", "9999")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/joblog/9999/detail")
                         .param("fromLineNum", "1")
                         .cookie(cookie))
                 .andExpect(status().isOk())
@@ -238,26 +161,19 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testLogDetailCatInvalidLogId: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/logDetailCat with valid logId but no executor → returns logs from DB
-     */
     @Test
     public void testLogDetailCatValidLogIdNoExecutor() throws Exception {
-        // Insert a log with executor address
         jdbcTemplate.execute(
                 "INSERT INTO xxl_job_log(id, job_group, job_id, executor_address, trigger_time, trigger_code, handle_code, alarm_status) "
                         + "VALUES (10, 1, 1, 'http://127.0.0.1:9999', NOW(), 200, 0, 0)");
 
-        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/10")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("logId", "10")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/joblog/10/detail")
                         .param("fromLineNum", "1")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andReturn();
         logger.info(
                 "testLogDetailCatValidLogIdNoExecutor: {}", result.getResponse().getContentAsString());
-        // Should fail because executor is not available
         String content = result.getResponse().getContentAsString();
         assertTrue(content.contains("\"code\":500") || content.contains("\"code\":200"));
     }
@@ -313,9 +229,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         mockRepo.put("http://mock-executor:9999", mockExecutorBiz);
         field.set(null, mockRepo);
 
-        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/11")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("logId", "11")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/joblog/11/detail")
                         .param("fromLineNum", "1")
                         .cookie(cookie))
                 .andExpect(status().isOk())
@@ -375,9 +289,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         mockRepo.put("http://xss-executor:9999", mockExecutorBiz);
         field.set(null, mockRepo);
 
-        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/12")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("logId", "12")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/joblog/12/detail")
                         .param("fromLineNum", "1")
                         .cookie(cookie))
                 .andExpect(status().isOk())
@@ -435,9 +347,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         mockRepo.put("http://error-executor:9999", mockExecutorBiz);
         field.set(null, mockRepo);
 
-        MvcResult result = mockMvc.perform(get("/joblog/logDetailCat/13")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("logId", "13")
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/joblog/13/detail")
                         .param("fromLineNum", "1")
                         .cookie(cookie))
                 .andExpect(status().isOk())
@@ -457,30 +367,20 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
                 "INSERT INTO xxl_job_log(id, job_group, job_id, trigger_time, trigger_code, handle_code, alarm_status) "
                         + "VALUES (2, 1, 1, NOW(), 500, 0, 0)"); // triggerCode=500 (not SUCCESS)
 
-        MvcResult result = mockMvc.perform(post("/joblog/logKill")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "2")
-                        .cookie(cookie))
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/joblog/2/kill").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
         logger.info("testLogKillTriggerNotSuccess: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/logKill → job info not found → code 500
-     */
     @Test
     public void testLogKillJobInfoNotFound() throws Exception {
-        // Insert log with non-existent job_id
         jdbcTemplate.execute(
                 "INSERT INTO xxl_job_log(id, job_group, job_id, trigger_time, trigger_code, handle_code, alarm_status) "
                         + "VALUES (20, 1, 9999, NOW(), 200, 0, 0)");
 
-        MvcResult result = mockMvc.perform(post("/joblog/logKill")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "20")
-                        .cookie(cookie))
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/joblog/20/kill").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -538,10 +438,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         mockRepo.put("http://kill-executor:9999", mockExecutorBiz);
         field.set(null, mockRepo);
 
-        MvcResult result = mockMvc.perform(post("/joblog/logKill")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "21")
-                        .cookie(cookie))
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/joblog/21/kill").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andReturn();
@@ -604,10 +501,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         mockRepo.put("http://kill-fail-executor:9999", mockExecutorBiz);
         field.set(null, mockRepo);
 
-        MvcResult result = mockMvc.perform(post("/joblog/logKill")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "22")
-                        .cookie(cookie))
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/joblog/22/kill").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -665,10 +559,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         mockRepo.put("http://kill-error-executor:9999", mockExecutorBiz);
         field.set(null, mockRepo);
 
-        MvcResult result = mockMvc.perform(post("/joblog/logKill")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("id", "23")
-                        .cookie(cookie))
+        MvcResult result = mockMvc.perform(post("/admin-api/v1/joblog/23/kill").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andReturn();
@@ -686,8 +577,7 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
                 "INSERT INTO xxl_job_log(id, job_group, job_id, trigger_time, trigger_code, handle_code, alarm_status) "
                         + "VALUES (3, 1, 1, NOW(), 200, 200, 0)");
 
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "1")
                         .param("type", "9")
@@ -701,13 +591,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         assert count != null && count == 0 : "Expected 0 logs after clearLog type=9, got: " + count;
     }
 
-    /**
-     * POST /joblog/clearLog type=1 → clear logs older than 1 month → SUCCESS
-     */
     @Test
     public void testClearLogByMonth() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "0")
                         .param("type", "1")
@@ -718,13 +604,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testClearLogByMonth: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/clearLog invalid type → code 500
-     */
     @Test
     public void testClearLogInvalidType() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "0")
                         .param("type", "99")
@@ -735,13 +617,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testClearLogInvalidType: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/clearLog type=2 → clear logs older than 3 months → SUCCESS
-     */
     @Test
     public void testClearLogByThreeMonths() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "0")
                         .param("type", "2")
@@ -752,13 +630,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testClearLogByThreeMonths: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/clearLog type=3 → clear logs older than 6 months → SUCCESS
-     */
     @Test
     public void testClearLogBySixMonths() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "0")
                         .param("type", "3")
@@ -769,13 +643,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testClearLogBySixMonths: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/clearLog type=4 → clear logs older than 1 year → SUCCESS
-     */
     @Test
     public void testClearLogByYear() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "0")
                         .param("type", "4")
@@ -786,13 +656,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testClearLogByYear: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/clearLog type=5 → clear oldest 1000 logs → SUCCESS
-     */
     @Test
     public void testClearLogByCount1000() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "0")
                         .param("type", "5")
@@ -803,13 +669,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testClearLogByCount1000: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/clearLog type=6 → clear oldest 10000 logs → SUCCESS
-     */
     @Test
     public void testClearLogByCount10000() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "0")
                         .param("type", "6")
@@ -820,13 +682,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testClearLogByCount10000: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/clearLog type=7 → clear oldest 30000 logs → SUCCESS
-     */
     @Test
     public void testClearLogByCount30000() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "0")
                         .param("type", "7")
@@ -837,13 +695,9 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testClearLogByCount30000: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/clearLog type=8 → clear oldest 100000 logs → SUCCESS
-     */
     @Test
     public void testClearLogByCount100000() throws Exception {
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "0")
                         .param("type", "8")
@@ -854,12 +708,8 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
         logger.info("testClearLogByCount100000: {}", result.getResponse().getContentAsString());
     }
 
-    /**
-     * POST /joblog/clearLog with specific jobId → only clear logs for that job
-     */
     @Test
     public void testClearLogByJobId() throws Exception {
-        // Insert logs for different jobs
         jdbcTemplate.execute(
                 "INSERT INTO xxl_job_log(id, job_group, job_id, trigger_time, trigger_code, handle_code, alarm_status) "
                         + "VALUES (30, 1, 1, TIMESTAMPADD('MONTH', -2, NOW()), 200, 200, 0)");
@@ -867,30 +717,23 @@ public class JobLogControllerTest extends AbstractSpringMvcTest {
                 "INSERT INTO xxl_job_log(id, job_group, job_id, trigger_time, trigger_code, handle_code, alarm_status) "
                         + "VALUES (31, 1, 1, NOW(), 200, 200, 0)");
 
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "1")
-                        .param("type", "1") // Clear logs older than 1 month
+                        .param("type", "1")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andReturn();
         logger.info("testClearLogByJobId: {}", result.getResponse().getContentAsString());
 
-        // Verify old log was cleared but new log remains
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM xxl_job_log WHERE job_id = 1", Integer.class);
         assert count != null && count == 1 : "Expected 1 log remaining after clearLog";
     }
 
-    /**
-     * POST /joblog/clearLog with empty result → still returns SUCCESS
-     */
     @Test
     public void testClearLogEmptyResult() throws Exception {
-        // No logs in DB for this jobGroup
-        MvcResult result = mockMvc.perform(post("/joblog/clearLog")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        MvcResult result = mockMvc.perform(delete("/admin-api/v1/joblog")
                         .param("jobGroup", "1")
                         .param("jobId", "999")
                         .param("type", "9")
