@@ -45,6 +45,13 @@ public interface XxlJobUserDao {
             @Param("role") int role);
 
     /**
+     * Loads a job user by ID.
+     * @param id user ID
+     * @return XxlJobUser object
+     */
+    XxlJobUser loadById(@Param("id") int id);
+
+    /**
      * Loads a job user by username.
      * @param username username
      * @return XxlJobUser object

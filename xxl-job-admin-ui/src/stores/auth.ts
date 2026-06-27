@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { loginApi } from '@/api/auth'
+import { loginApi, getUserInfoApi } from '@/api/auth'
 import router from '@/router'
 
 export interface UserInfo {
@@ -24,19 +24,11 @@ export const useAuthStore = defineStore('auth', () => {
   async function getUserInfo() {
     if (!token.value) return
     try {
-      const jsonStr = hexToString(token.value)
-      userInfo.value = JSON.parse(jsonStr)
+      const data = await getUserInfoApi()
+      userInfo.value = data
     } catch {
       logout()
     }
-  }
-
-  function hexToString(hex: string): string {
-    const bytes = new Uint8Array(hex.length / 2)
-    for (let i = 0; i < hex.length; i += 2) {
-      bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16)
-    }
-    return new TextDecoder().decode(bytes)
   }
 
   function logout() {
