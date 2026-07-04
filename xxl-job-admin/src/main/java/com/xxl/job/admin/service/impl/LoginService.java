@@ -10,8 +10,8 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +45,9 @@ public class LoginService {
         if (configuredSecret != null && !configuredSecret.trim().isEmpty()) {
             secretKey = configuredSecret.trim().getBytes(StandardCharsets.UTF_8);
         } else {
-            secretKey = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+            byte[] generated = new byte[32];
+            new SecureRandom().nextBytes(generated);
+            secretKey = generated;
         }
     }
 
@@ -54,18 +56,26 @@ public class LoginService {
     private String makeToken(int userId, long expireAt) {
         String payload = userId + ":" + expireAt;
         String signature = sign(payload);
-        return base64UrlEncode(payload.getBytes(StandardCharsets.UTF_8))
-                + "."
-                + base64UrlEncode(signature.getBytes(StandardCharsets.UTF_8));
+        return base64UrlEncode(payload.getBytes(StandardCharsets.UTF_8)) + "." + signature;
     }
 
     private int parseToken(String token) {
-        if (token == null || !token.contains(".")) {
+        if (token == null) {
             return -1;
         }
         String[] parts = token.split("\\.", 2);
-        String payloadJson = new String(Base64.getUrlDecoder().decode(parts[0]), StandardCharsets.UTF_8);
-        String providedSig = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+        if (parts.length != 2) {
+            return -1;
+        }
+
+        String payloadJson;
+        try {
+            payloadJson = new String(Base64.getUrlDecoder().decode(parts[0]), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            return -1;
+        }
+
+        String providedSig = parts[1];
 
         String expectedSig = sign(payloadJson);
         if (!constantTimeEquals(expectedSig, providedSig)) {
@@ -127,9 +137,9 @@ public class LoginService {
 
         // param
         if (username == null
-                || username.trim().length() == 0
+                || username.trim().isEmpty()
                 || password == null
-                || password.trim().length() == 0) {
+                || password.trim().isEmpty()) {
             return new ReturnT<>(500, I18nUtil.getString("login_param_empty"));
         }
 

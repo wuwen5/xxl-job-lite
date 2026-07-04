@@ -42,7 +42,7 @@ public class IndexController {
         data.put("id", loginUser.getId());
         data.put("username", loginUser.getUsername());
         data.put("role", loginUser.getRole());
-        data.put("permission", loginUser.getPermission());
+        data.put("permission", loginUser.getPermission() == null ? "" : loginUser.getPermission());
         return new ReturnT<>(data);
     }
 
