@@ -40,6 +40,22 @@ public class IndexControllerTest extends AbstractSpringMvcTest {
     }
 
     @Test
+    public void testUserInfo() throws Exception {
+        MvcResult result = mockMvc.perform(get("/admin-api/v1/userinfo").cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.content.id").value(1))
+                .andExpect(jsonPath("$.content.username").value("admin"))
+                .andExpect(jsonPath("$.content.role").value(1))
+                .andExpect(jsonPath("$.content.permission").value(""))
+                .andExpect(jsonPath("$.content.password").doesNotExist())
+                .andReturn();
+
+        logger.info("testUserInfo response: {}", result.getResponse().getContentAsString());
+    }
+
+    @Test
     public void testDashboard() throws Exception {
         MvcResult result = mockMvc.perform(get("/admin-api/v1/dashboard").cookie(cookie))
                 .andExpect(status().isOk())
