@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@SuppressWarnings("all")
 public class JdbcDbLockUtilsPostgreSQLTest extends AbstractPostgreSQLTest {
 
     @Resource

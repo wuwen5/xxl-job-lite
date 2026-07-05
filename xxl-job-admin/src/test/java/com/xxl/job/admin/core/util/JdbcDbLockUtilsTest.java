@@ -1,18 +1,18 @@
 package com.xxl.job.admin.core.util;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.xxl.job.admin.AbstractTest;
 import jakarta.annotation.Resource;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@SuppressWarnings("all")
 public class JdbcDbLockUtilsTest extends AbstractTest {
 
     @Resource
@@ -20,7 +20,8 @@ public class JdbcDbLockUtilsTest extends AbstractTest {
 
     @BeforeEach
     void cleanLockTable() {
-        jdbcTemplate.execute("TRUNCATE TABLE xxl_job_lock");
+        jdbcTemplate.execute("DELETE FROM xxl_job_lock");
+        jdbcTemplate.execute("commit");
     }
 
     @Test
@@ -31,22 +32,15 @@ public class JdbcDbLockUtilsTest extends AbstractTest {
     }
 
     @Test
-    public void shouldInsertLockRowWhenNotExists() throws InterruptedException {
+    public void shouldInsertLockRowWhenNotExists() {
         JdbcDbLockUtils.executeWithDbLock("h2-insert-lock", true, true, () -> {});
 
-        for (int i = 0; i < 3; i++) {
-
-            try {
-                Integer count = jdbcTemplate.queryForObject(
-                        "select count(1) from xxl_job_lock where lock_name = ?", Integer.class, "h2-insert-lock");
-                assertEquals(1, count);
-            } catch (AssertionError e) {
-                if (i == 2) {
-                    throw e;
-                }
-                Thread.sleep(100);
-            }
-        }
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            sleepQuietly(50);
+            Integer count = jdbcTemplate.queryForObject(
+                    "select count(1) from xxl_job_lock where lock_name=?", Integer.class, "h2-insert-lock");
+            assertEquals(1, count);
+        });
     }
 
     @Test
@@ -66,7 +60,7 @@ public class JdbcDbLockUtilsTest extends AbstractTest {
 
         t1.start();
         t2.start();
-        assertTrue(done.await(5, TimeUnit.SECONDS), "both threads should finish");
+        assertTrue(done.await(5, SECONDS), "both threads should finish");
         assertEquals(2, maxActive.get(), "different locks should execute concurrently");
     }
 
@@ -94,10 +88,10 @@ public class JdbcDbLockUtilsTest extends AbstractTest {
 
         t1.start();
         t2.start();
-        assertTrue(thread1Started.await(2, TimeUnit.SECONDS), "thread1 should start first");
+        assertTrue(thread1Started.await(2, SECONDS), "thread1 should start first");
         Thread.sleep(100);
         thread1CanFinish.countDown();
-        assertTrue(done.await(5, TimeUnit.SECONDS), "both threads should finish");
+        assertTrue(done.await(5, SECONDS), "both threads should finish");
         assertEquals(1, maxActive.get(), "same lock should serialize execution");
     }
 
@@ -126,10 +120,10 @@ public class JdbcDbLockUtilsTest extends AbstractTest {
 
         t1.start();
         t2.start();
-        assertTrue(thread1Started.await(2, TimeUnit.SECONDS), "thread1 should start first");
+        assertTrue(thread1Started.await(2, SECONDS), "thread1 should start first");
         Thread.sleep(100);
         thread1CanFinish.countDown();
-        assertTrue(done.await(5, TimeUnit.SECONDS), "both threads should finish");
+        assertTrue(done.await(5, SECONDS), "both threads should finish");
         assertEquals(1, maxActive.get(), "same lock should serialize execution");
     }
 
@@ -155,7 +149,7 @@ public class JdbcDbLockUtilsTest extends AbstractTest {
 
     private static void awaitQuietly(CountDownLatch latch) {
         try {
-            latch.await(5, TimeUnit.SECONDS);
+            latch.await(5, SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
