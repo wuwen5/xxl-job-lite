@@ -6,11 +6,14 @@ import com.xxl.job.admin.dao.*;
 import jakarta.annotation.Resource;
 import java.util.Arrays;
 import javax.sql.DataSource;
+import lombok.Getter;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * xxl-job config
@@ -45,16 +48,18 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     // ---------------------- XxlJobScheduler ----------------------
 
-    // conf
     @Value("${xxl.job.i18n}")
     private String i18n;
 
+    @Getter
     @Value("${xxl.job.accessToken}")
     private String accessToken;
 
+    @Getter
     @Value("${xxl.job.timeout}")
     private int timeout;
 
+    @Getter
     @Value("${spring.mail.from}")
     private String emailFrom;
 
@@ -69,47 +74,51 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     // dao, service
 
+    @Getter
     @Resource
     private XxlJobLogDao xxlJobLogDao;
 
+    @Getter
     @Resource
     private XxlJobInfoDao xxlJobInfoDao;
 
+    @Getter
     @Resource
     private XxlJobRegistryDao xxlJobRegistryDao;
 
+    @Getter
     @Resource
     private XxlJobGroupDao xxlJobGroupDao;
 
+    @Getter
     @Resource
     private XxlJobLogReportDao xxlJobLogReportDao;
 
+    @Getter
     @Resource
     private JavaMailSender mailSender;
 
+    @Getter
     @Resource
     private DataSource dataSource;
 
+    @Getter
     @Resource
     private JobAlarmer jobAlarmer;
+
+    @Resource
+    @Getter
+    private JdbcTemplate jdbcTemplate;
+
+    @Resource
+    @Getter
+    private PlatformTransactionManager platformTransactionManager;
 
     public String getI18n() {
         if (!Arrays.asList("zh_CN", "zh_TC", "en").contains(i18n)) {
             return "zh_CN";
         }
         return i18n;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public String getEmailFrom() {
-        return emailFrom;
     }
 
     public int getTriggerPoolFastMax() {
@@ -128,40 +137,9 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     public int getLogretentiondays() {
         if (logretentiondays < 7) {
-            return -1; // Limit greater than or equal to 7, otherwise close
+            // Limit greater than or equal to 7, otherwise close
+            return -1;
         }
         return logretentiondays;
-    }
-
-    public XxlJobLogDao getXxlJobLogDao() {
-        return xxlJobLogDao;
-    }
-
-    public XxlJobInfoDao getXxlJobInfoDao() {
-        return xxlJobInfoDao;
-    }
-
-    public XxlJobRegistryDao getXxlJobRegistryDao() {
-        return xxlJobRegistryDao;
-    }
-
-    public XxlJobGroupDao getXxlJobGroupDao() {
-        return xxlJobGroupDao;
-    }
-
-    public XxlJobLogReportDao getXxlJobLogReportDao() {
-        return xxlJobLogReportDao;
-    }
-
-    public JavaMailSender getMailSender() {
-        return mailSender;
-    }
-
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
-    public JobAlarmer getJobAlarmer() {
-        return jobAlarmer;
     }
 }

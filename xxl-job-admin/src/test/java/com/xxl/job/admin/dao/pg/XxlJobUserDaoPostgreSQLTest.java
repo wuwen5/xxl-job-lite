@@ -67,7 +67,7 @@ public class XxlJobUserDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         assertEquals(1, xxlJobUserDao.save(user2));
 
         assertEquals(2, xxlJobUserDao.pageListCount(0, 10, null, -1));
-        assertEquals(1, xxlJobUserDao.pageListCount(0, 10, "alp", -1));
+        assertEquals(1, xxlJobUserDao.pageListCount(0, 10, "%alp%", -1));
         assertEquals(1, xxlJobUserDao.pageListCount(0, 10, null, 1));
 
         assertEquals(1, xxlJobUserDao.delete(user.getId()));
@@ -79,7 +79,7 @@ public class XxlJobUserDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         saveUser("alpha", 0);
         saveUser("beta", 1);
 
-        List<XxlJobUser> users = xxlJobUserDao.pageList(0, 10, "alpha", -1);
+        List<XxlJobUser> users = xxlJobUserDao.pageList(0, 10, "%alpha%", -1);
         assertEquals(1, users.size());
     }
 

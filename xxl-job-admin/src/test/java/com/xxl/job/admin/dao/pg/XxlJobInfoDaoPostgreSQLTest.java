@@ -40,13 +40,13 @@ public class XxlJobInfoDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         List<XxlJobInfo> byStatus = xxlJobInfoDao.pageList(0, 10, 0, 1, null, null, null);
         assertEquals(2, byStatus.size());
 
-        List<XxlJobInfo> byDesc = xxlJobInfoDao.pageList(0, 10, 0, -1, "gamma", null, null);
+        List<XxlJobInfo> byDesc = xxlJobInfoDao.pageList(0, 10, 0, -1, "%gamma%", null, null);
         assertEquals(1, byDesc.size());
 
-        List<XxlJobInfo> byHandler = xxlJobInfoDao.pageList(0, 10, 0, -1, null, "handlerAlpha", null);
+        List<XxlJobInfo> byHandler = xxlJobInfoDao.pageList(0, 10, 0, -1, null, "%handlerAlpha%", null);
         assertEquals(2, byHandler.size());
 
-        List<XxlJobInfo> byAuthor = xxlJobInfoDao.pageList(0, 10, 0, -1, null, null, "alice");
+        List<XxlJobInfo> byAuthor = xxlJobInfoDao.pageList(0, 10, 0, -1, null, null, "%alice%");
         assertEquals(2, byAuthor.size());
     }
 
@@ -58,9 +58,9 @@ public class XxlJobInfoDaoPostgreSQLTest extends AbstractPostgreSQLTest {
 
         assertEquals(2, xxlJobInfoDao.pageListCount(1, -1, null, null, null));
         assertEquals(2, xxlJobInfoDao.pageListCount(0, 1, null, null, null));
-        assertEquals(1, xxlJobInfoDao.pageListCount(0, -1, "gamma", null, null));
-        assertEquals(2, xxlJobInfoDao.pageListCount(0, -1, null, "handlerAlpha", null));
-        assertEquals(2, xxlJobInfoDao.pageListCount(0, -1, null, null, "alice"));
+        assertEquals(1, xxlJobInfoDao.pageListCount(0, -1, "%gamma%", null, null));
+        assertEquals(2, xxlJobInfoDao.pageListCount(0, -1, null, "%handlerAlpha%", null));
+        assertEquals(2, xxlJobInfoDao.pageListCount(0, -1, null, null, "%alice%"));
     }
 
     @Test

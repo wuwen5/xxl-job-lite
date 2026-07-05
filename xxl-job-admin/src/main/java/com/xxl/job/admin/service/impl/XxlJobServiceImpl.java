@@ -59,6 +59,11 @@ public class XxlJobServiceImpl implements XxlJobService {
             String author) {
 
         // page list
+        jobDesc = jobDesc != null && !jobDesc.trim().isEmpty() ? "%" + jobDesc.trim() + "%" : null;
+        executorHandler = executorHandler != null && !executorHandler.trim().isEmpty()
+                ? "%" + executorHandler.trim() + "%"
+                : null;
+        author = author != null && !author.trim().isEmpty() ? "%" + author.trim() + "%" : null;
         List<XxlJobInfo> list =
                 xxlJobInfoDao.pageList(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author);
         int listCount = xxlJobInfoDao.pageListCount(jobGroup, triggerStatus, jobDesc, executorHandler, author);
