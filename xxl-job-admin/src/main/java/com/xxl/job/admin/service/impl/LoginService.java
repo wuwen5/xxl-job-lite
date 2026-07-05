@@ -28,6 +28,7 @@ public class LoginService {
 
     private static final String HMAC_ALGORITHM = "HmacSHA256";
     private static final long REMEMBER_ME_MULTIPLIER = 30L;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Value("${xxl.job.login.token-secret:}")
     private String configuredSecret;
@@ -46,7 +47,7 @@ public class LoginService {
             secretKey = configuredSecret.trim().getBytes(StandardCharsets.UTF_8);
         } else {
             byte[] generated = new byte[32];
-            new SecureRandom().nextBytes(generated);
+            SECURE_RANDOM.nextBytes(generated);
             secretKey = generated;
         }
     }
@@ -68,21 +69,21 @@ public class LoginService {
             return -1;
         }
 
-        String payloadJson;
+        String payload;
         try {
-            payloadJson = new String(Base64.getUrlDecoder().decode(parts[0]), StandardCharsets.UTF_8);
+            payload = new String(Base64.getUrlDecoder().decode(parts[0]), StandardCharsets.UTF_8);
         } catch (IllegalArgumentException e) {
             return -1;
         }
 
         String providedSig = parts[1];
 
-        String expectedSig = sign(payloadJson);
+        String expectedSig = sign(payload);
         if (!constantTimeEquals(expectedSig, providedSig)) {
             return -1;
         }
 
-        String[] payloadParts = payloadJson.split(":");
+        String[] payloadParts = payload.split(":");
         if (payloadParts.length != 2) {
             return -1;
         }
@@ -192,8 +193,10 @@ public class LoginService {
         }
 
         // 2. fallback to cookie
+        boolean isCookieAuth = false;
         if (token == null) {
             token = CookieUtil.getValue(request, LOGIN_IDENTITY_KEY);
+            isCookieAuth = true;
         }
 
         if (token != null) {
@@ -204,8 +207,11 @@ public class LoginService {
                     return dbUser;
                 }
             }
-            // invalid or expired token - clear cookie
-            logout(request, response);
+
+            if (isCookieAuth) {
+                // invalid or expired token - clear cookie
+                logout(request, response);
+            }
         }
         return null;
     }
