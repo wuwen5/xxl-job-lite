@@ -15,6 +15,7 @@ e2e/test-results
 
 xxl-job-admin-ui/node_modules
 xxl-job-admin-ui/dist
+xxl-job-admin-ui/node
 *.local
 .env.local
 .env.*.local

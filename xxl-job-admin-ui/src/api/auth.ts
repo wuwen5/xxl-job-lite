@@ -12,6 +12,10 @@ export function logoutApi() {
   return request.post<any, string>('/logout')
 }
 
+export function getUserInfoApi() {
+  return request.get<any, { id: number; username: string; role: number; permission: string }>('/userinfo')
+}
+
 export function getDashboardInfo() {
   return request.get<any, any>('/dashboard')
 }
