@@ -79,8 +79,8 @@ public final class JdbcDbLockUtils {
 
     private static SQLException findSqlException(Throwable t) {
         while (t != null) {
-            if (t instanceof SQLException) {
-                return (SQLException) t;
+            if (t instanceof SQLException sqlException) {
+                return sqlException;
             }
             t = t.getCause();
         }
