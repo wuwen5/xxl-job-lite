@@ -60,92 +60,88 @@ public class JobScheduleHelper {
 
                 AtomicBoolean preReadSuc = new AtomicBoolean(true);
                 try {
-                    JdbcDbLockUtils.executeWithDbLock(
-                            XxlJobAdminConfig.getAdminConfig().getDataSource(), "schedule_lock", () -> {
+                    JdbcDbLockUtils.executeWithDbLock("schedule_lock", () -> {
 
-                                // 1、pre read
-                                long nowTime = System.currentTimeMillis();
-                                List<XxlJobInfo> scheduleList = XxlJobAdminConfig.getAdminConfig()
-                                        .getXxlJobInfoDao()
-                                        .scheduleJobQuery(nowTime + PRE_READ_MS, preReadCount);
-                                if (scheduleList != null && !scheduleList.isEmpty()) {
-                                    // 2、push time-ring
-                                    for (XxlJobInfo jobInfo : scheduleList) {
+                        // 1、pre read
+                        long nowTime = System.currentTimeMillis();
+                        List<XxlJobInfo> scheduleList = XxlJobAdminConfig.getAdminConfig()
+                                .getXxlJobInfoDao()
+                                .scheduleJobQuery(nowTime + PRE_READ_MS, preReadCount);
+                        if (scheduleList != null && !scheduleList.isEmpty()) {
+                            // 2、push time-ring
+                            for (XxlJobInfo jobInfo : scheduleList) {
 
-                                        // time-ring jump
-                                        if (nowTime > jobInfo.getTriggerNextTime() + PRE_READ_MS) {
-                                            // 2.1、trigger-expire > 5s：pass && make next-trigger-time
-                                            logger.warn(
-                                                    ">>>>>>>>>>> xxl-job, schedule misfire, jobId = {}",
-                                                    jobInfo.getId());
+                                // time-ring jump
+                                if (nowTime > jobInfo.getTriggerNextTime() + PRE_READ_MS) {
+                                    // 2.1、trigger-expire > 5s：pass && make next-trigger-time
+                                    logger.warn(">>>>>>>>>>> xxl-job, schedule misfire, jobId = {}", jobInfo.getId());
 
-                                            // 1、misfire match
-                                            MisfireStrategyEnum misfireStrategyEnum = MisfireStrategyEnum.match(
-                                                    jobInfo.getMisfireStrategy(), MisfireStrategyEnum.DO_NOTHING);
-                                            if (MisfireStrategyEnum.FIRE_ONCE_NOW == misfireStrategyEnum) {
-                                                // FIRE_ONCE_NOW 》 trigger
-                                                JobTriggerPoolHelper.trigger(
-                                                        jobInfo.getId(), TriggerTypeEnum.MISFIRE, -1, null, null, null);
-                                                logger.debug(
-                                                        ">>>>>>>>>>> xxl-job, schedule push trigger : jobId = {}",
-                                                        jobInfo.getId());
-                                            }
-
-                                            // 2、fresh next
-                                            refreshNextValidTime(jobInfo, new Date());
-
-                                        } else if (nowTime > jobInfo.getTriggerNextTime()) {
-                                            // 2.2、trigger-expire < 5s：direct-trigger && make next-trigger-time
-
-                                            // 1、trigger
-                                            JobTriggerPoolHelper.trigger(
-                                                    jobInfo.getId(), TriggerTypeEnum.CRON, -1, null, null, null);
-                                            logger.debug(
-                                                    ">>>>>>>>>>> xxl-job, schedule push trigger : jobId = {}",
-                                                    jobInfo.getId());
-
-                                            // 2、fresh next
-                                            refreshNextValidTime(jobInfo, new Date());
-
-                                            // next-trigger-time in 5s, pre-read again
-                                            if (jobInfo.getTriggerStatus() == 1
-                                                    && nowTime + PRE_READ_MS > jobInfo.getTriggerNextTime()) {
-
-                                                // 1、make ring second
-                                                int ringSecond = (int) ((jobInfo.getTriggerNextTime() / 1000) % 60);
-
-                                                // 2、push time ring
-                                                pushTimeRing(ringSecond, jobInfo.getId());
-
-                                                // 3、fresh next
-                                                refreshNextValidTime(jobInfo, new Date(jobInfo.getTriggerNextTime()));
-                                            }
-
-                                        } else {
-                                            // 2.3、trigger-pre-read：time-ring trigger && make next-trigger-time
-
-                                            // 1、make ring second
-                                            int ringSecond = (int) ((jobInfo.getTriggerNextTime() / 1000) % 60);
-
-                                            // 2、push time ring
-                                            pushTimeRing(ringSecond, jobInfo.getId());
-
-                                            // 3、fresh next
-                                            refreshNextValidTime(jobInfo, new Date(jobInfo.getTriggerNextTime()));
-                                        }
+                                    // 1、misfire match
+                                    MisfireStrategyEnum misfireStrategyEnum = MisfireStrategyEnum.match(
+                                            jobInfo.getMisfireStrategy(), MisfireStrategyEnum.DO_NOTHING);
+                                    if (MisfireStrategyEnum.FIRE_ONCE_NOW == misfireStrategyEnum) {
+                                        // FIRE_ONCE_NOW 》 trigger
+                                        JobTriggerPoolHelper.trigger(
+                                                jobInfo.getId(), TriggerTypeEnum.MISFIRE, -1, null, null, null);
+                                        logger.debug(
+                                                ">>>>>>>>>>> xxl-job, schedule push trigger : jobId = {}",
+                                                jobInfo.getId());
                                     }
 
-                                    // 3、update trigger info
-                                    for (XxlJobInfo jobInfo : scheduleList) {
-                                        XxlJobAdminConfig.getAdminConfig()
-                                                .getXxlJobInfoDao()
-                                                .scheduleUpdate(jobInfo);
+                                    // 2、fresh next
+                                    refreshNextValidTime(jobInfo, new Date());
+
+                                } else if (nowTime > jobInfo.getTriggerNextTime()) {
+                                    // 2.2、trigger-expire < 5s：direct-trigger && make next-trigger-time
+
+                                    // 1、trigger
+                                    JobTriggerPoolHelper.trigger(
+                                            jobInfo.getId(), TriggerTypeEnum.CRON, -1, null, null, null);
+                                    logger.debug(
+                                            ">>>>>>>>>>> xxl-job, schedule push trigger : jobId = {}", jobInfo.getId());
+
+                                    // 2、fresh next
+                                    refreshNextValidTime(jobInfo, new Date());
+
+                                    // next-trigger-time in 5s, pre-read again
+                                    if (jobInfo.getTriggerStatus() == 1
+                                            && nowTime + PRE_READ_MS > jobInfo.getTriggerNextTime()) {
+
+                                        // 1、make ring second
+                                        int ringSecond = (int) ((jobInfo.getTriggerNextTime() / 1000) % 60);
+
+                                        // 2、push time ring
+                                        pushTimeRing(ringSecond, jobInfo.getId());
+
+                                        // 3、fresh next
+                                        refreshNextValidTime(jobInfo, new Date(jobInfo.getTriggerNextTime()));
                                     }
 
                                 } else {
-                                    preReadSuc.set(false);
+                                    // 2.3、trigger-pre-read：time-ring trigger && make next-trigger-time
+
+                                    // 1、make ring second
+                                    int ringSecond = (int) ((jobInfo.getTriggerNextTime() / 1000) % 60);
+
+                                    // 2、push time ring
+                                    pushTimeRing(ringSecond, jobInfo.getId());
+
+                                    // 3、fresh next
+                                    refreshNextValidTime(jobInfo, new Date(jobInfo.getTriggerNextTime()));
                                 }
-                            });
+                            }
+
+                            // 3、update trigger info
+                            for (XxlJobInfo jobInfo : scheduleList) {
+                                XxlJobAdminConfig.getAdminConfig()
+                                        .getXxlJobInfoDao()
+                                        .scheduleUpdate(jobInfo);
+                            }
+
+                        } else {
+                            preReadSuc.set(false);
+                        }
+                    });
                 } catch (Throwable e) {
                     logger.error(">>>>>>>>>>> xxl-job, JobScheduleHelper#scheduleThread error:", e);
                 }

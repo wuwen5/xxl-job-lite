@@ -74,9 +74,9 @@ public class XxlJobGroupDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         saveGroup("executor-beta", "title-2", 0);
         saveGroup("misc", "other-title", 1);
 
-        assertEquals(2, xxlJobGroupDao.pageListCount(0, 10, "executor", null));
-        assertEquals(3, xxlJobGroupDao.pageListCount(0, 10, null, "title"));
-        assertEquals(1, xxlJobGroupDao.pageListCount(0, 10, "alpha", "title-1"));
+        assertEquals(2, xxlJobGroupDao.pageListCount(0, 10, "%executor%", null));
+        assertEquals(3, xxlJobGroupDao.pageListCount(0, 10, null, "%title%"));
+        assertEquals(1, xxlJobGroupDao.pageListCount(0, 10, "%alpha%", "%title-1%"));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class XxlJobGroupDaoPostgreSQLTest extends AbstractPostgreSQLTest {
         saveGroup("executor-alpha", "title-1", 0);
         saveGroup("executor-beta", "title-2", 0);
 
-        List<XxlJobGroup> result = xxlJobGroupDao.pageList(0, 10, "executor", "title");
+        List<XxlJobGroup> result = xxlJobGroupDao.pageList(0, 10, "%executor%", "%title%");
         assertEquals(2, result.size());
     }
 

@@ -68,5 +68,7 @@ public class XxlJobLogDaoTest extends AbstractTest {
 
         int ret2 = xxlJobLogDao.delete(log.getJobId());
         assertEquals(1, ret2);
+
+        xxlJobLogDao.findFailJobLogIds(10);
     }
 }

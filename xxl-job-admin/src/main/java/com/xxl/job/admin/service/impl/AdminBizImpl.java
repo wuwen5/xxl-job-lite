@@ -1,6 +1,5 @@
 package com.xxl.job.admin.service.impl;
 
-import com.xxl.job.admin.core.conf.XxlJobAdminConfig;
 import com.xxl.job.admin.core.model.XxlJobGroup;
 import com.xxl.job.admin.core.model.XxlJobInfo;
 import com.xxl.job.admin.core.model.XxlJobUser;
@@ -68,7 +67,6 @@ public class AdminBizImpl implements AdminBiz {
         List<XxlJobInfo> jobsByGroup = xxlJobInfoDao.getJobsByGroup(groupId);
 
         JdbcDbLockUtils.executeWithDbLock(
-                XxlJobAdminConfig.getAdminConfig().getDataSource(),
                 jobExecutorParam.getJobExecutorParam().getAppName(),
                 false,
                 false,
@@ -124,11 +122,7 @@ public class AdminBizImpl implements AdminBiz {
 
         try {
             JdbcDbLockUtils.executeWithDbLock(
-                    XxlJobAdminConfig.getAdminConfig().getDataSource(),
-                    jobExecutorParam.getAppName(),
-                    true,
-                    false,
-                    () -> xxlJobGroupDao.save(newGroup));
+                    jobExecutorParam.getAppName(), true, false, () -> xxlJobGroupDao.save(newGroup));
         } catch (Exception e) {
             log.warn("初始化job_group失败, 可能已存在, appName={}", jobExecutorParam.getAppName(), e);
         }

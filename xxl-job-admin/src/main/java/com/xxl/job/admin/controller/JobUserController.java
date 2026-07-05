@@ -48,6 +48,7 @@ public class JobUserController {
             int role) {
 
         // page list
+        username = (username != null && !username.trim().isEmpty()) ? "%" + username.trim() + "%" : "";
         List<XxlJobUser> list = xxlJobUserDao.pageList(start, length, username, role);
         int listCount = xxlJobUserDao.pageListCount(start, length, username, role);
 

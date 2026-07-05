@@ -43,7 +43,7 @@
         FROM xxl_job_user t
         <trim prefix="WHERE" prefixOverrides="AND | OR" >
             <if test="username != null and username != ''">
-                AND t.username like CONCAT(CONCAT('%', #{username}), '%')
+                AND t.username like #{username}
             </if>
             <if test="role gt -1">
                 AND t.role = #{role}
@@ -58,7 +58,7 @@
         FROM xxl_job_user t
         <trim prefix="WHERE" prefixOverrides="AND | OR" >
             <if test="username != null and username != ''">
-                AND t.username like CONCAT(CONCAT('%', #{username}), '%')
+                AND t.username like #{username}
             </if>
             <if test="role gt -1">
                 AND t.role = #{role}
@@ -95,12 +95,13 @@
 
     <update id="update" parameterType="com.xxl.job.admin.core.model.XxlJobUser" >
         UPDATE xxl_job_user
-        SET
-        <if test="password != null and password != ''">
+        <set>
+          <if test="password != null and password != ''">
             password = #{password},
-        </if>
-        role = #{role},
-        permission = #{permission}
+          </if>
+          role = #{role},
+          permission = #{permission}
+        </set>
         WHERE id = #{id}
     </update>
 
