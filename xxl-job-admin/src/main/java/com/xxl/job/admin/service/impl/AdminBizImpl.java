@@ -68,7 +68,7 @@ public class AdminBizImpl implements AdminBiz {
 
         JdbcDbLockUtils.executeWithDbLock(
                 jobExecutorParam.getJobExecutorParam().getAppName(),
-                false,
+                true,
                 false,
                 () -> jobExecutorParam.getJobInfoParamList().stream()
                         .filter(job -> jobsByGroup.stream()
