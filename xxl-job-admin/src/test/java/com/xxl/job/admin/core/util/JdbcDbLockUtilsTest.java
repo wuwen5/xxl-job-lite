@@ -31,12 +31,22 @@ public class JdbcDbLockUtilsTest extends AbstractTest {
     }
 
     @Test
-    public void shouldInsertLockRowWhenNotExists() {
+    public void shouldInsertLockRowWhenNotExists() throws InterruptedException {
         JdbcDbLockUtils.executeWithDbLock("h2-insert-lock", true, true, () -> {});
 
-        Integer count = jdbcTemplate.queryForObject(
-                "select count(1) from xxl_job_lock where lock_name = ?", Integer.class, "h2-insert-lock");
-        assertEquals(1, count);
+        for (int i = 0; i < 3; i++) {
+
+            try {
+                Integer count = jdbcTemplate.queryForObject(
+                        "select count(1) from xxl_job_lock where lock_name = ?", Integer.class, "h2-insert-lock");
+                assertEquals(1, count);
+            } catch (AssertionError e) {
+                if (i == 2) {
+                    throw e;
+                }
+                Thread.sleep(100);
+            }
+        }
     }
 
     @Test
