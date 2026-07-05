@@ -54,8 +54,8 @@ public class JobGroupController {
             String title) {
 
         // page query
-appname = appname != null && !appname.trim().isEmpty() ? "%" + appname.trim() + "%" : null;
-title = title != null && !title.trim().isEmpty() ? "%" + title.trim() + "%" : null;
+        appname = appname != null && !appname.trim().isEmpty() ? "%" + appname.trim() + "%" : null;
+        title = title != null && !title.trim().isEmpty() ? "%" + title.trim() + "%" : null;
         List<XxlJobGroup> list = xxlJobGroupDao.pageList(start, length, appname, title);
         int listCount = xxlJobGroupDao.pageListCount(start, length, appname, title);
 
