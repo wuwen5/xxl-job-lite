@@ -34,7 +34,7 @@ public class JdbcDbLockUtilsTest extends AbstractTest {
     @Test
     public void shouldInsertLockRowWhenNotExists() {
         JdbcDbLockUtils.executeWithDbLock("h2-insert-lock", true, true, () -> {});
-
+        jdbcTemplate.execute("commit");
         await().atMost(2, SECONDS).untilAsserted(() -> {
             sleepQuietly(50);
             Integer count = jdbcTemplate.queryForObject(
