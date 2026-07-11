@@ -44,10 +44,8 @@ public class ScriptUtil {
      * @param logFile
      * @param params
      * @return
-     * @throws IOException
      */
-    public static int execToFile(String command, String scriptFile, String logFile, String... params)
-            throws IOException {
+    public static int execToFile(String command, String scriptFile, String logFile, String... params) {
 
         FileOutputStream fileOutputStream = null;
         Thread inputThread = null;
@@ -63,7 +61,7 @@ public class ScriptUtil {
             if (params != null) {
                 Collections.addAll(cmdarray, params);
             }
-            String[] cmdarrayFinal = cmdarray.toArray(new String[cmdarray.size()]);
+            String[] cmdarrayFinal = cmdarray.toArray(new String[0]);
 
             // process-exec
             final Process process = Runtime.getRuntime().exec(cmdarrayFinal);
@@ -88,7 +86,8 @@ public class ScriptUtil {
             errThread.start();
 
             // process-wait
-            int exitValue = process.waitFor(); // exit code: 0=success, 1=error
+            // exit code: 0=success, 1=error
+            int exitValue = process.waitFor();
 
             // log-thread join
             inputThread.join();
@@ -117,12 +116,6 @@ public class ScriptUtil {
 
     /**
      * 数据流Copy（Input自动关闭，Output不处理）
-     *
-     * @param inputStream
-     * @param outputStream
-     * @param buffer
-     * @return
-     * @throws IOException
      */
     private static long copy(InputStream inputStream, OutputStream outputStream, byte[] buffer) throws IOException {
         try {
@@ -142,9 +135,6 @@ public class ScriptUtil {
             if (outputStream != null) {
                 outputStream.flush();
             }
-            // out = null;
-            inputStream.close();
-            inputStream = null;
             return total;
         } finally {
             if (inputStream != null) {
@@ -152,65 +142,4 @@ public class ScriptUtil {
             }
         }
     }
-
-    /**
-     * 脚本执行，日志文件实时输出
-     *
-     * 优点：支持将目标数据实时输出到指定日志文件中去
-     * 缺点：
-     *      标准输出和错误输出优先级固定，可能和脚本中顺序不一致
-     *      Java无法实时获取
-     *
-     *      <!-- commons-exec -->
-     * 		<dependency>
-     * 			<groupId>org.apache.commons</groupId>
-     * 			<artifactId>commons-exec</artifactId>
-     * 			<version>${commons-exec.version}</version>
-     * 		</dependency>
-     *
-     * @param command
-     * @param scriptFile
-     * @param logFile
-     * @param params
-     * @return
-     * @throws IOException
-     */
-    /*public static int execToFileB(String command, String scriptFile, String logFile, String... params) throws IOException {
-        // 标准输出：print （null if watchdog timeout）
-        // 错误输出：logging + 异常 （still exists if watchdog timeout）
-        // 标准输入
-
-        FileOutputStream fileOutputStream = null;   //
-        try {
-            fileOutputStream = new FileOutputStream(logFile, true);
-            PumpStreamHandler streamHandler = new PumpStreamHandler(fileOutputStream, fileOutputStream, null);
-
-            // command
-            CommandLine commandline = new CommandLine(command);
-            commandline.addArgument(scriptFile);
-            if (params!=null && params.length>0) {
-                commandline.addArguments(params);
-            }
-
-            // exec
-            DefaultExecutor exec = new DefaultExecutor();
-            exec.setExitValues(null);
-            exec.setStreamHandler(streamHandler);
-            int exitValue = exec.execute(commandline);  // exit code: 0=success, 1=error
-            return exitValue;
-        } catch (Exception e) {
-            XxlJobLogger.log(e);
-            return -1;
-        } finally {
-            if (fileOutputStream != null) {
-                try {
-                    fileOutputStream.close();
-                } catch (IOException e) {
-                    XxlJobLogger.log(e);
-                }
-
-            }
-        }
-    }*/
-
 }

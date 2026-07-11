@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -117,7 +118,8 @@ public class JobGroupController {
     }
 
     private Optional<String> validate(XxlJobGroup xxlJobGroup) {
-        if (xxlJobGroup.getAppname() == null || xxlJobGroup.getAppname().trim().isEmpty()) {
+
+        if (!StringUtils.hasText(xxlJobGroup.getAppname())) {
             return Optional.of(I18nUtil.getString("system_please_input") + "AppName");
         }
         if (xxlJobGroup.getAppname().length() < 4 || xxlJobGroup.getAppname().length() > 64) {
@@ -126,15 +128,14 @@ public class JobGroupController {
         if (xxlJobGroup.getAppname().contains(">") || xxlJobGroup.getAppname().contains("<")) {
             return Optional.of("AppName" + I18nUtil.getString("system_unvalid"));
         }
-        if (xxlJobGroup.getTitle() == null || xxlJobGroup.getTitle().trim().isEmpty()) {
+        if (!StringUtils.hasText(xxlJobGroup.getTitle())) {
             return Optional.of(I18nUtil.getString("system_please_input") + I18nUtil.getString("jobgroup_field_title"));
         }
         if (xxlJobGroup.getTitle().contains(">") || xxlJobGroup.getTitle().contains("<")) {
             return Optional.of(I18nUtil.getString("jobgroup_field_title") + I18nUtil.getString("system_unvalid"));
         }
         if (xxlJobGroup.getAddressType() != 0) {
-            if (xxlJobGroup.getAddressList() == null
-                    || xxlJobGroup.getAddressList().trim().isEmpty()) {
+            if (!StringUtils.hasText(xxlJobGroup.getAddressList())) {
                 return Optional.of(I18nUtil.getString("jobgroup_field_addressType_limit"));
             }
             if (xxlJobGroup.getAddressList().contains(">")

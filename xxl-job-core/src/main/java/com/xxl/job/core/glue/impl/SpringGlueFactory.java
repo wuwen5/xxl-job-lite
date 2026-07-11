@@ -49,24 +49,22 @@ public class SpringGlueFactory extends GroovyGlueFactory {
             // with bean-id, bean could be found by both @Resource and @Autowired, or bean could only be found by
             // @Autowired
 
-            if (AnnotationUtils.getAnnotation(field, Resource.class) != null) {
+            Resource resource = AnnotationUtils.getAnnotation(field, Resource.class);
+            if (resource != null) {
                 try {
-                    Resource resource = AnnotationUtils.getAnnotation(field, Resource.class);
-                    if (resource.name() != null && resource.name().length() > 0) {
+                    if (resource.name() != null && !resource.name().isEmpty()) {
                         fieldBean = XxlJobSpringExecutor.getApplicationContext().getBean(resource.name());
                     } else {
                         fieldBean = XxlJobSpringExecutor.getApplicationContext().getBean(field.getName());
                     }
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
                 if (fieldBean == null) {
                     fieldBean = XxlJobSpringExecutor.getApplicationContext().getBean(field.getType());
                 }
             } else if (AnnotationUtils.getAnnotation(field, Autowired.class) != null) {
                 Qualifier qualifier = AnnotationUtils.getAnnotation(field, Qualifier.class);
-                if (qualifier != null
-                        && qualifier.value() != null
-                        && qualifier.value().length() > 0) {
+                if (qualifier != null && !qualifier.value().isEmpty()) {
                     fieldBean = XxlJobSpringExecutor.getApplicationContext().getBean(qualifier.value());
                 } else {
                     fieldBean = XxlJobSpringExecutor.getApplicationContext().getBean(field.getType());
@@ -77,9 +75,7 @@ public class SpringGlueFactory extends GroovyGlueFactory {
                 field.setAccessible(true);
                 try {
                     field.set(instance, fieldBean);
-                } catch (IllegalArgumentException e) {
-                    log.error(e.getMessage(), e);
-                } catch (IllegalAccessException e) {
+                } catch (IllegalArgumentException | IllegalAccessException e) {
                     log.error(e.getMessage(), e);
                 }
             }

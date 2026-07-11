@@ -1,7 +1,6 @@
 package com.xxl.job.admin.core.util;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -51,29 +50,6 @@ public class JacksonUtil {
     public static <T> T readValue(String jsonStr, Class<T> clazz) {
         try {
             return getInstance().readValue(jsonStr, clazz);
-        } catch (JsonParseException e) {
-            log.error(e.getMessage(), e);
-        } catch (JsonMappingException e) {
-            log.error(e.getMessage(), e);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    /**
-     * string --> List<Bean>...
-     *
-     * @param jsonStr
-     * @param parametrized
-     * @param parameterClasses
-     * @param <T>
-     * @return
-     */
-    public static <T> T readValue(String jsonStr, Class<?> parametrized, Class<?>... parameterClasses) {
-        try {
-            JavaType javaType = getInstance().getTypeFactory().constructParametricType(parametrized, parameterClasses);
-            return getInstance().readValue(jsonStr, javaType);
         } catch (JsonParseException e) {
             log.error(e.getMessage(), e);
         } catch (JsonMappingException e) {

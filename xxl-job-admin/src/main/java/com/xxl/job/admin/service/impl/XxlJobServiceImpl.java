@@ -12,7 +12,11 @@ import com.xxl.job.admin.core.thread.JobScheduleHelper;
 import com.xxl.job.admin.core.thread.JobTriggerPoolHelper;
 import com.xxl.job.admin.core.trigger.TriggerTypeEnum;
 import com.xxl.job.admin.core.util.I18nUtil;
-import com.xxl.job.admin.dao.*;
+import com.xxl.job.admin.dao.XxlJobGroupDao;
+import com.xxl.job.admin.dao.XxlJobInfoDao;
+import com.xxl.job.admin.dao.XxlJobLogDao;
+import com.xxl.job.admin.dao.XxlJobLogGlueDao;
+import com.xxl.job.admin.dao.XxlJobLogReportDao;
 import com.xxl.job.admin.service.XxlJobService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
@@ -20,18 +24,25 @@ import com.xxl.job.core.glue.GlueTypeEnum;
 import com.xxl.job.core.util.DateUtil;
 import jakarta.annotation.Resource;
 import java.text.MessageFormat;
-import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * core job action for xxl-job
  * @author xuxueli 2016-5-28 15:30:33
  */
 @Service
+@Slf4j
 public class XxlJobServiceImpl implements XxlJobService {
-    private static Logger logger = LoggerFactory.getLogger(XxlJobServiceImpl.class);
 
     @Resource
     private XxlJobGroupDao xxlJobGroupDao;
@@ -59,11 +70,9 @@ public class XxlJobServiceImpl implements XxlJobService {
             String author) {
 
         // page list
-        jobDesc = jobDesc != null && !jobDesc.trim().isEmpty() ? "%" + jobDesc.trim() + "%" : null;
-        executorHandler = executorHandler != null && !executorHandler.trim().isEmpty()
-                ? "%" + executorHandler.trim() + "%"
-                : null;
-        author = author != null && !author.trim().isEmpty() ? "%" + author.trim() + "%" : null;
+        jobDesc = StringUtils.hasText(jobDesc) ? "%" + jobDesc.trim() + "%" : null;
+        executorHandler = StringUtils.hasText(executorHandler) ? "%" + executorHandler.trim() + "%" : null;
+        author = StringUtils.hasText(author) ? "%" + author.trim() + "%" : null;
         List<XxlJobInfo> list =
                 xxlJobInfoDao.pageList(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author);
         int listCount = xxlJobInfoDao.pageListCount(jobGroup, triggerStatus, jobDesc, executorHandler, author);
@@ -88,12 +97,12 @@ public class XxlJobServiceImpl implements XxlJobService {
                     ReturnT.FAIL_CODE,
                     (I18nUtil.getString("system_please_choose") + I18nUtil.getString("jobinfo_field_jobgroup")));
         }
-        if (jobInfo.getJobDesc() == null || jobInfo.getJobDesc().trim().isEmpty()) {
+        if (!StringUtils.hasText(jobInfo.getJobDesc())) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
                     (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_jobdesc")));
         }
-        if (jobInfo.getAuthor() == null || jobInfo.getAuthor().trim().isEmpty()) {
+        if (!StringUtils.hasText(jobInfo.getAuthor())) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
                     (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_author")));
@@ -161,10 +170,10 @@ public class XxlJobServiceImpl implements XxlJobService {
         }
 
         // 》ChildJobId valid
-        if (jobInfo.getChildJobId() != null && !jobInfo.getChildJobId().trim().isEmpty()) {
+        if (StringUtils.hasText(jobInfo.getChildJobId())) {
             String[] childJobIds = jobInfo.getChildJobId().split(",");
             for (String childJobIdItem : childJobIds) {
-                if (childJobIdItem != null && !childJobIdItem.trim().isEmpty() && isNumeric(childJobIdItem)) {
+                if (isNumeric(childJobIdItem)) {
                     XxlJobInfo childJobInfo = xxlJobInfoDao.loadById(Integer.parseInt(childJobIdItem));
                     if (childJobInfo == null) {
                         return new ReturnT<>(
@@ -211,23 +220,25 @@ public class XxlJobServiceImpl implements XxlJobService {
 
     private boolean isNumeric(String str) {
         try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
+            if (StringUtils.hasText(str)) {
+                Integer.parseInt(str);
+                return true;
+            }
+        } catch (NumberFormatException ignored) {
         }
+        return false;
     }
 
     @Override
     public ReturnT<String> update(XxlJobInfo jobInfo, XxlJobUser loginUser) {
 
         // valid base
-        if (jobInfo.getJobDesc() == null || jobInfo.getJobDesc().trim().isEmpty()) {
+        if (!StringUtils.hasText(jobInfo.getJobDesc())) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
                     (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_jobdesc")));
         }
-        if (jobInfo.getAuthor() == null || jobInfo.getAuthor().trim().isEmpty()) {
+        if (!StringUtils.hasText(jobInfo.getAuthor())) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
                     (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_author")));
@@ -281,10 +292,10 @@ public class XxlJobServiceImpl implements XxlJobService {
         }
 
         // 》ChildJobId valid
-        if (jobInfo.getChildJobId() != null && !jobInfo.getChildJobId().trim().isEmpty()) {
+        if (StringUtils.hasText(jobInfo.getChildJobId())) {
             String[] childJobIds = jobInfo.getChildJobId().split(",");
             for (String childJobIdItem : childJobIds) {
-                if (childJobIdItem != null && !childJobIdItem.trim().isEmpty() && isNumeric(childJobIdItem)) {
+                if (isNumeric(childJobIdItem)) {
                     // parse child
                     int childJobId = Integer.parseInt(childJobIdItem);
                     if (childJobId == jobInfo.getId()) {
@@ -356,7 +367,7 @@ public class XxlJobServiceImpl implements XxlJobService {
                 }
                 nextTriggerTime = nextValidTime.getTime();
             } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 return new ReturnT<>(
                         ReturnT.FAIL_CODE,
                         (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
@@ -420,7 +431,7 @@ public class XxlJobServiceImpl implements XxlJobService {
             }
             nextTriggerTime = nextValidTime.getTime();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return new ReturnT<>(
                     ReturnT.FAIL_CODE, (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
         }
@@ -499,9 +510,9 @@ public class XxlJobServiceImpl implements XxlJobService {
         Set<String> executorAddressSet = new HashSet<>();
         List<XxlJobGroup> groupList = xxlJobGroupDao.findAll();
 
-        if (groupList != null && !groupList.isEmpty()) {
+        if (groupList != null) {
             for (XxlJobGroup group : groupList) {
-                if (group.getRegistryList() != null && !group.getRegistryList().isEmpty()) {
+                if (group.getRegistryList() != null) {
                     executorAddressSet.addAll(group.getRegistryList());
                 }
             }
@@ -531,7 +542,7 @@ public class XxlJobServiceImpl implements XxlJobService {
 
         List<XxlJobLogReport> logReportList = xxlJobLogReportDao.queryLogReport(startDate, endDate);
 
-        if (logReportList != null && !logReportList.isEmpty()) {
+        if (logReportList != null) {
             for (XxlJobLogReport item : logReportList) {
                 String day = DateUtil.formatDate(item.getTriggerDay());
                 int triggerDayCountRunning = item.getRunningCount();
