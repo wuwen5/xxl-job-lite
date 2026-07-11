@@ -2,7 +2,8 @@
 
 ## 运行方式
 
-- **Docker Compose（完整栈）**：`docker compose -f docker-compose-e2e.yml up --build --abort-on-container-exit --exit-code-from e2e-tests`
+- **Docker Compose（完整栈，MySQL）**：`docker compose -f compose.yml -f compose.mysql.yml -f compose.e2e.yml up --build --abort-on-container-exit --exit-code-from e2e-tests`
+- **Docker Compose（完整栈，PostgreSQL）**：`docker compose -f compose.yml -f compose.postgres.yml -f compose.e2e.yml up --build --abort-on-container-exit --exit-code-from e2e-tests`
 - **本地运行**（需要 admin 已在 `localhost:8080` 运行）：`cd e2e && npx playwright test`
 - 单个文件：`npx playwright test tests/login.spec.ts`
 - 单个用例：`npx playwright test -g "should login successfully"`

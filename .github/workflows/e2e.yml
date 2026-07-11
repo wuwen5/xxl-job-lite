@@ -9,6 +9,12 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database:
+          - mysql
+          - postgres
     steps:
       - uses: actions/checkout@v7
 
@@ -27,18 +33,28 @@ jobs:
         with:
           key: docker-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
 
-      - name: Run E2E Tests with Docker Compose
-        run: docker compose -f docker-compose-e2e.yml up --build --abort-on-container-exit --exit-code-from e2e-tests
+      - name: Run E2E Tests with Docker Compose (${{ matrix.database }})
+        run: |
+          docker compose \
+            -f compose.yml \
+            -f compose.${{ matrix.database }}.yml \
+            -f compose.e2e.yml \
+            up --build --abort-on-container-exit --exit-code-from e2e-tests
 
       - name: Tear down Docker Compose
         if: always()
-        run: docker compose -f docker-compose-e2e.yml down -v --rmi local
+        run: |
+          docker compose \
+            -f compose.yml \
+            -f compose.${{ matrix.database }}.yml \
+            -f compose.e2e.yml \
+            down -v --rmi local
 
       - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.database }}
           path: e2e/playwright-report/
           retention-days: 7
       - uses: daun/playwright-report-summary@31ed947ec7a623d18a66cfd20ef546dc66ef8063

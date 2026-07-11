@@ -133,11 +133,25 @@ To switch databases, swap the JDBC driver and the matching DDL script. The DAO a
 
 ### A. Docker Compose (recommended for trying it out)
 
-The repo ships an e2e Compose file that doubles as a demo stack: `MySQL + Admin + Sample Executor`. It is intended for local exploration — **not** as a production deployment recipe.
+The repo ships modular Compose files that can be combined to choose your database backend.
+
+**Start with MySQL**
 
 ```bash
 # From the repo root
-docker compose -f docker-compose-e2e.yml up --build xxl-job-admin mysql executor-sample
+docker compose \
+  -f compose.yml \
+  -f compose.mysql.yml \
+  up --build xxl-job-admin executor-sample
+```
+
+**Start with PostgreSQL**
+
+```bash
+docker compose \
+  -f compose.yml \
+  -f compose.postgres.yml \
+  up --build xxl-job-admin executor-sample
 ```
 
 Once it is up:
@@ -145,9 +159,8 @@ Once it is up:
 - Admin UI: [http://localhost:8080](http://localhost:8080)
 - Actuator health: [http://localhost:9001/actuator/health/readiness](http://localhost:9001/actuator/health/readiness)
 - Sample executor: port `8081`
-- MySQL: port `3306`, user `root` / password `root_pwd`, database `xxl_job`, schema seeded from `doc/db/tables_xxl_job.sql`
 
-Default login: `admin / 123456` (seeded by `tables_xxl_job.sql`).
+Default login: `admin / 123456` (seeded by the database init script).
 
 ### B. Build and Run from Source
 

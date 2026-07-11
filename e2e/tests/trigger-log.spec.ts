@@ -23,6 +23,11 @@ test.describe('Trigger Log', () => {
     await page.getByRole('menuitem', { name: '任务管理' }).click();
     await expect(page).toHaveURL(/.*jobinfo/);
 
+    const executorDropdown = page.locator('.el-select').first();
+    await executorDropdown.click();
+    await page.getByRole('option', { name: '示例执行器' }).click();
+    await page.getByRole('button', { name: '查询' }).click();
+    
     const firstRow = page.locator('tbody tr').first();
     await firstRow.getByRole('button', { name: '执行' }).first().click();
 
@@ -44,8 +49,8 @@ test.describe('Trigger Log', () => {
     await page.getByRole('menuitem', { name: '调度日志' }).click();
     await expect(page).toHaveURL(/.*joblog/);
 
-    const executorDropdown = page.locator('.el-select').first();
-    await executorDropdown.click();
+    const executorDropdown2 = page.locator('.el-select').first();
+    await executorDropdown2.click();
     await page.getByRole('option', { name: '示例执行器' }).click();
     await page.getByRole('button', { name: '查询' }).click();
 
