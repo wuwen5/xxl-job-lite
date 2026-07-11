@@ -1,0 +1,14 @@
+services:
+  e2e-tests:
+    image: mcr.microsoft.com/playwright:v1.44.0-jammy
+    volumes:
+      - ./e2e:/e2e
+    working_dir: /e2e
+    command: bash -c "npm install && npx playwright test"
+    depends_on:
+      xxl-job-admin:
+        condition: service_healthy
+      executor-sample:
+        condition: service_healthy
+    networks:
+      - xxl-job-network

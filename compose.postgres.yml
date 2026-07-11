@@ -1,0 +1,22 @@
+services:
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: pg_pwd
+      POSTGRES_DB: xxl_job
+      POSTGRES_USER: xxl_job
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xxl_job -d xxl_job"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - ./doc/db/tables_xxl_job_pg.sql:/docker-entrypoint-initdb.d/tables_xxl_job_pg.sql:ro
+    networks:
+      - xxl-job-network
+
+  xxl-job-admin:
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/xxl_job
+      SPRING_DATASOURCE_USERNAME: xxl_job
+      SPRING_DATASOURCE_PASSWORD: pg_pwd

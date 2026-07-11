@@ -133,11 +133,25 @@ English version: [README.en.md](./README.en.md)
 
 ### A. Docker Compose 启动（推荐试用）
 
-仓库自带了一份 e2e Compose 文件，可直接作为试用栈快速拉起 `MySQL + Admin + Sample Executor`。该栈仅用于本地体验，不是生产部署方案。
+仓库提供了模块化的 Compose 文件，可灵活组合数据库后端。
+
+**使用 MySQL 启动**
 
 ```bash
 # 在仓库根目录
-docker compose -f docker-compose-e2e.yml up --build xxl-job-admin mysql executor-sample
+docker compose \
+  -f compose.yml \
+  -f compose.mysql.yml \
+  up --build xxl-job-admin executor-sample
+```
+
+**使用 PostgreSQL 启动**
+
+```bash
+docker compose \
+  -f compose.yml \
+  -f compose.postgres.yml \
+  up --build xxl-job-admin executor-sample
 ```
 
 启动完成后：
@@ -145,9 +159,8 @@ docker compose -f docker-compose-e2e.yml up --build xxl-job-admin mysql executor
 - 管理端：[http://localhost:8080](http://localhost:8080)
 - Actuator 健康检查：[http://localhost:9001/actuator/health/readiness](http://localhost:9001/actuator/health/readiness)
 - 示例 Executor：监听 8081
-- MySQL：监听 3306，账号 `root / root_pwd`，库 `xxl_job`，初始化脚本来自 `doc/db/tables_xxl_job.sql`
 
-默认登录账号：`admin / 123456`（由 `tables_xxl_job.sql` 种子数据生成）。
+默认登录账号：`admin / 123456`（由初始化脚本种子数据生成）。
 
 ### B. 源码构建并启动
 

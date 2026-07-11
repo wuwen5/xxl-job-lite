@@ -29,7 +29,7 @@
 - 单个类：`./mvnw -pl xxl-job-admin -Dtest=ClassName test`。
 - PostgreSQL DAO 测试在 `xxl-job-admin/src/test/java/com/xxl/job/admin/dao/pg/*`，继承 `AbstractPostgreSQLTest`，会启动 Testcontainers `postgres:16-alpine`——需要 Docker 运行。
 - H2 切片测试使用 `test` profile（`application-test.properties`、`schema.sql`）。
-- E2E 测试**不在** Maven 流程中——它们在 `e2e/`（Playwright 1.44），通过 `docker compose -f docker-compose-e2e.yml up --build --abort-on-container-exit --exit-code-from e2e-tests` 运行。Compose 栈构建 `xxl-job-admin` 和 `xxl-job-executor-sample-springboot` 镜像，启动 MySQL 并用 `doc/db/tables_xxl_job.sql` 初始化，然后对 `http://xxl-job-admin:8080` 执行 `npx playwright test`。`.github/workflows/e2e.yml` 中的 Maven 构建步骤用 `-Dmaven.test.skip=true`；e2e 流水线和 CI 流水线是独立的。
+- E2E 测试**不在** Maven 流程中——它们在 `e2e/`（Playwright 1.44），通过模块化 Compose 文件运行。例如 MySQL：`docker compose -f compose.yml -f compose.mysql.yml -f compose.e2e.yml up --build --abort-on-container-exit --exit-code-from e2e-tests`；PostgreSQL 替换为 `-f compose.postgres.yml`。`.github/workflows/e2e.yml` 中的 Maven 构建步骤用 `-Dmaven.test.skip=true`；e2e 流水线和 CI 流水线是独立的，且支持 MySQL / PostgreSQL 矩阵测试。
 - E2E 测试编写与 playwright-cli 使用指南见 `e2e/AGENTS.md`。
 
 ## 运行时默认值
