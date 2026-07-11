@@ -41,7 +41,7 @@ jobs:
           name: playwright-report
           path: e2e/playwright-report/
           retention-days: 7
-      - uses: daun/playwright-report-summary@8bb85779022480a59ed8d33d9a4b8bda1c67666b
+      - uses: daun/playwright-report-summary@31ed947ec7a623d18a66cfd20ef546dc66ef8063
         if: always()
         with:
           report-file: e2e/test-results/results.json
