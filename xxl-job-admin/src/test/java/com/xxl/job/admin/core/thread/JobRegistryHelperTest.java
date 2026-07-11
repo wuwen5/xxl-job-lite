@@ -126,7 +126,7 @@ class JobRegistryHelperTest {
     }
 
     @Test
-    void shouldNotUpdateGroupWhenNoRegistryAddresses() throws Exception {
+    void shouldUpdateGroupWhenNoRegistryAddresses() {
         XxlJobGroup group = new XxlJobGroup();
         group.setId(1);
         group.setAppname("test-app");
@@ -142,7 +142,7 @@ class JobRegistryHelperTest {
         helper.start();
 
         await().atMost(3, TimeUnit.SECONDS).untilAsserted(() -> {
-            verify(groupDao, atLeastOnce()).update(argThat(g -> "old-address".equals(g.getAddressList())));
+            verify(groupDao, atLeastOnce()).update(argThat(g -> g.getAddressList() == null));
         });
     }
 

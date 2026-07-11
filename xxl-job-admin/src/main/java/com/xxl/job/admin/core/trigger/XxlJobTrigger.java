@@ -83,6 +83,7 @@ public class XxlJobTrigger {
         if (ExecutorRouteStrategyEnum.SHARDING_BROADCAST
                         == ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null)
                 && group.getRegistryList() != null
+                && !group.getRegistryList().isEmpty()
                 && shardingParam == null) {
             for (int i = 0; i < group.getRegistryList().size(); i++) {
                 processTrigger(
@@ -145,19 +146,19 @@ public class XxlJobTrigger {
         log.debug(">>>>>>>>>>> xxl-job trigger start, jobId:{}", jobLog.getId());
 
         // 2、init trigger-param
-        TriggerParam triggerParam = new TriggerParam()
-                .setJobId(jobInfo.getId())
-                .setExecutorHandler(jobInfo.getExecutorHandler())
-                .setExecutorParams(jobInfo.getExecutorParam())
-                .setExecutorBlockStrategy(jobInfo.getExecutorBlockStrategy())
-                .setExecutorTimeout(jobInfo.getExecutorTimeout())
-                .setLogId(jobLog.getId())
-                .setLogDateTime(jobLog.getTriggerTime().getTime())
-                .setGlueType(jobInfo.getGlueType())
-                .setGlueSource(jobInfo.getGlueSource())
-                .setGlueUpdatetime(jobInfo.getGlueUpdatetime().getTime())
-                .setBroadcastIndex(index)
-                .setBroadcastTotal(total);
+        TriggerParam triggerParam = new TriggerParam();
+        triggerParam.setJobId(jobInfo.getId());
+        triggerParam.setExecutorHandler(jobInfo.getExecutorHandler());
+        triggerParam.setExecutorParams(jobInfo.getExecutorParam());
+        triggerParam.setExecutorBlockStrategy(jobInfo.getExecutorBlockStrategy());
+        triggerParam.setExecutorTimeout(jobInfo.getExecutorTimeout());
+        triggerParam.setLogId(jobLog.getId());
+        triggerParam.setLogDateTime(jobLog.getTriggerTime().getTime());
+        triggerParam.setGlueType(jobInfo.getGlueType());
+        triggerParam.setGlueSource(jobInfo.getGlueSource());
+        triggerParam.setGlueUpdatetime(jobInfo.getGlueUpdatetime().getTime());
+        triggerParam.setBroadcastIndex(index);
+        triggerParam.setBroadcastTotal(total);
 
         // 3、init address
         String address = null;

@@ -87,12 +87,15 @@ public class JobRegistryHelper {
                         // fresh group address
                         for (XxlJobGroup group : groupList) {
                             Set<String> registrySet = appAddressMap.get(group.getAppname());
+
+                            String addressListStr = null;
                             if (registrySet != null && !registrySet.isEmpty()) {
                                 List<String> registryList = new ArrayList<>(registrySet);
                                 Collections.sort(registryList);
-                                String addressListStr = String.join(",", registryList);
-                                group.setAddressList(addressListStr);
+                                addressListStr = String.join(",", registryList);
                             }
+
+                            group.setAddressList(addressListStr);
                             group.setUpdateTime(new Date());
 
                             XxlJobAdminConfig.getAdminConfig()

@@ -3,14 +3,12 @@ package com.xxl.job.core.biz.model;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * Created by xuxueli on 16/7/22.
  */
 @Setter
 @Getter
-@Accessors(chain = true)
 public class TriggerParam implements Serializable {
     private static final long serialVersionUID = 42L;
 
