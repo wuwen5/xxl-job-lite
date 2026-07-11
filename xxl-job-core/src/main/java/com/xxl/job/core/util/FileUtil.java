@@ -3,6 +3,7 @@ package com.xxl.job.core.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author xuxueli 2017-12-29 17:56:48
  */
 @Slf4j
+@UtilityClass
 public class FileUtil {
 
     /**

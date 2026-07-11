@@ -225,6 +225,7 @@ public class XxlJobServiceImpl implements XxlJobService {
                 return true;
             }
         } catch (NumberFormatException ignored) {
+            // do nothing
         }
         return false;
     }

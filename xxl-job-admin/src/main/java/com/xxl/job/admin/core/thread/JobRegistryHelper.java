@@ -100,7 +100,7 @@ public class JobRegistryHelper {
                                     .update(group);
                         }
                     }
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     if (!toStop) {
                         log.error(">>>>>>>>>>> xxl-job, job registry monitor thread error.", e);
                     }

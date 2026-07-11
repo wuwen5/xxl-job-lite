@@ -4,14 +4,15 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author xuxueli 2020-04-12 0:14:00
  */
+@UtilityClass
+@Slf4j
 public class JdkSerializeTool {
-    private static Logger logger = LoggerFactory.getLogger(JdkSerializeTool.class);
 
     // ------------------------ serialize and unserialize ------------------------
 
@@ -27,7 +28,7 @@ public class JdkSerializeTool {
             oos.writeObject(object);
             return baos.toByteArray();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -44,7 +45,7 @@ public class JdkSerializeTool {
             // 反序列化
             return ois.readObject();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }

@@ -137,9 +137,7 @@ public class ScriptUtil {
             }
             return total;
         } finally {
-            if (inputStream != null) {
-                inputStream.close();
-            }
+            inputStream.close();
         }
     }
 }

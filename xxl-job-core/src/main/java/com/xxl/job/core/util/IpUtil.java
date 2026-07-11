@@ -7,6 +7,7 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author xuxueli 2016-5-22 11:38:05
  */
 @Slf4j
+@UtilityClass
 public class IpUtil {
 
     private static final String ANYHOST_VALUE = "0.0.0.0";

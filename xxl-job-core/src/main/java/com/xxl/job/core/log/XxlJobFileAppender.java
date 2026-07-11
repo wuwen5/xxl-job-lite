@@ -11,12 +11,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * store trigger log in each log-file
  * @author xuxueli 2016-3-12 19:25:12
  */
+@UtilityClass
 @Slf4j
 public class XxlJobFileAppender {
 

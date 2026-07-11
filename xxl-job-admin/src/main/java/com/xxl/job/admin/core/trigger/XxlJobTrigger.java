@@ -14,6 +14,7 @@ import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.util.IpUtil;
 import com.xxl.job.core.util.ThrowableUtil;
 import java.util.Date;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
@@ -21,6 +22,7 @@ import org.springframework.util.StringUtils;
  * xxl-job trigger
  * Created by xuxueli on 17/7/13.
  */
+@UtilityClass
 @Slf4j
 public class XxlJobTrigger {
 

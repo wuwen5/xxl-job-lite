@@ -8,12 +8,14 @@ import com.xxl.job.admin.core.trigger.TriggerTypeEnum;
 import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.core.context.XxlJobContext;
 import java.text.MessageFormat;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 /**
  * @author xuxueli 2020-10-30 20:43:10
  */
+@UtilityClass
 @Slf4j
 public class XxlJobCompleter {
 

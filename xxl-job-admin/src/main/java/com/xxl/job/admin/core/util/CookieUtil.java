@@ -3,12 +3,14 @@ package com.xxl.job.admin.core.util;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.experimental.UtilityClass;
 
 /**
  * Cookie.Util
  *
  * @author xuxueli 2015-12-12 18:01:06
  */
+@UtilityClass
 public class CookieUtil {
 
     // 默认缓存时间,单位/秒, 2H
