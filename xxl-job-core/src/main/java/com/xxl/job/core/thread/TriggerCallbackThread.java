@@ -11,6 +11,8 @@ import com.xxl.job.core.log.XxlJobFileAppender;
 import com.xxl.job.core.util.FileUtil;
 import com.xxl.job.core.util.JdkSerializeTool;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -225,8 +227,12 @@ public class TriggerCallbackThread {
         if (!callbackLogPath.exists()) {
             return;
         }
-        if (callbackLogPath.isFile() && !callbackLogPath.delete()) {
-            log.warn("Failed to delete invalid callback log file: {}", callbackLogPath);
+        if (callbackLogPath.isFile()) {
+            try {
+                Files.delete(callbackLogPath.toPath());
+            } catch (IOException e) {
+                log.warn("Failed to delete invalid callback log file: {}", callbackLogPath);
+            }
         }
         if (!(callbackLogPath.isDirectory())) {
             return;

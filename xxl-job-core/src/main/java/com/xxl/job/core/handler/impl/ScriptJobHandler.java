@@ -7,6 +7,8 @@ import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.log.XxlJobFileAppender;
 import com.xxl.job.core.util.ScriptUtil;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +40,13 @@ public class ScriptJobHandler extends IJobHandler {
             if (glueSrcFileList != null) {
                 Arrays.stream(glueSrcFileList)
                         .filter(f -> f.getName().startsWith(jobId + "_"))
-                        .filter(f -> !f.delete())
-                        .forEach(f -> log.warn("Failed to delete old script file: {}", f));
+                        .forEach(f -> {
+                            try {
+                                Files.delete(f.toPath());
+                            } catch (IOException e) {
+                                log.warn("Failed to delete old script file: {}", f, e);
+                            }
+                        });
             }
         }
     }
