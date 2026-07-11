@@ -225,10 +225,8 @@ public class TriggerCallbackThread {
         if (!callbackLogPath.exists()) {
             return;
         }
-        if (callbackLogPath.isFile()) {
-            if (!callbackLogPath.delete()) {
-                log.warn("Failed to delete invalid callback log file: {}", callbackLogPath);
-            }
+        if (callbackLogPath.isFile() && !callbackLogPath.delete()) {
+            log.warn("Failed to delete invalid callback log file: {}", callbackLogPath);
         }
         if (!(callbackLogPath.isDirectory())) {
             return;

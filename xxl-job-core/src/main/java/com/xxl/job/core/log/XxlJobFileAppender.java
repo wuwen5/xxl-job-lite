@@ -46,19 +46,15 @@ public class XxlJobFileAppender {
         }
         // mk base dir
         File logPathDir = new File(logBasePath);
-        if (!logPathDir.exists()) {
-            if (!logPathDir.mkdirs()) {
-                log.warn("Failed to create log base directory: {}", logBasePath);
-            }
+        if (!logPathDir.exists() && !logPathDir.mkdirs()) {
+            log.warn("Failed to create log base directory: {}", logBasePath);
         }
         logBasePath = logPathDir.getPath();
 
         // mk glue dir
         File glueBaseDir = new File(logPathDir, "gluesource");
-        if (!glueBaseDir.exists()) {
-            if (!glueBaseDir.mkdirs()) {
-                log.warn("Failed to create glue source directory: {}", glueBaseDir);
-            }
+        if (!glueBaseDir.exists() && !glueBaseDir.mkdirs()) {
+            log.warn("Failed to create glue source directory: {}", glueBaseDir);
         }
         glueSrcPath = glueBaseDir.getPath();
     }
@@ -84,10 +80,8 @@ public class XxlJobFileAppender {
         // avoid concurrent problem, can not be static
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         File logFilePath = new File(getLogPath(), sdf.format(triggerDate));
-        if (!logFilePath.exists()) {
-            if (!logFilePath.mkdir()) {
-                log.warn("Failed to create log file directory: {}", logFilePath);
-            }
+        if (!logFilePath.exists() && !logFilePath.mkdir()) {
+            log.warn("Failed to create log file directory: {}", logFilePath);
         }
 
         // filePath/yyyy-MM-dd/9999.log
