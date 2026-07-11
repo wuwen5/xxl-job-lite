@@ -1,10 +1,10 @@
 package com.xxl.job.admin.core.util;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -15,13 +15,14 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author xuxueli 2015-9-25 18:02:56
  */
+@UtilityClass
 @Slf4j
 public class JacksonUtil {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public static ObjectMapper getInstance() {
-        return objectMapper;
+        return OBJECT_MAPPER;
     }
 
     /**
@@ -51,29 +52,6 @@ public class JacksonUtil {
     public static <T> T readValue(String jsonStr, Class<T> clazz) {
         try {
             return getInstance().readValue(jsonStr, clazz);
-        } catch (JsonParseException e) {
-            log.error(e.getMessage(), e);
-        } catch (JsonMappingException e) {
-            log.error(e.getMessage(), e);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    /**
-     * string --> List<Bean>...
-     *
-     * @param jsonStr
-     * @param parametrized
-     * @param parameterClasses
-     * @param <T>
-     * @return
-     */
-    public static <T> T readValue(String jsonStr, Class<?> parametrized, Class<?>... parameterClasses) {
-        try {
-            JavaType javaType = getInstance().getTypeFactory().constructParametricType(parametrized, parameterClasses);
-            return getInstance().readValue(jsonStr, javaType);
         } catch (JsonParseException e) {
             log.error(e.getMessage(), e);
         } catch (JsonMappingException e) {

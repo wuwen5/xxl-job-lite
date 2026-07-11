@@ -5,6 +5,7 @@ import com.xxl.job.core.util.DateUtil;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
+import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.FormattingTuple;
@@ -15,6 +16,7 @@ import org.slf4j.helpers.MessageFormatter;
  *
  * @author xuxueli 2020-11-05
  */
+@UtilityClass
 public class XxlJobHelper {
 
     // ---------------------- base info ----------------------
@@ -95,7 +97,7 @@ public class XxlJobHelper {
 
     // ---------------------- tool for log ----------------------
 
-    private static Logger logger = LoggerFactory.getLogger("xxl-job logger");
+    private static final Logger logger = LoggerFactory.getLogger("xxl-job logger");
 
     /**
      * append log with pattern
@@ -107,11 +109,6 @@ public class XxlJobHelper {
 
         FormattingTuple ft = MessageFormatter.arrayFormat(appendLogPattern, appendLogArguments);
         String appendLog = ft.getMessage();
-
-        /*appendLog = appendLogPattern;
-        if (appendLogArguments!=null && appendLogArguments.length>0) {
-            appendLog = MessageFormat.format(appendLogPattern, appendLogArguments);
-        }*/
 
         StackTraceElement callInfo = new Throwable().getStackTrace()[1];
         return logDetail(callInfo, appendLog);
@@ -144,27 +141,19 @@ public class XxlJobHelper {
             return false;
         }
 
-        /*// "yyyy-MM-dd HH:mm:ss [ClassName]-[MethodName]-[LineNumber]-[ThreadName] log";
-        StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
-        StackTraceElement callInfo = stackTraceElements[1];*/
-
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer
-                .append(DateUtil.formatDateTime(new Date()))
-                .append(" ")
-                .append("[" + callInfo.getClassName() + "#" + callInfo.getMethodName() + "]")
-                .append("-")
-                .append("[" + callInfo.getLineNumber() + "]")
-                .append("-")
-                .append("[" + Thread.currentThread().getName() + "]")
-                .append(" ")
-                .append(appendLog != null ? appendLog : "");
-        String formatAppendLog = stringBuffer.toString();
+        String formatAppendLog = DateUtil.formatDateTime(new Date()) + " "
+                + "["
+                + callInfo.getClassName() + "#" + callInfo.getMethodName() + "]" + "-"
+                + "["
+                + callInfo.getLineNumber() + "]" + "-"
+                + "["
+                + Thread.currentThread().getName() + "]" + " "
+                + (appendLog != null ? appendLog : "");
 
         // appendlog
         String logFileName = xxlJobContext.getJobLogFileName();
 
-        if (logFileName != null && logFileName.trim().length() > 0) {
+        if (logFileName != null && !logFileName.trim().isEmpty()) {
             XxlJobFileAppender.appendLog(logFileName, formatAppendLog);
             return true;
         } else {

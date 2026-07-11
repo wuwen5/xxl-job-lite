@@ -8,6 +8,7 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,6 +24,7 @@ import org.apache.http.util.EntityUtils;
  * @author xuxueli 2018-11-25 00:55:31
  */
 @Slf4j
+@UtilityClass
 public class XxlJobRemotingUtil {
 
     public static final String XXL_JOB_ACCESS_TOKEN = "XXL-JOB-ACCESS-TOKEN";

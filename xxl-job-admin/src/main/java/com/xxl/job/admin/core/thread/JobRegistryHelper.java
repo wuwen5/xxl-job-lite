@@ -6,18 +6,26 @@ import com.xxl.job.admin.core.model.XxlJobRegistry;
 import com.xxl.job.core.biz.model.RegistryParam;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.RegistryConfig;
-import java.util.*;
-import java.util.concurrent.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 /**
  * job registry instance
  * @author xuxueli 2016-10-02 19:10:24
  */
+@Slf4j
 public class JobRegistryHelper {
-    private static Logger logger = LoggerFactory.getLogger(JobRegistryHelper.class);
 
     private static JobRegistryHelper instance = new JobRegistryHelper();
 
@@ -62,35 +70,31 @@ public class JobRegistryHelper {
                         }
 
                         // fresh online address (admin/executor)
-                        HashMap<String, List<String>> appAddressMap = new HashMap<>();
                         List<XxlJobRegistry> list = XxlJobAdminConfig.getAdminConfig()
                                 .getXxlJobRegistryDao()
                                 .findAll(RegistryConfig.DEAD_TIMEOUT, new Date());
+                        Map<String, Set<String>> appAddressMap = new HashMap<>();
                         if (list != null) {
                             for (XxlJobRegistry item : list) {
                                 if (RegistryConfig.RegistType.EXECUTOR.name().equals(item.getRegistryGroup())) {
-                                    String appname = item.getRegistryKey();
-                                    List<String> registryList = appAddressMap.get(appname);
-                                    if (registryList == null) {
-                                        registryList = new ArrayList<>();
-                                    }
-
-                                    if (!registryList.contains(item.getRegistryValue())) {
-                                        registryList.add(item.getRegistryValue());
-                                    }
-                                    appAddressMap.put(appname, registryList);
+                                    appAddressMap
+                                            .computeIfAbsent(item.getRegistryKey(), k -> new LinkedHashSet<>())
+                                            .add(item.getRegistryValue());
                                 }
                             }
                         }
 
                         // fresh group address
                         for (XxlJobGroup group : groupList) {
-                            List<String> registryList = appAddressMap.get(group.getAppname());
+                            Set<String> registrySet = appAddressMap.get(group.getAppname());
+
                             String addressListStr = null;
-                            if (registryList != null && !registryList.isEmpty()) {
+                            if (registrySet != null && !registrySet.isEmpty()) {
+                                List<String> registryList = new ArrayList<>(registrySet);
                                 Collections.sort(registryList);
                                 addressListStr = String.join(",", registryList);
                             }
+
                             group.setAddressList(addressListStr);
                             group.setUpdateTime(new Date());
 
@@ -99,9 +103,9 @@ public class JobRegistryHelper {
                                     .update(group);
                         }
                     }
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     if (!toStop) {
-                        logger.error(">>>>>>>>>>> xxl-job, job registry monitor thread error.", e);
+                        log.error(">>>>>>>>>>> xxl-job, job registry monitor thread error.", e);
                     }
                 }
                 try {
@@ -109,11 +113,11 @@ public class JobRegistryHelper {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     if (!toStop) {
-                        logger.error(">>>>>>>>>>> xxl-job, job registry monitor thread error.", e);
+                        log.error(">>>>>>>>>>> xxl-job, job registry monitor thread error.", e);
                     }
                 }
             }
-            logger.info(">>>>>>>>>>> xxl-job, job registry monitor thread stop");
+            log.info(">>>>>>>>>>> xxl-job, job registry monitor thread stop");
         });
         registryMonitorThread.setDaemon(true);
         registryMonitorThread.setName("xxl-job, admin JobRegistryMonitorHelper-registryMonitorThread");
@@ -132,7 +136,7 @@ public class JobRegistryHelper {
             registryMonitorThread.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 

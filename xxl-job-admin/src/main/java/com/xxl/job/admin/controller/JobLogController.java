@@ -118,10 +118,9 @@ public class JobLogController {
             // is end
             if (logResult.getContent() != null
                     && logResult.getContent().getFromLineNum()
-                            > logResult.getContent().getToLineNum()) {
-                if (jobLog.getHandleCode() > 0) {
-                    logResult.getContent().setEnd(true);
-                }
+                            > logResult.getContent().getToLineNum()
+                    && jobLog.getHandleCode() > 0) {
+                logResult.getContent().setEnd(true);
             }
 
             // fix xss

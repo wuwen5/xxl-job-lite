@@ -184,12 +184,9 @@ public class JobThread extends Thread {
                                     + ", handleMsg = "
                                     + XxlJobContext.getXxlJobContext().getHandleMsg());
 
-                } else {
-                    if (idleTimes > 30) {
-                        if (triggerQueue.isEmpty()) { // avoid concurrent trigger causes jobId-lost
-                            XxlJobExecutor.removeJobThread(jobId, "excutor idle times over limit.");
-                        }
-                    }
+                } else if (idleTimes > 30 && triggerQueue.isEmpty()) {
+                    // avoid concurrent trigger causes jobId-lost
+                    XxlJobExecutor.removeJobThread(jobId, "excutor idle times over limit.");
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

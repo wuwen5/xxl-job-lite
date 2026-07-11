@@ -10,17 +10,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.collections.CaseInsensitiveKeyMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * job log report helper
  *
  * @author xuxueli 2019-11-22
  */
+@Slf4j
 public class JobLogReportHelper {
-    private static final Logger logger = LoggerFactory.getLogger(JobLogReportHelper.class);
 
     private static final JobLogReportHelper INSTANCE = new JobLogReportHelper();
 
@@ -38,56 +37,54 @@ public class JobLogReportHelper {
 
     public void start() {
 
-        logrThread = new Thread(new Runnable() {
+        logrThread = new Thread(
+                () -> {
 
-            @Override
-            public void run() {
+                    // last clean log time
+                    long lastCleanLogTime = 0;
 
-                // last clean log time
-                long lastCleanLogTime = 0;
+                    while (!toStop) {
 
-                while (!toStop) {
+                        // 1、log-report refresh: refresh log report in 3 days
+                        try {
+                            refreshLogReport();
+                        } catch (Throwable e) {
+                            error(e);
+                        }
 
-                    // 1、log-report refresh: refresh log report in 3 days
-                    try {
-                        refreshLogReport();
-                    } catch (Throwable e) {
-                        if (!toStop) {
-                            logger.error(">>>>>>>>>>> xxl-job, job log report thread error:{}", e, e);
+                        try {
+                            // 2、log-clean: switch open & once each day
+                            final int retentionDays =
+                                    XxlJobAdminConfig.getAdminConfig().getLogretentiondays();
+                            if (retentionDays > 0
+                                    && System.currentTimeMillis() - lastCleanLogTime > 24 * 60 * 60 * 1000) {
+                                cleanExpiredLogs(retentionDays);
+                                // update clean time
+                                lastCleanLogTime = System.currentTimeMillis();
+                            }
+                        } catch (Throwable e) {
+                            error(e);
+                        }
+
+                        try {
+                            TimeUnit.MINUTES.sleep(1);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            error(e);
                         }
                     }
 
-                    try {
-                        // 2、log-clean: switch open & once each day
-                        final int retentionDays =
-                                XxlJobAdminConfig.getAdminConfig().getLogretentiondays();
-                        if (retentionDays > 0 && System.currentTimeMillis() - lastCleanLogTime > 24 * 60 * 60 * 1000) {
-                            cleanExpiredLogs(retentionDays);
-                            // update clean time
-                            lastCleanLogTime = System.currentTimeMillis();
-                        }
-                    } catch (Throwable e) {
-                        if (!toStop) {
-                            logger.error(">>>>>>>>>>> xxl-job, job log report thread error:{}", e, e);
-                        }
-                    }
-
-                    try {
-                        TimeUnit.MINUTES.sleep(1);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        if (!toStop) {
-                            logger.error(e.getMessage(), e);
-                        }
-                    }
-                }
-
-                logger.info(">>>>>>>>>>> xxl-job, job log report thread stop");
-            }
-        });
+                    log.info(">>>>>>>>>>> xxl-job, job log report thread stop");
+                },
+                "xxl-job, admin JobLogReportHelper");
         logrThread.setDaemon(true);
-        logrThread.setName("xxl-job, admin JobLogReportHelper");
         logrThread.start();
+    }
+
+    private void error(Throwable e) {
+        if (!toStop) {
+            log.error(">>>>>>>>>>> xxl-job, job log report thread error:{}", e, e);
+        }
     }
 
     public void toStop() {
@@ -98,7 +95,7 @@ public class JobLogReportHelper {
             logrThread.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 

@@ -9,8 +9,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -25,16 +24,14 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
  *
  * @author xuxueli 2018-11-01 09:24:52
  */
+@Slf4j
 public class XxlJobSpringExecutor extends XxlJobExecutor
         implements ApplicationContextAware, SmartInitializingSingleton, DisposableBean {
-    private static final Logger logger = LoggerFactory.getLogger(XxlJobSpringExecutor.class);
 
-    // start
     @Override
     public void afterSingletonsInstantiated() {
 
         // init JobHandler Repository
-        /*initJobHandlerRepository(applicationContext);*/
 
         // init JobHandler Repository (for method)
         List<JobInfoParam> jobInfoParams = initJobHandlerMethodRepository(applicationContext);
@@ -70,7 +67,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor
             Object bean;
             Lazy onBean = applicationContext.findAnnotationOnBean(beanDefinitionName, Lazy.class);
             if (onBean != null) {
-                logger.debug("xxl-job annotation scan, skip @Lazy Bean:{}", beanDefinitionName);
+                log.debug("xxl-job annotation scan, skip @Lazy Bean:{}", beanDefinitionName);
                 continue;
             } else {
                 bean = applicationContext.getBean(beanDefinitionName);
@@ -84,7 +81,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor
                         MethodIntrospector.selectMethods(bean.getClass(), (MethodIntrospector.MetadataLookup<XxlJob>)
                                 method -> AnnotatedElementUtils.findMergedAnnotation(method, XxlJob.class));
             } catch (Throwable ex) {
-                logger.error("xxl-job method-jobhandler resolve error for bean[{}].", beanDefinitionName, ex);
+                log.error("xxl-job method-jobhandler resolve error for bean[{}].", beanDefinitionName, ex);
             }
             if (annotatedMethods == null || annotatedMethods.isEmpty()) {
                 continue;
@@ -94,17 +91,19 @@ public class XxlJobSpringExecutor extends XxlJobExecutor
             for (Map.Entry<Method, XxlJob> methodXxlJobEntry : annotatedMethods.entrySet()) {
                 Method executeMethod = methodXxlJobEntry.getKey();
                 XxlJob xxlJob = methodXxlJobEntry.getValue();
-                // regist
-                registJobHandler(xxlJob, bean, executeMethod);
+                if (xxlJob != null) {
+                    // regist
+                    registJobHandler(xxlJob, bean, executeMethod);
 
-                if (xxlJob != null && (!xxlJob.cron().isEmpty() || xxlJob.fixedRate() > 0)) {
-                    JobInfoParam infoInitParam = new JobInfoParam();
-                    infoInitParam.setExecutorParam(xxlJob.param());
-                    infoInitParam.setJobDesc(xxlJob.desc());
-                    infoInitParam.setExecutorHandler(xxlJob.value());
-                    infoInitParam.setCron(xxlJob.cron());
-                    infoInitParam.setFixedRate(xxlJob.fixedRate());
-                    list.add(infoInitParam);
+                    if (!xxlJob.cron().isEmpty() || xxlJob.fixedRate() > 0) {
+                        JobInfoParam infoInitParam = new JobInfoParam();
+                        infoInitParam.setExecutorParam(xxlJob.param());
+                        infoInitParam.setJobDesc(xxlJob.desc());
+                        infoInitParam.setExecutorHandler(xxlJob.value());
+                        infoInitParam.setCron(xxlJob.cron());
+                        infoInitParam.setFixedRate(xxlJob.fixedRate());
+                        list.add(infoInitParam);
+                    }
                 }
             }
         }

@@ -37,7 +37,7 @@ public class JobFailMonitorHelper {
 
                     List<Long> failLogIds =
                             XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().findFailJobLogIds(1000);
-                    if (failLogIds != null && !failLogIds.isEmpty()) {
+                    if (failLogIds != null) {
                         for (long failLogId : failLogIds) {
 
                             // lock log
@@ -73,14 +73,13 @@ public class JobFailMonitorHelper {
                             }
 
                             // 2、fail alarm monitor
-                            int newAlarmStatus = 0; // 告警状态：0-默认、-1=锁定状态、1-无需告警、2-告警成功、3-告警失败
+                            // 告警状态：0-默认、-1=锁定状态、1-无需告警、2-告警成功、3-告警失败
+                            int newAlarmStatus = 1;
                             if (info != null) {
                                 boolean alarmResult = XxlJobAdminConfig.getAdminConfig()
                                         .getJobAlarmer()
                                         .alarm(info, log);
                                 newAlarmStatus = alarmResult ? 2 : 3;
-                            } else {
-                                newAlarmStatus = 1;
                             }
 
                             XxlJobAdminConfig.getAdminConfig()
@@ -91,7 +90,7 @@ public class JobFailMonitorHelper {
 
                 } catch (Throwable e) {
                     if (!toStop) {
-                        log.error(">>>>>>>>>>> xxl-job, job fail monitor thread error:{}", e);
+                        log.error(">>>>>>>>>>> xxl-job, job fail monitor thread error.", e);
                     }
                 }
 

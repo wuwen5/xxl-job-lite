@@ -151,7 +151,6 @@ public class JobScheduleHelper {
                 // Wait seconds, align second
                 if (cost < 1000) { // scan-overtime, not wait
                     try {
-                        // pre-read period: success > scan each second; fail > skip this period;
                         TimeUnit.MILLISECONDS.sleep(
                                 (preReadSuc.get() ? 1000 : PRE_READ_MS) - System.currentTimeMillis() % 1000);
                     } catch (InterruptedException e) {

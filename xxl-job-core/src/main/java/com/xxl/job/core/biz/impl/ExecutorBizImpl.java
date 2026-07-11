@@ -147,13 +147,11 @@ public class ExecutorBizImpl implements ExecutorBiz {
                             ReturnT.FAIL_CODE,
                             "block strategy effect：" + ExecutorBlockStrategyEnum.DISCARD_LATER.getTitle());
                 }
-            } else if (ExecutorBlockStrategyEnum.COVER_EARLY == blockStrategy) {
+            } else if (ExecutorBlockStrategyEnum.COVER_EARLY == blockStrategy && jobThread.isRunningOrHasQueue()) {
                 // kill running jobThread
-                if (jobThread.isRunningOrHasQueue()) {
-                    removeOldReason = "block strategy effect：" + ExecutorBlockStrategyEnum.COVER_EARLY.getTitle();
+                removeOldReason = "block strategy effect：" + ExecutorBlockStrategyEnum.COVER_EARLY.getTitle();
 
-                    jobThread = null;
-                }
+                jobThread = null;
             }
         }
 
