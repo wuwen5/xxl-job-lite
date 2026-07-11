@@ -20,3 +20,4 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/xxl_job
       SPRING_DATASOURCE_USERNAME: xxl_job
       SPRING_DATASOURCE_PASSWORD: pg_pwd
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
