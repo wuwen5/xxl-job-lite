@@ -41,7 +41,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver {
 
         // error result
         ReturnT<String> errorResult =
-                new ReturnT<>(ReturnT.FAIL_CODE, ex.toString().replaceAll("\n", "<br/>"));
+                new ReturnT<>(ReturnT.FAIL_CODE, ex.toString().replace("\n", "<br/>"));
 
         // response
         ModelAndView mv = new ModelAndView();

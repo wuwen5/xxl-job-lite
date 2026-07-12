@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class XxlJobScheduler {
     private static final Logger logger = LoggerFactory.getLogger(XxlJobScheduler.class);
 
-    public void init() throws Exception {
+    public void init() {
         // init i18n
         initI18n();
 
@@ -42,7 +42,7 @@ public class XxlJobScheduler {
         logger.info(">>>>>>>>> init xxl-job admin success.");
     }
 
-    public void destroy() throws Exception {
+    public void destroy() {
 
         // stop-schedule
         JobScheduleHelper.getInstance().toStop();
@@ -74,9 +74,9 @@ public class XxlJobScheduler {
     // ---------------------- executor-client ----------------------
     private static ConcurrentMap<String, ExecutorBiz> executorBizRepository = new ConcurrentHashMap<>();
 
-    public static ExecutorBiz getExecutorBiz(String address) throws Exception {
+    public static ExecutorBiz getExecutorBiz(String address) {
         // valid
-        if (address == null || address.trim().length() == 0) {
+        if (address == null || address.trim().isEmpty()) {
             return null;
         }
 

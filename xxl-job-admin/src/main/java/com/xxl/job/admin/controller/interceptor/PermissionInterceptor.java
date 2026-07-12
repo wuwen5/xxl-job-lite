@@ -59,7 +59,7 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
                 return false;
             }
             if (needAdminuser && loginUser.getRole() != 1) {
-                throw new RuntimeException(I18nUtil.getString("system_permission_limit"));
+                throw new SecurityException(I18nUtil.getString("system_permission_limit"));
             }
             // set loginUser, with request
             request.setAttribute(LoginService.LOGIN_IDENTITY_KEY, loginUser);
@@ -86,7 +86,7 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
     public static void validJobGroupPermission(int jobGroup) {
         XxlJobUser loginUser = getLoginUser();
         if (!loginUser.validPermission(jobGroup)) {
-            throw new RuntimeException(
+            throw new SecurityException(
                     I18nUtil.getString("system_permission_limit") + "[username=" + loginUser.getUsername() + "]");
         }
     }

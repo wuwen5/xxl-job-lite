@@ -51,6 +51,7 @@ public class CookieUtil {
         if (domain != null) {
             cookie.setDomain(domain);
         }
+        cookie.setSecure(true);
         cookie.setPath(path);
         cookie.setMaxAge(maxAge);
         cookie.setHttpOnly(isHttpOnly);
@@ -79,9 +80,9 @@ public class CookieUtil {
      * @param key
      */
     private static Cookie get(HttpServletRequest request, String key) {
-        Cookie[] arr_cookie = request.getCookies();
-        if (arr_cookie != null && arr_cookie.length > 0) {
-            for (Cookie cookie : arr_cookie) {
+        Cookie[] arrCookie = request.getCookies();
+        if (arrCookie != null) {
+            for (Cookie cookie : arrCookie) {
                 if (cookie.getName().equals(key)) {
                     return cookie;
                 }

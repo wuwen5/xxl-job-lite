@@ -116,10 +116,14 @@ public class XxlJobRemotingUtil {
                     new TrustManager[] {
                         new X509TrustManager() {
                             @Override
-                            public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+                            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                                // do nothing, trust all clients
+                            }
 
                             @Override
-                            public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+                            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                                // do nothing, trust all servers
+                            }
 
                             @Override
                             public X509Certificate[] getAcceptedIssuers() {

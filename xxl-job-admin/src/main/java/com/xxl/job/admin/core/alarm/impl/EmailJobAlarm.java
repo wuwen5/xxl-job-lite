@@ -12,19 +12,19 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * job alarm by email
  *
  * @author xuxueli 2020-01-19
  */
+@Slf4j
 @Component
 public class EmailJobAlarm implements JobAlarm {
-    private static Logger logger = LoggerFactory.getLogger(EmailJobAlarm.class);
 
     /**
      * fail alarm
@@ -36,9 +36,7 @@ public class EmailJobAlarm implements JobAlarm {
         boolean alarmResult = true;
 
         // send monitor email
-        if (info != null
-                && info.getAlarmEmail() != null
-                && info.getAlarmEmail().trim().length() > 0) {
+        if (info != null && StringUtils.hasText(info.getAlarmEmail())) {
 
             // alarmContent
             String alarmContent = "Alarm Job LogId=" + jobLog.getId();
@@ -78,8 +76,7 @@ public class EmailJobAlarm implements JobAlarm {
 
                     XxlJobAdminConfig.getAdminConfig().getMailSender().send(mimeMessage);
                 } catch (Exception e) {
-                    logger.error(
-                            ">>>>>>>>>>> xxl-job, job fail alarm email send error, JobLogId:{}", jobLog.getId(), e);
+                    log.error(">>>>>>>>>>> xxl-job, job fail alarm email send error, JobLogId:{}", jobLog.getId(), e);
 
                     alarmResult = false;
                 }
@@ -94,29 +91,39 @@ public class EmailJobAlarm implements JobAlarm {
      *
      * @return
      */
-    private static final String loadEmailJobAlarmTemplate() {
-        String mailBodyTemplate = "<h5>" + I18nUtil.getString("jobconf_monitor_detail") + "：</span>"
-                + "<table border=\"1\" cellpadding=\"3\" style=\"border-collapse:collapse; width:80%;\" >\n"
-                + "   <thead style=\"font-weight: bold;color: #ffffff;background-color: #ff8c00;\" >"
-                + "      <tr>\n"
-                + "         <td width=\"20%\" >"
-                + I18nUtil.getString("jobinfo_field_jobgroup") + "</td>\n" + "         <td width=\"10%\" >"
-                + I18nUtil.getString("jobinfo_field_id") + "</td>\n" + "         <td width=\"20%\" >"
-                + I18nUtil.getString("jobinfo_field_jobdesc") + "</td>\n" + "         <td width=\"10%\" >"
-                + I18nUtil.getString("jobconf_monitor_alarm_title") + "</td>\n" + "         <td width=\"40%\" >"
-                + I18nUtil.getString("jobconf_monitor_alarm_content") + "</td>\n" + "      </tr>\n"
-                + "   </thead>\n"
-                + "   <tbody>\n"
-                + "      <tr>\n"
-                + "         <td>{0}</td>\n"
-                + "         <td>{1}</td>\n"
-                + "         <td>{2}</td>\n"
-                + "         <td>"
-                + I18nUtil.getString("jobconf_monitor_alarm_type") + "</td>\n" + "         <td>{3}</td>\n"
-                + "      </tr>\n"
-                + "   </tbody>\n"
-                + "</table>";
+    private static String loadEmailJobAlarmTemplate() {
+        String jobgroup = I18nUtil.getString("jobinfo_field_jobgroup");
+        String id = I18nUtil.getString("jobinfo_field_id");
+        String jobdesc = I18nUtil.getString("jobinfo_field_jobdesc");
+        String alarmTitle = I18nUtil.getString("jobconf_monitor_alarm_title");
+        String alarmContent = I18nUtil.getString("jobconf_monitor_alarm_content");
+        String alarmType = I18nUtil.getString("jobconf_monitor_alarm_type");
+        String monitorDetail = I18nUtil.getString("jobconf_monitor_detail");
 
-        return mailBodyTemplate;
+        return String.format(
+                """
+        <h5>%s：</h5>
+        <table border="1" cellpadding="3" style="border-collapse:collapse; width:80%%;">
+           <thead style="font-weight:bold; color:#ffffff; background-color:#ff8c00;">
+              <tr>
+                 <td width="20%%">%s</td>
+                 <td width="10%%">%s</td>
+                 <td width="20%%">%s</td>
+                 <td width="10%%">%s</td>
+                 <td width="40%%">%s</td>
+              </tr>
+           </thead>
+           <tbody>
+              <tr>
+                 <td>{0}</td>
+                 <td>{1}</td>
+                 <td>{2}</td>
+                 <td>%s</td>
+                 <td>{3}</td>
+              </tr>
+           </tbody>
+        </table>
+        """,
+                monitorDetail, jobgroup, id, jobdesc, alarmTitle, alarmContent, alarmType);
     }
 }

@@ -8,6 +8,7 @@ import com.xxl.job.admin.core.trigger.TriggerTypeEnum;
 import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.core.context.XxlJobContext;
 import java.text.MessageFormat;
+import java.util.Objects;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
@@ -55,7 +56,7 @@ public class XxlJobCompleter {
 
                 String[] childJobIds = xxlJobInfo.getChildJobId().split(",");
                 for (int i = 0; i < childJobIds.length; i++) {
-                    int childJobId = isNumeric(childJobIds[i]) ? Integer.parseInt(childJobIds[i]) : -1;
+                    int childJobId = parseChildJobId(childJobIds[i]);
                     if (childJobId > 0) {
                         // valid
                         if (childJobId == xxlJobLog.getJobId()) {
@@ -87,24 +88,21 @@ public class XxlJobCompleter {
             }
         }
 
-        if (triggerChildMsg != null) {
-            xxlJobLog.setHandleMsg(xxlJobLog.getHandleMsg() + triggerChildMsg);
-        }
+        xxlJobLog.setHandleMsg(xxlJobLog.getHandleMsg() + Objects.toString(triggerChildMsg, ""));
 
         // 2、fix_delay trigger next
         // on the way
 
     }
 
-    private static boolean isNumeric(String str) {
+    private static int parseChildJobId(String str) {
         if (str == null || str.trim().isEmpty()) {
-            return false;
+            return -1;
         }
         try {
-            Integer.parseInt(str);
-            return true;
+            return Integer.parseInt(str);
         } catch (NumberFormatException e) {
-            return false;
+            return -1;
         }
     }
 }

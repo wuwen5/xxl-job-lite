@@ -5,23 +5,19 @@ import com.xxl.job.core.handler.annotation.XxlJob;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * xxl-job executor (for frameless)
  *
  * @author xuxueli 2020-11-05
  */
+@Setter
+@Getter
 public class XxlJobSimpleExecutor extends XxlJobExecutor {
 
     private List<Object> xxlJobBeanList = new ArrayList<>();
-
-    public List<Object> getXxlJobBeanList() {
-        return xxlJobBeanList;
-    }
-
-    public void setXxlJobBeanList(List<Object> xxlJobBeanList) {
-        this.xxlJobBeanList = xxlJobBeanList;
-    }
 
     @Override
     public void start() {
@@ -33,7 +29,7 @@ public class XxlJobSimpleExecutor extends XxlJobExecutor {
         try {
             super.start();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -51,9 +47,6 @@ public class XxlJobSimpleExecutor extends XxlJobExecutor {
         for (Object bean : xxlJobBeanList) {
             // method
             Method[] methods = bean.getClass().getDeclaredMethods();
-            if (methods.length == 0) {
-                continue;
-            }
             for (Method executeMethod : methods) {
                 XxlJob xxlJob = executeMethod.getAnnotation(XxlJob.class);
                 // registry

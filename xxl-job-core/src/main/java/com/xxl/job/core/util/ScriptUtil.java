@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import lombok.experimental.UtilityClass;
 
 /**
  *  1、内嵌编译器如"PythonInterpreter"无法引用扩展包，因此推荐使用java调用控制台进程方式"Runtime.getRuntime().exec()"来运行脚本(shell或python)；
@@ -18,6 +19,7 @@ import java.util.List;
  *
  * Created by xuxueli on 17/2/25.
  */
+@UtilityClass
 public class ScriptUtil {
 
     /**
@@ -31,8 +33,6 @@ public class ScriptUtil {
         // make file,   filePath/gluesource/666-123456789.py
         try (FileOutputStream fileOutputStream = new FileOutputStream(scriptFileName)) {
             fileOutputStream.write(content.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw e;
         }
     }
 
@@ -47,12 +47,9 @@ public class ScriptUtil {
      */
     public static int execToFile(String command, String scriptFile, String logFile, String... params) {
 
-        FileOutputStream fileOutputStream = null;
         Thread inputThread = null;
         Thread errThread = null;
-        try {
-            // file
-            fileOutputStream = new FileOutputStream(logFile, true);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(logFile, true)) {
 
             // command
             List<String> cmdarray = new ArrayList<>();
@@ -67,17 +64,16 @@ public class ScriptUtil {
             final Process process = Runtime.getRuntime().exec(cmdarrayFinal);
 
             // log-thread
-            final FileOutputStream finalFileOutputStream = fileOutputStream;
             inputThread = new Thread(() -> {
                 try {
-                    copy(process.getInputStream(), finalFileOutputStream, new byte[1024]);
+                    copy(process.getInputStream(), fileOutputStream, new byte[1024]);
                 } catch (IOException e) {
                     XxlJobHelper.log(e);
                 }
             });
             errThread = new Thread(() -> {
                 try {
-                    copy(process.getErrorStream(), finalFileOutputStream, new byte[1024]);
+                    copy(process.getErrorStream(), fileOutputStream, new byte[1024]);
                 } catch (IOException e) {
                     XxlJobHelper.log(e);
                 }
@@ -98,13 +94,6 @@ public class ScriptUtil {
             XxlJobHelper.log(e);
             return -1;
         } finally {
-            if (fileOutputStream != null) {
-                try {
-                    fileOutputStream.close();
-                } catch (IOException e) {
-                    XxlJobHelper.log(e);
-                }
-            }
             if (inputThread != null && inputThread.isAlive()) {
                 inputThread.interrupt();
             }

@@ -95,6 +95,7 @@ public class JobTriggerPoolHelper {
                     XxlJobTrigger.trigger(
                             jobId, triggerType, failRetryCount, executorShardingParam, executorParam, addressList);
                 } catch (Throwable e) {
+                    // NOSONAR
                     log.error(e.getMessage(), e);
                 } finally {
 

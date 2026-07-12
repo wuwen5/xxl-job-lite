@@ -36,7 +36,7 @@ public class ExecutorRouteLFU extends ExecutorRouter {
         HashMap<String, Integer> lfuItemMap = JOB_LFU_MAP.get(jobId);
         if (lfuItemMap == null) {
             // 避免重复覆盖
-            lfuItemMap = JOB_LFU_MAP.computeIfAbsent(jobId, HashMap::new);
+            lfuItemMap = JOB_LFU_MAP.computeIfAbsent(jobId, k -> new HashMap<>(32));
         }
 
         // put new

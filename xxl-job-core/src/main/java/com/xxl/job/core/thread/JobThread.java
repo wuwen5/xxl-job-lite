@@ -15,15 +15,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * handler thread
  * @author xuxueli 2016-1-16 19:52:47
  */
+@Slf4j
 public class JobThread extends Thread {
-    private static Logger logger = LoggerFactory.getLogger(JobThread.class);
 
     private int jobId;
     private IJobHandler handler;
@@ -62,7 +61,7 @@ public class JobThread extends Thread {
     public ReturnT<String> pushTriggerQueue(TriggerParam triggerParam) {
         // avoid repeat
         if (triggerLogIdSet.contains(triggerParam.getLogId())) {
-            logger.info(">>>>>>>>>>> repeate trigger job, logId:{}", triggerParam.getLogId());
+            log.info(">>>>>>>>>>> repeate trigger job, logId:{}", triggerParam.getLogId());
             return new ReturnT<>(ReturnT.FAIL_CODE, "repeate trigger job, logId:" + triggerParam.getLogId());
         }
 
@@ -101,7 +100,7 @@ public class JobThread extends Thread {
         try {
             handler.init();
         } catch (Throwable e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         // execute
@@ -246,9 +245,9 @@ public class JobThread extends Thread {
         try {
             handler.destroy();
         } catch (Throwable e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
-        logger.info(">>>>>>>>>>> xxl-job JobThread stoped, hashCode:{}", Thread.currentThread());
+        log.info(">>>>>>>>>>> xxl-job JobThread stoped, hashCode:{}", Thread.currentThread());
     }
 }

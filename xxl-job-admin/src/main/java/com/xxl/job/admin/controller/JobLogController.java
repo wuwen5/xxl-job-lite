@@ -104,7 +104,6 @@ public class JobLogController {
     public ReturnT<LogResult> logDetailCat(@PathVariable long logId, int fromLineNum) {
         try {
             // valid
-            // todo, need to improve performance
             XxlJobLog jobLog = xxlJobLogDao.load(logId);
             if (jobLog == null) {
                 return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("joblog_logid_unvalid"));
