@@ -139,7 +139,8 @@ public class JobScheduleHelper {
                             preReadSuc.set(false);
                         }
                     });
-                } catch (Exception e) {
+                } catch (Throwable e) {
+                    // NOSONAR
                     log.error(">>>>>>>>>>> xxl-job, JobScheduleHelper#scheduleThread error:", e);
                 }
 
@@ -165,7 +166,7 @@ public class JobScheduleHelper {
             while (!ringThreadToStop) {
 
                 // align second
-                sleep(TimeUnit.MILLISECONDS, 1000 - System.currentTimeMillis() % 1000, !scheduleThreadToStop);
+                sleep(TimeUnit.MILLISECONDS, 1000 - System.currentTimeMillis() % 1000, !ringThreadToStop);
 
                 try {
                     // second data
@@ -190,7 +191,7 @@ public class JobScheduleHelper {
                         // clear
                         ringItemData.clear();
                     }
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     if (!ringThreadToStop) {
                         log.error(">>>>>>>>>>> xxl-job, JobScheduleHelper#ringThread error:", e);
                     }

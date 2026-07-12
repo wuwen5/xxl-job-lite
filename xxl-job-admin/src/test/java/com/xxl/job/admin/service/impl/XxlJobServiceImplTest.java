@@ -585,6 +585,477 @@ public class XxlJobServiceImplTest extends AbstractTest {
         logger.info("testUpdateSelfReferencingChildJob: msg={}", result.getMsg());
     }
 
+    /**
+     * Test update with empty job description -> FAIL
+     */
+    @Test
+    public void testUpdateEmptyJobDesc() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateEmptyJobDesc: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with empty author -> FAIL
+     */
+    @Test
+    public void testUpdateEmptyAuthor() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateEmptyAuthor: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with invalid schedule type -> FAIL
+     */
+    @Test
+    public void testUpdateInvalidScheduleType() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("INVALID");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateInvalidScheduleType: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with invalid CRON expression -> FAIL
+     */
+    @Test
+    public void testUpdateInvalidCronExpression() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("CRON");
+        jobInfo.setScheduleConf("not a cron");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateInvalidCronExpression: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with valid FIX_RATE schedule -> SUCCESS
+     */
+    @Test
+    public void testUpdateFixRateJobSuccess() {
+        // Insert a job with NONE schedule first
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test FIX_RATE Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+        xxlJobInfoDao.save(jobInfo);
+
+        // Update to FIX_RATE
+        jobInfo.setScheduleType("FIX_RATE");
+        jobInfo.setScheduleConf("60");
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.SUCCESS_CODE, result.getCode());
+        logger.info("testUpdateFixRateJobSuccess: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with FIX_RATE but null schedule conf -> FAIL
+     */
+    @Test
+    public void testUpdateFixRateNullConf() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("FIX_RATE");
+        jobInfo.setScheduleConf(null);
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateFixRateNullConf: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with FIX_RATE and value 0 -> FAIL
+     */
+    @Test
+    public void testUpdateFixRateZeroValue() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("FIX_RATE");
+        jobInfo.setScheduleConf("0");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateFixRateZeroValue: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with FIX_RATE and non-numeric value -> FAIL
+     */
+    @Test
+    public void testUpdateFixRateNonNumeric() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("FIX_RATE");
+        jobInfo.setScheduleConf("abc");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateFixRateNonNumeric: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with invalid executor route strategy -> FAIL
+     */
+    @Test
+    public void testUpdateInvalidExecutorRouteStrategy() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("INVALID");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateInvalidExecutorRouteStrategy: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with invalid misfire strategy -> FAIL
+     */
+    @Test
+    public void testUpdateInvalidMisfireStrategy() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("INVALID");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateInvalidMisfireStrategy: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with invalid executor block strategy -> FAIL
+     */
+    @Test
+    public void testUpdateInvalidExecutorBlockStrategy() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("INVALID");
+        jobInfo.setGlueType("BEAN");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateInvalidExecutorBlockStrategy: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with child job id pointing to non-existent job -> FAIL
+     */
+    @Test
+    public void testUpdateChildJobNotFound() {
+        // Insert a parent job
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Parent Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+        xxlJobInfoDao.save(jobInfo);
+
+        // Update with non-existent child job id
+        jobInfo.setChildJobId("9999");
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateChildJobNotFound: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with child job in a group the login user has no permission for -> FAIL
+     */
+    @Test
+    public void testUpdateChildJobPermissionDenied() {
+        // Insert a child job in group 2 (normalUser only has permission for group 1)
+        XxlJobInfo childJob = new XxlJobInfo();
+        childJob.setJobGroup(2);
+        childJob.setJobDesc("Child Job");
+        childJob.setAuthor("tester");
+        childJob.setScheduleType("NONE");
+        childJob.setMisfireStrategy("DO_NOTHING");
+        childJob.setExecutorRouteStrategy("FIRST");
+        childJob.setExecutorHandler("childJobHandler");
+        childJob.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        childJob.setGlueType("BEAN");
+        xxlJobInfoDao.save(childJob);
+
+        // Insert a parent job in group 1
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Parent Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+        xxlJobInfoDao.save(jobInfo);
+
+        // Update with child job id pointing to group-2 child; normalUser has no permission
+        jobInfo.setChildJobId(String.valueOf(childJob.getId()));
+        ReturnT<String> result = xxlJobService.update(jobInfo, normalUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateChildJobPermissionDenied: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with non-numeric child job id -> FAIL
+     */
+    @Test
+    public void testUpdateNonNumericChildJobId() {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setId(1);
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+        jobInfo.setChildJobId("abc");
+
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateNonNumericChildJobId: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update with non-existent job group -> FAIL
+     */
+    @Test
+    public void testUpdateInvalidJobGroup() {
+        // Insert a job first
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Test Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("NONE");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+        xxlJobInfoDao.save(jobInfo);
+
+        // Update with non-existent job group
+        jobInfo.setJobGroup(999);
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateInvalidJobGroup: msg={}", result.getMsg());
+    }
+
+    /**
+     * Test update when trigger status is 1 and schedule is unchanged ->
+     * existing trigger next time is reused (no regeneration).
+     */
+    @Test
+    public void testUpdateTriggerStatus1ScheduleUnchanged() {
+        // Insert a running job with CRON schedule
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Running Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("CRON");
+        jobInfo.setScheduleConf("0 0 12 * * ? *");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+        jobInfo.setTriggerStatus(1);
+        jobInfo.setTriggerNextTime(123456789L);
+        xxlJobInfoDao.save(jobInfo);
+
+        // Update only jobDesc; schedule data unchanged
+        jobInfo.setJobDesc("Renamed Running Job");
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.SUCCESS_CODE, result.getCode());
+        XxlJobInfo updated = xxlJobInfoDao.loadById(jobInfo.getId());
+        assertEquals(123456789L, updated.getTriggerNextTime());
+        logger.info("testUpdateTriggerStatus1ScheduleUnchanged: triggerNextTime unchanged");
+    }
+
+    /**
+     * Test update when trigger status is 1 and CRON schedule is changed ->
+     * next trigger time is regenerated from new cron expression.
+     */
+    @Test
+    public void testUpdateTriggerStatus1ScheduleChanged() {
+        // Insert a running job with CRON schedule
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Running Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("CRON");
+        jobInfo.setScheduleConf("0 0 12 * * ? *");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+        jobInfo.setTriggerStatus(1);
+        jobInfo.setTriggerNextTime(123456789L);
+        xxlJobInfoDao.save(jobInfo);
+
+        // Change CRON expression -> regenerate trigger next time
+        jobInfo.setScheduleConf("0 0 18 * * ? *");
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.SUCCESS_CODE, result.getCode());
+        XxlJobInfo updated = xxlJobInfoDao.loadById(jobInfo.getId());
+        assertNotEquals(123456789L, updated.getTriggerNextTime());
+        logger.info(
+                "testUpdateTriggerStatus1ScheduleChanged: triggerNextTime regenerated to {}",
+                updated.getTriggerNextTime());
+    }
+
+    /**
+     * Test update when trigger status is 1 and schedule changes to NONE ->
+     * generateNextValidTime returns null -> FAIL.
+     */
+    @Test
+    public void testUpdateTriggerStatus1ScheduleChangedToNone() {
+        // Insert a running job with CRON schedule
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        jobInfo.setJobGroup(1);
+        jobInfo.setJobDesc("Running Job");
+        jobInfo.setAuthor("tester");
+        jobInfo.setScheduleType("CRON");
+        jobInfo.setScheduleConf("0 0 12 * * ? *");
+        jobInfo.setMisfireStrategy("DO_NOTHING");
+        jobInfo.setExecutorRouteStrategy("FIRST");
+        jobInfo.setExecutorHandler("demoJobHandler");
+        jobInfo.setExecutorBlockStrategy("SERIAL_EXECUTION");
+        jobInfo.setGlueType("BEAN");
+        jobInfo.setTriggerStatus(1);
+        jobInfo.setTriggerNextTime(123456789L);
+        xxlJobInfoDao.save(jobInfo);
+
+        // Change schedule type to NONE -> generateNextValidTime returns null -> FAIL
+        jobInfo.setScheduleType("NONE");
+        ReturnT<String> result = xxlJobService.update(jobInfo, adminUser);
+
+        assertEquals(ReturnT.FAIL_CODE, result.getCode());
+        logger.info("testUpdateTriggerStatus1ScheduleChangedToNone: msg={}", result.getMsg());
+    }
     // ---------------------- remove ----------------------
 
     /**
