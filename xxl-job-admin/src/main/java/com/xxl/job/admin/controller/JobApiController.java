@@ -12,17 +12,16 @@ import com.xxl.job.core.util.XxlJobRemotingUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Created by xuxueli on 17/5/10.
  */
-@Controller
+@RestController
 @RequestMapping("/api")
 public class JobApiController {
 
@@ -37,7 +36,6 @@ public class JobApiController {
      * @return
      */
     @PostMapping("/{uri}")
-    @ResponseBody
     @PermissionLimit(limit = false)
     public ReturnT<String> api(
             HttpServletRequest request, @PathVariable("uri") String uri, @RequestBody(required = false) String data) {

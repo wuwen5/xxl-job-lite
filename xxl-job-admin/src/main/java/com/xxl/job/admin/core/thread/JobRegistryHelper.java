@@ -168,9 +168,6 @@ public class JobRegistryHelper {
                                 registryParam.getRegistryKey(),
                                 registryParam.getRegistryValue(),
                                 new Date());
-
-                // fresh
-                freshGroupRegistryInfo(registryParam);
             }
         });
 
@@ -188,22 +185,14 @@ public class JobRegistryHelper {
 
         // async execute
         registryOrRemoveThreadPool.execute(() -> {
-            int ret = XxlJobAdminConfig.getAdminConfig()
+            XxlJobAdminConfig.getAdminConfig()
                     .getXxlJobRegistryDao()
                     .registryDelete(
                             registryParam.getRegistryGroup(),
                             registryParam.getRegistryKey(),
                             registryParam.getRegistryValue());
-            if (ret > 0) {
-                // fresh
-                freshGroupRegistryInfo(registryParam);
-            }
         });
 
         return ReturnT.SUCCESS;
-    }
-
-    private void freshGroupRegistryInfo(RegistryParam registryParam) {
-        // Under consideration, prevent affecting core tables
     }
 }

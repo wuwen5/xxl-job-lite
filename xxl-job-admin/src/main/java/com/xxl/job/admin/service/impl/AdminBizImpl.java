@@ -148,6 +148,6 @@ public class AdminBizImpl implements AdminBiz {
             }
         }
         // 3次重试后仍然找不到，则抛出异常
-        throw new RuntimeException("初始化job_group失败, 请检查数据库!");
+        throw new IllegalStateException("初始化job_group失败, 请检查数据库!");
     }
 }

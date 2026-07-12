@@ -36,7 +36,7 @@ public class NetUtil {
                 portTmp--;
             }
         }
-        throw new RuntimeException("no available port.");
+        throw new IllegalStateException("no available port.");
     }
 
     /**
@@ -47,21 +47,11 @@ public class NetUtil {
      */
     public static boolean isPortUsed(int port) {
         boolean used = false;
-        ServerSocket serverSocket = null;
-        try {
-            serverSocket = new ServerSocket(port);
-            used = false;
+        try (ServerSocket ignore = new ServerSocket(port)) {
+            // do nothing, just try to bind the port
         } catch (IOException e) {
             log.info(">>>>>>>>>>> xxl-job, port[{}] is in use.", port);
             used = true;
-        } finally {
-            if (serverSocket != null) {
-                try {
-                    serverSocket.close();
-                } catch (IOException e) {
-                    log.info("");
-                }
-            }
         }
         return used;
     }

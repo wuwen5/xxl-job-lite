@@ -14,8 +14,10 @@ import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.util.IpUtil;
 import com.xxl.job.core.util.ThrowableUtil;
 import java.util.Date;
+import java.util.Objects;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -82,8 +84,7 @@ public class XxlJobTrigger {
         }
         if (ExecutorRouteStrategyEnum.SHARDING_BROADCAST
                         == ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null)
-                && group.getRegistryList() != null
-                && !group.getRegistryList().isEmpty()
+                && !CollectionUtils.isEmpty(group.getRegistryList())
                 && shardingParam == null) {
             for (int i = 0; i < group.getRegistryList().size(); i++) {
                 processTrigger(
@@ -163,7 +164,7 @@ public class XxlJobTrigger {
         // 3、init address
         String address = null;
         ReturnT<String> routeAddressResult = null;
-        if (group.getRegistryList() != null && !group.getRegistryList().isEmpty()) {
+        if (!CollectionUtils.isEmpty(group.getRegistryList())) {
             if (ExecutorRouteStrategyEnum.SHARDING_BROADCAST == executorRouteStrategyEnum) {
                 if (index < group.getRegistryList().size()) {
                     address = group.getRegistryList().get(index);
@@ -225,7 +226,7 @@ public class XxlJobTrigger {
                         (routeAddressResult != null && routeAddressResult.getMsg() != null)
                                 ? routeAddressResult.getMsg() + "<br><br>"
                                 : "")
-                .append(triggerResult.getMsg() != null ? triggerResult.getMsg() : "");
+                .append(Objects.toString(triggerResult.getMsg(), ""));
 
         // 6、save log trigger-info
         jobLog.setExecutorAddress(address)

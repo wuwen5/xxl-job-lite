@@ -24,9 +24,9 @@ public class ExecutorRouteLRU extends ExecutorRouter {
     public String route(int jobId, List<String> addressList) {
 
         // cache clear
-        if (System.currentTimeMillis() > cacheValidTime) {
+        if (System.currentTimeMillis() > ExecutorRouteLRU.cacheValidTime) {
             JOB_LRU_MAP.clear();
-            cacheValidTime = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
+            ExecutorRouteLRU.cacheValidTime = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
         }
 
         // init lru
@@ -42,9 +42,7 @@ public class ExecutorRouteLRU extends ExecutorRouter {
 
         // put new
         for (String address : addressList) {
-            if (!lruItem.containsKey(address)) {
-                lruItem.put(address, address);
-            }
+            lruItem.putIfAbsent(address, address);
         }
         // remove old
         List<String> delKeys = new ArrayList<>();
@@ -53,10 +51,8 @@ public class ExecutorRouteLRU extends ExecutorRouter {
                 delKeys.add(existKey);
             }
         }
-        if (!delKeys.isEmpty()) {
-            for (String delKey : delKeys) {
-                lruItem.remove(delKey);
-            }
+        for (String delKey : delKeys) {
+            lruItem.remove(delKey);
         }
 
         // load

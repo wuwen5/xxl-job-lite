@@ -65,7 +65,7 @@ public class IndexController {
             String password,
             String ifRemember) {
         boolean ifRem = ifRemember != null && !ifRemember.trim().isEmpty() && "on".equals(ifRemember);
-        return loginService.login(request, response, userName, password, ifRem);
+        return loginService.login(response, userName, password, ifRem);
     }
 
     @PostMapping(value = "logout")

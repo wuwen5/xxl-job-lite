@@ -48,7 +48,7 @@ public class JobLogReportHelper {
                         // 1、log-report refresh: refresh log report in 3 days
                         try {
                             refreshLogReport();
-                        } catch (Throwable e) {
+                        } catch (Exception e) {
                             error(e);
                         }
 
@@ -62,7 +62,7 @@ public class JobLogReportHelper {
                                 // update clean time
                                 lastCleanLogTime = System.currentTimeMillis();
                             }
-                        } catch (Throwable e) {
+                        } catch (Exception e) {
                             error(e);
                         }
 
@@ -81,7 +81,7 @@ public class JobLogReportHelper {
         logrThread.start();
     }
 
-    private void error(Throwable e) {
+    private void error(Exception e) {
         if (!toStop) {
             log.error(">>>>>>>>>>> xxl-job, job log report thread error:{}", e, e);
         }
@@ -165,12 +165,13 @@ public class JobLogReportHelper {
     }
 
     private static Date getDayStart(int offsetDays) {
-        LocalDateTime startOfDay = LocalDate.now().plusDays(offsetDays).atStartOfDay();
+        LocalDateTime startOfDay =
+                LocalDate.now(ZoneId.systemDefault()).plusDays(offsetDays).atStartOfDay();
         return Date.from(startOfDay.atZone(ZoneId.systemDefault()).toInstant());
     }
 
     private static Date getDayEnd(int offsetDays) {
-        LocalDateTime endOfDay = LocalDate.now()
+        LocalDateTime endOfDay = LocalDate.now(ZoneId.systemDefault())
                 .plusDays(offsetDays)
                 // 23:59:59.999999999
                 .atTime(LocalTime.MAX);

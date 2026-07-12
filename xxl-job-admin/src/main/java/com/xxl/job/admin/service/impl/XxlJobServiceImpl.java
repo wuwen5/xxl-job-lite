@@ -44,6 +44,24 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class XxlJobServiceImpl implements XxlJobService {
 
+    /**
+     * i18n key: system_please_input
+     */
+    private static final String SYSTEM_PLEASE_INPUT_I18N = "system_please_input";
+
+    /**
+     * i18n key: schedule_type
+     */
+    private static final String SCHEDULE_TYPE_I18N = "schedule_type";
+
+    /**
+     * i18n key: system_unvalid
+     */
+    private static final String SYSTEM_UNVALID_I18N = "system_unvalid";
+
+    private static final String PLACE_STRING = "({0})";
+    private static final String JOBINFO_FIELD_CHILD_JOB_ID_I18N = "jobinfo_field_childJobId";
+
     @Resource
     private XxlJobGroupDao xxlJobGroupDao;
 
@@ -100,40 +118,41 @@ public class XxlJobServiceImpl implements XxlJobService {
         if (!StringUtils.hasText(jobInfo.getJobDesc())) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_jobdesc")));
+                    (I18nUtil.getString(SYSTEM_PLEASE_INPUT_I18N) + I18nUtil.getString("jobinfo_field_jobdesc")));
         }
         if (!StringUtils.hasText(jobInfo.getAuthor())) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_author")));
+                    (I18nUtil.getString(SYSTEM_PLEASE_INPUT_I18N) + I18nUtil.getString("jobinfo_field_author")));
         }
 
         // valid trigger
         ScheduleTypeEnum scheduleTypeEnum = ScheduleTypeEnum.match(jobInfo.getScheduleType(), null);
         if (scheduleTypeEnum == null) {
             return new ReturnT<>(
-                    ReturnT.FAIL_CODE, (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                    ReturnT.FAIL_CODE,
+                    (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
         if (scheduleTypeEnum == ScheduleTypeEnum.CRON) {
             if (jobInfo.getScheduleConf() == null || !CronExpression.isValidExpression(jobInfo.getScheduleConf())) {
-                return new ReturnT<>(ReturnT.FAIL_CODE, "Cron" + I18nUtil.getString("system_unvalid"));
+                return new ReturnT<>(ReturnT.FAIL_CODE, "Cron" + I18nUtil.getString(SYSTEM_UNVALID_I18N));
             }
         } else if (scheduleTypeEnum
                 == ScheduleTypeEnum.FIX_RATE /* || scheduleTypeEnum == ScheduleTypeEnum.FIX_DELAY*/) {
             if (jobInfo.getScheduleConf() == null) {
-                return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("schedule_type")));
+                return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString(SCHEDULE_TYPE_I18N)));
             }
             try {
                 int fixSecond = Integer.parseInt(jobInfo.getScheduleConf());
                 if (fixSecond < 1) {
                     return new ReturnT<>(
                             ReturnT.FAIL_CODE,
-                            (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                            (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
                 }
             } catch (Exception e) {
                 return new ReturnT<>(
                         ReturnT.FAIL_CODE,
-                        (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                        (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
             }
         }
 
@@ -141,32 +160,35 @@ public class XxlJobServiceImpl implements XxlJobService {
         if (GlueTypeEnum.match(jobInfo.getGlueType()) == null) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("jobinfo_field_gluetype") + I18nUtil.getString("system_unvalid")));
+                    (I18nUtil.getString("jobinfo_field_gluetype") + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
         if (GlueTypeEnum.BEAN == GlueTypeEnum.match(jobInfo.getGlueType())
                 && (jobInfo.getExecutorHandler() == null
                         || jobInfo.getExecutorHandler().trim().isEmpty())) {
-            return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("system_please_input") + "JobHandler"));
+            return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString(SYSTEM_PLEASE_INPUT_I18N) + "JobHandler"));
         }
         // 》fix "\r" in shell
         if (GlueTypeEnum.GLUE_SHELL == GlueTypeEnum.match(jobInfo.getGlueType()) && jobInfo.getGlueSource() != null) {
-            jobInfo.setGlueSource(jobInfo.getGlueSource().replaceAll("\r", ""));
+            jobInfo.setGlueSource(jobInfo.getGlueSource().replace("\r", ""));
         }
 
         // valid advanced
         if (ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null) == null) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("jobinfo_field_executorRouteStrategy") + I18nUtil.getString("system_unvalid")));
+                    (I18nUtil.getString("jobinfo_field_executorRouteStrategy")
+                            + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
         if (MisfireStrategyEnum.match(jobInfo.getMisfireStrategy(), null) == null) {
             return new ReturnT<>(
-                    ReturnT.FAIL_CODE, (I18nUtil.getString("misfire_strategy") + I18nUtil.getString("system_unvalid")));
+                    ReturnT.FAIL_CODE,
+                    (I18nUtil.getString("misfire_strategy") + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
         if (ExecutorBlockStrategyEnum.match(jobInfo.getExecutorBlockStrategy(), null) == null) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("jobinfo_field_executorBlockStrategy") + I18nUtil.getString("system_unvalid")));
+                    (I18nUtil.getString("jobinfo_field_executorBlockStrategy")
+                            + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
 
         // 》ChildJobId valid
@@ -179,7 +201,8 @@ public class XxlJobServiceImpl implements XxlJobService {
                         return new ReturnT<>(
                                 ReturnT.FAIL_CODE,
                                 MessageFormat.format(
-                                        (I18nUtil.getString("jobinfo_field_childJobId") + "({0})"
+                                        (I18nUtil.getString(JOBINFO_FIELD_CHILD_JOB_ID_I18N)
+                                                + PLACE_STRING
                                                 + I18nUtil.getString("system_not_found")),
                                         childJobIdItem));
                     }
@@ -187,7 +210,8 @@ public class XxlJobServiceImpl implements XxlJobService {
                         return new ReturnT<>(
                                 ReturnT.FAIL_CODE,
                                 MessageFormat.format(
-                                        (I18nUtil.getString("jobinfo_field_childJobId") + "({0})"
+                                        (I18nUtil.getString(JOBINFO_FIELD_CHILD_JOB_ID_I18N)
+                                                + PLACE_STRING
                                                 + I18nUtil.getString("system_permission_limit")),
                                         childJobIdItem));
                     }
@@ -195,8 +219,9 @@ public class XxlJobServiceImpl implements XxlJobService {
                     return new ReturnT<>(
                             ReturnT.FAIL_CODE,
                             MessageFormat.format(
-                                    (I18nUtil.getString("jobinfo_field_childJobId") + "({0})"
-                                            + I18nUtil.getString("system_unvalid")),
+                                    (I18nUtil.getString(JOBINFO_FIELD_CHILD_JOB_ID_I18N)
+                                            + PLACE_STRING
+                                            + I18nUtil.getString(SYSTEM_UNVALID_I18N)),
                                     childJobIdItem));
                 }
             }
@@ -237,42 +262,43 @@ public class XxlJobServiceImpl implements XxlJobService {
         if (!StringUtils.hasText(jobInfo.getJobDesc())) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_jobdesc")));
+                    (I18nUtil.getString(SYSTEM_PLEASE_INPUT_I18N) + I18nUtil.getString("jobinfo_field_jobdesc")));
         }
         if (!StringUtils.hasText(jobInfo.getAuthor())) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_author")));
+                    (I18nUtil.getString(SYSTEM_PLEASE_INPUT_I18N) + I18nUtil.getString("jobinfo_field_author")));
         }
 
         // valid trigger
         ScheduleTypeEnum scheduleTypeEnum = ScheduleTypeEnum.match(jobInfo.getScheduleType(), null);
         if (scheduleTypeEnum == null) {
             return new ReturnT<>(
-                    ReturnT.FAIL_CODE, (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                    ReturnT.FAIL_CODE,
+                    (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
         if (scheduleTypeEnum == ScheduleTypeEnum.CRON) {
             if (jobInfo.getScheduleConf() == null || !CronExpression.isValidExpression(jobInfo.getScheduleConf())) {
-                return new ReturnT<>(ReturnT.FAIL_CODE, "Cron" + I18nUtil.getString("system_unvalid"));
+                return new ReturnT<>(ReturnT.FAIL_CODE, "Cron" + I18nUtil.getString(SYSTEM_UNVALID_I18N));
             }
         } else if (scheduleTypeEnum
                 == ScheduleTypeEnum.FIX_RATE /*|| scheduleTypeEnum == ScheduleTypeEnum.FIX_DELAY*/) {
             if (jobInfo.getScheduleConf() == null) {
                 return new ReturnT<>(
                         ReturnT.FAIL_CODE,
-                        (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                        (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
             }
             try {
                 int fixSecond = Integer.parseInt(jobInfo.getScheduleConf());
                 if (fixSecond < 1) {
                     return new ReturnT<>(
                             ReturnT.FAIL_CODE,
-                            (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                            (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
                 }
             } catch (Exception e) {
                 return new ReturnT<>(
                         ReturnT.FAIL_CODE,
-                        (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                        (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
             }
         }
 
@@ -280,16 +306,19 @@ public class XxlJobServiceImpl implements XxlJobService {
         if (ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null) == null) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("jobinfo_field_executorRouteStrategy") + I18nUtil.getString("system_unvalid")));
+                    (I18nUtil.getString("jobinfo_field_executorRouteStrategy")
+                            + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
         if (MisfireStrategyEnum.match(jobInfo.getMisfireStrategy(), null) == null) {
             return new ReturnT<>(
-                    ReturnT.FAIL_CODE, (I18nUtil.getString("misfire_strategy") + I18nUtil.getString("system_unvalid")));
+                    ReturnT.FAIL_CODE,
+                    (I18nUtil.getString("misfire_strategy") + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
         if (ExecutorBlockStrategyEnum.match(jobInfo.getExecutorBlockStrategy(), null) == null) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("jobinfo_field_executorBlockStrategy") + I18nUtil.getString("system_unvalid")));
+                    (I18nUtil.getString("jobinfo_field_executorBlockStrategy")
+                            + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
 
         // 》ChildJobId valid
@@ -302,8 +331,8 @@ public class XxlJobServiceImpl implements XxlJobService {
                     if (childJobId == jobInfo.getId()) {
                         return new ReturnT<>(
                                 ReturnT.FAIL_CODE,
-                                (I18nUtil.getString("jobinfo_field_childJobId") + "(" + childJobId + ")"
-                                        + I18nUtil.getString("system_unvalid")));
+                                (I18nUtil.getString(JOBINFO_FIELD_CHILD_JOB_ID_I18N) + "(" + childJobId + ")"
+                                        + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
                     }
 
                     // valid child
@@ -312,7 +341,8 @@ public class XxlJobServiceImpl implements XxlJobService {
                         return new ReturnT<>(
                                 ReturnT.FAIL_CODE,
                                 MessageFormat.format(
-                                        (I18nUtil.getString("jobinfo_field_childJobId") + "({0})"
+                                        (I18nUtil.getString(JOBINFO_FIELD_CHILD_JOB_ID_I18N)
+                                                + PLACE_STRING
                                                 + I18nUtil.getString("system_not_found")),
                                         childJobIdItem));
                     }
@@ -320,7 +350,8 @@ public class XxlJobServiceImpl implements XxlJobService {
                         return new ReturnT<>(
                                 ReturnT.FAIL_CODE,
                                 MessageFormat.format(
-                                        (I18nUtil.getString("jobinfo_field_childJobId") + "({0})"
+                                        (I18nUtil.getString(JOBINFO_FIELD_CHILD_JOB_ID_I18N)
+                                                + PLACE_STRING
                                                 + I18nUtil.getString("system_permission_limit")),
                                         childJobIdItem));
                     }
@@ -328,8 +359,9 @@ public class XxlJobServiceImpl implements XxlJobService {
                     return new ReturnT<>(
                             ReturnT.FAIL_CODE,
                             MessageFormat.format(
-                                    (I18nUtil.getString("jobinfo_field_childJobId") + "({0})"
-                                            + I18nUtil.getString("system_unvalid")),
+                                    (I18nUtil.getString(JOBINFO_FIELD_CHILD_JOB_ID_I18N)
+                                            + PLACE_STRING
+                                            + I18nUtil.getString(SYSTEM_UNVALID_I18N)),
                                     childJobIdItem));
                 }
             }
@@ -342,7 +374,7 @@ public class XxlJobServiceImpl implements XxlJobService {
         if (xxlJobGroupDao.load(jobInfo.getJobGroup()) == null) {
             return new ReturnT<>(
                     ReturnT.FAIL_CODE,
-                    (I18nUtil.getString("jobinfo_field_jobgroup") + I18nUtil.getString("system_unvalid")));
+                    (I18nUtil.getString("jobinfo_field_jobgroup") + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
 
         // stage job info
@@ -364,14 +396,14 @@ public class XxlJobServiceImpl implements XxlJobService {
                 if (nextValidTime == null) {
                     return new ReturnT<>(
                             ReturnT.FAIL_CODE,
-                            (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                            (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
                 }
                 nextTriggerTime = nextValidTime.getTime();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 return new ReturnT<>(
                         ReturnT.FAIL_CODE,
-                        (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                        (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
             }
         }
 
@@ -428,13 +460,14 @@ public class XxlJobServiceImpl implements XxlJobService {
             if (nextValidTime == null) {
                 return new ReturnT<>(
                         ReturnT.FAIL_CODE,
-                        (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                        (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
             }
             nextTriggerTime = nextValidTime.getTime();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return new ReturnT<>(
-                    ReturnT.FAIL_CODE, (I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")));
+                    ReturnT.FAIL_CODE,
+                    (I18nUtil.getString(SCHEDULE_TYPE_I18N) + I18nUtil.getString(SYSTEM_UNVALID_I18N)));
         }
 
         xxlJobInfo.setTriggerStatus(1);

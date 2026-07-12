@@ -129,12 +129,7 @@ public class LoginService {
 
     // ---------------------- login tool, with cookie and db ----------------------
 
-    public ReturnT<String> login(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            String username,
-            String password,
-            boolean ifRemember) {
+    public ReturnT<String> login(HttpServletResponse response, String username, String password, boolean ifRemember) {
 
         // param
         if (username == null
